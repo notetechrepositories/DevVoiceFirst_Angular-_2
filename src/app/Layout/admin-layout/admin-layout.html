@@ -1,0 +1,59 @@
+<div class="d-flex">
+  <!-- Sidebar -->
+  <ul class="menu bg-dark text-white p-3 vh-100">
+    <div class="logo text-center mb-4">
+      <h3 class="m-0">VOICE FIRST</h3>
+    </div>
+
+    <ng-container *ngTemplateOutlet="renderMenu; context: { items: menuItems }"></ng-container>
+
+    <!-- Logout -->
+    <li class="mt-auto">
+      <div class="menu-item text-white" (click)="logout()">
+        <span class="label-content">
+          <i class="fa-solid fa-right-from-bracket me-2"></i> Logout
+        </span>
+      </div>
+    </li>
+  </ul>
+
+  <!-- Main Content Area -->
+  <main class="flex-grow-1 p-4">
+    <router-outlet></router-outlet>
+  </main>
+</div>
+
+<!-- Recursive Menu Template -->
+<ng-template #renderMenu let-items="items">
+  <ng-container *ngFor="let item of items">
+    <li>
+      <div
+        class="menu-item d-flex align-items-center py-2 px-3"
+        (click)="!item.route && item.children?.length ? toggleMenu(item.id) : null"
+      >
+        <a
+          [routerLink]="item.route"
+          *ngIf="item.route"
+          class="label-content text-decoration-none text-white d-flex align-items-center"
+        >
+          <i class="fa {{ item.icon }} me-2"></i> {{ item.label }}
+        </a>
+
+        <span *ngIf="!item.route" class="menu-label d-flex align-items-center w-100">
+          <span class="label-content d-flex align-items-center">
+            <i class="fa {{ item.icon }} me-2"></i> {{ item.label }}
+          </span>
+          <i
+            *ngIf="item.children?.length"
+            class="arrow fa-solid fa-angle-right ms-auto"
+            [ngClass]="{ open: isExpanded(item.id) }"
+          ></i>
+        </span>
+      </div>
+
+      <ul *ngIf="item.children?.length && isExpanded(item.id)" class="list-unstyled ps-4">
+        <ng-container *ngTemplateOutlet="renderMenu; context: { items: item.children }"></ng-container>
+      </ul>
+    </li>
+  </ng-container>
+</ng-template>

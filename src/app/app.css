@@ -1,0 +1,41 @@
+.menu {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+  width: 250px;
+  font-family: Arial, sans-serif;
+}
+
+.menu > li {
+  border-bottom: 1px solid #ccc;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.menu-item:hover {
+  background-color: #f0f0f0;
+}
+
+.menu-item i {
+  margin-right: 10px;
+}
+
+ul ul {
+  padding-left: 20px;
+  border-left: 2px solid #eee;
+}
+
+.arrow {
+  margin-left: auto;
+  transition: transform 0.3s ease;
+}
+
+.arrow.open {
+  transform: rotate(90deg);
+}

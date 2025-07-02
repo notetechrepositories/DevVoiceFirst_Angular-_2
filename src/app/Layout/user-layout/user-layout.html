@@ -1,0 +1,96 @@
+<nav class="nav-container">
+  <div class="nav-logo">
+    <img src="assets/images/logo-vf.png" alt="logo" />
+    <!-- <h1>OICE FIRST</h1> -->
+  </div>
+  <ul class="nav-list" [class.nav-active]="isMenuOpen">
+
+    <!-- <li>
+      <a *ngIf="isloggedin; else landingLink" routerLink="/user/home" routerLinkActive="active-link"
+        [routerLinkActiveOptions]="{ exact: true }">Home</a>
+      <ng-template #landingLink>
+        <a routerLink="/landing" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }">Home</a>
+      </ng-template>
+    </li>
+
+    <li>
+      <a *ngIf="isloggedin; else docLink" routerLink="/user/documents" routerLinkActive="active-link">Documents</a>
+      <ng-template #docLink>
+        <a routerLink="/documents" routerLinkActive="active-link">Documents</a>
+      </ng-template>
+    </li>
+
+    <li>
+      <a *ngIf="isloggedin; else aboutLink" routerLink="/user/about-us" routerLinkActive="active-link">About Us</a>
+      <ng-template #aboutLink>
+        <a routerLink="/about-us" routerLinkActive="active-link">About Us</a>
+      </ng-template>
+    </li>
+
+    <li *ngIf="isloggedin">
+      <a routerLink="/user/qr-scanner" routerLinkActive="active-link">QR</a>
+    </li>
+
+    <li *ngIf="isloggedin">
+      <a routerLink="/user/profile" routerLinkActive="active-link">
+        <i class='bx bxs-user'></i>
+      </a>
+    </li> -->
+
+    <li>
+      <button *ngIf="isloggedin; else loginButton" class="action-btn">Logout</button>
+      <ng-template #loginButton>
+        <!-- <button class="action-btn" routerLink="authentication/login">Login</button> -->
+        <a class="action-btn" routerLink="/authentication/login">Login</a>
+      </ng-template>
+    </li>
+  </ul>
+
+
+  <div class="nav-toggle" (click)="toggleMenu()">
+    <span class="nav-line" [class.nav-toggle-active]="isMenuOpen"></span>
+    <span class="nav-line" [class.nav-toggle-active]="isMenuOpen"></span>
+    <span class="nav-line" [class.nav-toggle-active]="isMenuOpen"></span>
+  </div>
+</nav>
+
+<!-- Overlay -->
+<div class="nav-overlay" [class.active]="isMenuOpen" (click)="toggleMenu()"></div>
+
+<!-- Mobile Menu -->
+<div class="nav-menu" [class.nav-menu-active]="isMenuOpen">
+  <ul class="nav-menu-list">
+    @if(isloggedin){
+    <li routerLinkActive="active-link" routerLink="/user/home" [routerLinkActiveOptions]="{ exact: true }"
+      (click)="onMenuClick()">
+      <a>Home</a>
+    </li>
+    <li routerLinkActive="active-link" routerLink="/user/qr-scanner" (click)="onMenuClick()">
+      <a>QR Scanner</a>
+    </li>
+    <li routerLinkActive="active-link" routerLink="/user/profile" (click)="onMenuClick()">
+      <a>Profile</a>
+    </li>
+    <li>
+      <a>Logout</a>
+    </li>
+    }
+    @else{
+    <li routerLinkActive="active-link" routerLink="/landing" [routerLinkActiveOptions]="{ exact: true }"
+      (click)="onMenuClick()">
+      <a>Home</a>
+    </li>
+    <li (click)="onMenuClick()">
+      <a>Login</a>
+    </li>
+    }
+
+  </ul>
+
+</div>
+
+<main>
+    <div class="p-4">
+        <router-outlet></router-outlet>
+    </div>
+</main>
