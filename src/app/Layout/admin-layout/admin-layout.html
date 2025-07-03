@@ -1,59 +1,129 @@
 <div class="d-flex">
   <!-- Sidebar -->
-  <ul class="menu bg-dark text-white p-3 vh-100">
+  <div class="menu bg-dark text-white d-flex flex-column">
+    
+    <!-- Logo (fixed) -->
     <div class="logo text-center mb-4">
       <h3 class="m-0">VOICE FIRST</h3>
     </div>
 
-    <ng-container *ngTemplateOutlet="renderMenu; context: { items: menuItems }"></ng-container>
+    <!-- Scrollable menu items -->
+    <div class="menu-scroll flex-grow-1 overflow-auto">
+      <ul class="list-unstyled mb-0 px-0">
+        <ng-container *ngTemplateOutlet="renderMenu; context: { items: menuItems, isRoot: true }"></ng-container>
+      </ul>
+    </div>
 
-    <!-- Logout -->
-    <li class="mt-auto">
+    <!-- Logout (fixed at bottom) -->
+    <div class="mt-auto">
       <div class="menu-item text-white" (click)="logout()">
         <span class="label-content">
-          <i class="fa-solid fa-right-from-bracket me-2"></i> Logout
+          <div class="icon-container me-1">
+            <i class="fa-solid fa-right-from-bracket me-2"></i>
+          </div>
+          Logout
         </span>
       </div>
-    </li>
-  </ul>
+    </div>
+    
+  </div>
 
-  <!-- Main Content Area -->
-  <main class="flex-grow-1 p-4">
-    <router-outlet></router-outlet>
-  </main>
+ <!-- Main Content -->
+  <div class="flex-grow-1 d-flex flex-column">
+  <!-- Top Navigation Bar -->
+  <nav class="top-navbar d-flex justify-content-between align-items-center shadow-sm">
+    
+    <!-- ✅ Role Dropdown -->
+    <div class="dropdown">
+      <button class="btn btn-light dropdown-toggle dropdown-btn" type="button" id="roleDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        {{ selectedRole }}
+      </button>
+      <ul class="dropdown-menu" aria-labelledby="roleDropdown">
+        <li *ngFor="let role of roles">
+          <a class="dropdown-item" (click)="selectRole(role)">
+            {{ role }}
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Right-side icons -->
+    <div>
+      <i class="fa fa-bell me-3"></i>
+      <i class="fa fa-user-circle"></i>
+    </div>
+  </nav>
+
+    <!-- Router Content -->
+    <main class="p-4 flex-grow-1 overflow-auto" style="height: 490px;">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
 </div>
 
-<!-- Recursive Menu Template -->
-<ng-template #renderMenu let-items="items">
+
+
+<!-- Recursive Template -->
+<ng-template #renderMenu let-items="items" let-isRoot="isRoot" let-depth="depth">
   <ng-container *ngFor="let item of items">
     <li>
       <div
         class="menu-item d-flex align-items-center py-2 px-3"
-        (click)="!item.route && item.children?.length ? toggleMenu(item.id) : null"
+        (click)="!item.t7_2_route && item.children?.length ? toggleMenu(item.id_t7_2_menu) : null"
       >
         <a
-          [routerLink]="item.route"
-          *ngIf="item.route"
-          class="label-content text-decoration-none text-white d-flex align-items-center"
+          *ngIf="item.t7_2_route"
+          [routerLink]="item.t7_2_route"
+          class="label-content text-decoration-none d-flex align-items-center"
         >
-          <i class="fa {{ item.icon }} me-2"></i> {{ item.label }}
+          <!-- Root items use icon-container -->
+          <ng-container *ngIf="isRoot; else subIcon">
+            <div class="icon-container me-1">
+              <i class="fa" [ngClass]="item.icon || 'fa-atom'"></i>
+            </div>
+          </ng-container>
+
+          <!-- Submenu icon (no square background) -->
+          <ng-template #subIcon>
+            <i class="fa me-2" [ngClass]="item.icon || 'fa-angle-right'"></i>
+          </ng-template>
+
+          {{ item.t7_2_menu_name }}
         </a>
 
-        <span *ngIf="!item.route" class="menu-label d-flex align-items-center w-100">
+        <span *ngIf="!item.t7_2_route" class="menu-label d-flex align-items-center w-100">
           <span class="label-content d-flex align-items-center">
-            <i class="fa {{ item.icon }} me-2"></i> {{ item.label }}
+            <ng-container *ngIf="isRoot; else subIconLabel">
+              <div class="icon-container me-1">
+                <i class="fa" [ngClass]="item.icon || 'fa-atom'"></i>
+              </div>
+            </ng-container>
+
+            <ng-template #subIconLabel>
+              <i class="fa me-2" [ngClass]="item.icon || 'fa-angle-right'"></i>
+            </ng-template>
+
+            {{ item.t7_2_menu_name }}
           </span>
           <i
             *ngIf="item.children?.length"
             class="arrow fa-solid fa-angle-right ms-auto"
-            [ngClass]="{ open: isExpanded(item.id) }"
+            [ngClass]="{ open: isExpanded(item.id_t7_2_menu) }"
           ></i>
         </span>
       </div>
 
-      <ul *ngIf="item.children?.length && isExpanded(item.id)" class="list-unstyled ps-4">
-        <ng-container *ngTemplateOutlet="renderMenu; context: { items: item.children }"></ng-container>
+      <ul
+        *ngIf="item.children?.length && isExpanded(item.id_t7_2_menu)"
+        class="submenu" 
+        [ngClass]="'depth-' + (depth + 1)"
+      >
+        <ng-container
+          *ngTemplateOutlet="renderMenu; context: { items: item.children, isRoot: false, depth: (depth + 1) }"
+        ></ng-container>
       </ul>
     </li>
   </ng-container>
+  
 </ng-template>
+

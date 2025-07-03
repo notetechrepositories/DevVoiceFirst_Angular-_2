@@ -79,7 +79,7 @@ handleLogin(response:any){
             if(res.exists){
               sessionStorage.setItem("loggedInUser",JSON.stringify(payload));
               if(res.user?.type=="admin"){
-                this.router.navigate(['admin/company-dashboard']);
+                this.router.navigate(['admin/admin-dashboard']);
               }
               else{
                 this.router.navigate(['user/home']);

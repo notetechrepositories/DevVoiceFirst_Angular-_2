@@ -1,30 +1,65 @@
+.logo h3{
+  font-family: 'Saira', sans-serif;
+  font-weight: 900;
+  letter-spacing:2px ;
+  font-size: 20px;
+}
+
 .menu {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  width: 250px;
-  font-family: Arial, sans-serif;
+  width: 260px;
   background-color: #1f2937;
-  color: #fff;
-  height: 100vh;
-  overflow-y: auto;
+  color: #dbdbdb;
+  transition: 0.3s ease-in-out;
+  padding-top: 15px;
+  padding-bottom: 5px;
+  margin: 10px;
+  height: 97.9vh;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Scrollable part */
+.menu-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #4b5563 #1f2937;
+}
+
+.menu-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.menu-scroll::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+
+.menu-scroll::-webkit-scrollbar-thumb {
+  background-color: #4b5563;
+  border-radius: 4px;
+  border: 2px solid #1f2937;
+}
+
+.menu-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: #6b7280;
+}
+
+menu:hover{
+   color: #ffffff;
 }
 
 .menu > li {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.055);
 }
 
 .menu-item {
   display: flex;
   align-items: center;
-  padding: 12px 20px;
+  padding: 10px 15px;
   cursor: pointer;
   user-select: none;
   transition: background-color 0.3s;
-}
-
-.menu-item:hover {
-  background-color: #374151;
+  color: #dbdbdb;
+  transition: .3s ease-in-out;
 }
 
 .menu-item i {
@@ -33,7 +68,7 @@
 
 .menu-item a {
   text-decoration: none;
-  color: #fff;
+  color: #dbdbdb;
 }
 
 .label {
@@ -44,12 +79,36 @@
   display: flex;
   align-items: center;
   width: 100%;
+  color: #dbdbdb;
+  transition: .3s ease-in-out;  
+}
+
+.menu-label:hover{
+  color: #ffffff;
+}
+
+.menu ul {
+  font-size: 0.85rem;
+  list-style: none;
+  padding-left: 1.25rem;
+  color: #dbdbdb;
+  transition: .3s ease-in-out;
+}
+
+.menu ul:hover{
+  color: #ffffff;
 }
 
 .label-content {
   display: flex;
   align-items: center;
   gap: 12px;
+  color: #dbdbdb;
+  transition: .3s ease-in-out;
+}
+
+.menu-item:hover .label-content {
+   color: #ffffff;
 }
 
 .arrow {
@@ -59,9 +118,15 @@
 
 ul ul {
   padding-left: 20px;
-  background-color: #111827;
+  background-color: #242424;
   transition: all 0.3s ease;
   overflow: hidden;
+  color: #dbdbdb;
+  transition: .3s ease-in-out;
+}
+
+.menuitem:hover ul ul{
+  color: #dbdbdb;
 }
 
 .arrow {
@@ -73,9 +138,104 @@ ul ul {
   transform: rotate(90deg);
 }
 
+.icon-container {
+  height: 25px;
+  width: 25px;
+  border-radius: 6px;
+  display: inline-flex;  
+  justify-content: center;
+  align-items: center;
+  background-color: rgb(49, 49, 49);
+  overflow: hidden;  
+  box-shadow: rgba(255, 217, 0, 0.507) 0px 8px 56px 0px, rgba(255, 230, 0, 0.356) 0px 0px 0px 1px; 
+  transition: .3s ease-in-out;     
+}
+
+.icon-container i {
+  font-size: 11px;                 
+  line-height: 1;          
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 12px;
+  color: #ababab;
+  transition: .3s ease-in-out; 
+}
+
+.menu-item:hover .icon-container{
+  box-shadow: rgba(255, 217, 0, 0.507) 0px 9px 36px 0px, rgba(255, 230, 0, 0.479) 0px 0px 0px 1px; 
+}
+
+.menu-item:hover .icon-container i{
+   color: #fcc737;
+}
+
+
 @media (max-width: 768px) {
-  .menu {
-    width: 100%;
-    height: auto;
+  .menu{
+    height: 94.5vh;
   }
 }
+
+.submenu i.fa {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+.menu-item:hover .submenu i.fa {
+  color: #fff;
+}
+
+/*------- Top navbar -------*/
+
+.top-navbar {
+  background-color: #ffffff;
+  color: #1f2937;
+  border-bottom: 1px solid #e5e7eb;
+  height: 56px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  margin: 10px 10px 0px 0px;
+  background-color: #e5e7eb;
+  border-radius: 10px;
+  padding: 0px 20px 0px 10px;
+}
+
+.dropdown-btn{
+  border-radius: 10px;
+  padding: 5px 25px;
+  font-size: .8rem;
+}
+
+.dropdown-menu li a{
+  font-size: .8rem;
+}
+
+/*============================== main ===========================*/
+
+main{
+  margin:10px 10px 10px 0px;
+}
+
+main {
+  scrollbar-width: thin;
+  scrollbar-color: #ebebeb #f9f9f9;
+}
+
+main::-webkit-scrollbar {
+  width: 8px;
+}
+
+main::-webkit-scrollbar-track {
+  background: #f9f9f9;
+}
+
+main::-webkit-scrollbar-thumb {
+  background-color: #ebebeb;
+  border-radius: 4px;
+  border: 2px solid #f9f9f9;
+}
+
+main::-webkit-scrollbar-thumb:hover {
+  background-color: #6b7280;
+}
+

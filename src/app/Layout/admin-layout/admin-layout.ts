@@ -3,163 +3,28 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { Auth } from '../../Service/AuthService/auth';
+import { Menu } from '../../Service/MenuService/menu';
 
 export interface MenuItem {
-  id: number;
-  label: string;
-  priority: string;
-  route: string | null;
-  icon?: string;  // <-- New icon field
+  id_t7_2_menu: number;
+  t7_2_menu_name: string;
+  t7_2_position: string;
+  t7_2_icon: string | null;
+  t7_2_route?: string;  // <-- New icon field
   children?: MenuItem[];
 }
 
-export const MENU_DATA: MenuItem[] = [
-  {
-    "id": 1,
-    "label": "Dashboard",
-    "icon": "fa-dashboard",
-    "priority": "A",
-    "route": "/dashboard"
-  },
-  {
-    "id": 2,
-    "label": "Settings",
-    "icon": "fa-cogs",
-    "priority": "B",
-    "route": null
-  },
-  {
-    "id": 3,
-    "label": "User Management",
-    "icon": "fa-users",
-    "priority": "BA",
-    "route": "/settings/users"
-  },
-  {
-    "id": 4,
-    "label": "Roles",
-    "icon": "fa-lock",
-    "priority": "BB",
-    "route": null
-  },
-  {
-    "id": 5,
-    "label": "Audit Logs",
-    "icon": "fa-file-alt",
-    "priority": "BBA",
-    "route": "/settings/roles/audit"
-  },
-  {
-    "id": 6,
-    "label": "Reports",
-    "icon": "fa-chart-bar",
-    "priority": "C",
-    "route": null
-  },
-  {
-    "id": 7,
-    "label": "Sales Report",
-    "icon": "fa-chart-line",
-    "priority": "CA",
-    "route": "/reports/sales"
-  },
-  {
-    "id": 8,
-    "label": "User Report",
-    "icon": "fa-user",
-    "priority": "CB",
-    "route": "/reports/users"
-  },
-  {
-    "id": 9,
-    "label": "Projects",
-    "icon": "fa-folder",
-    "priority": "D",
-    "route": null
-  },
-  {
-    "id": 10,
-    "label": "Ongoing",
-    "icon": "fa-hourglass-half",
-    "priority": "DA",
-    "route": "/projects/ongoing"
-  },
-  {
-    "id": 11,
-    "label": "Completed",
-    "icon": "fa-check-circle",
-    "priority": "DB",
-    "route": "/projects/completed"
-  },
-  {
-    "id": 12,
-    "label": "Archived",
-    "icon": "fa-archive",
-    "priority": "DC",
-    "route": null
-  },
-  {
-    "id": 13,
-    "label": "By Year",
-    "icon": "fa-calendar-alt",
-    "priority": "DCA",
-    "route": "/projects/archived/year"
-  },
-  {
-    "id": 14,
-    "label": "Support",
-    "icon": "fa-life-ring",
-    "priority": "E",
-    "route": null
-  },
-  {
-    "id": 15,
-    "label": "Tickets",
-    "icon": "fa-ticket-alt",
-    "priority": "EA",
-    "route": "/support/tickets"
-  },
-  {
-    "id": 16,
-    "label": "Live Chat",
-    "icon": "fa-comments",
-    "priority": "EB",
-    "route": "/support/chat"
-  },
-  {
-    "id": 17,
-    "label": "Knowledge Base",
-    "icon": "fa-book",
-    "priority": "EC",
-    "route": null
-  },
-  {
-    "id": 18,
-    "label": "FAQ",
-    "icon": "fa-question-circle",
-    "priority": "ECA",
-    "route": "/support/kb/faq"
-  },
-  {
-    "id": 19,
-    "label": "Guides",
-    "icon": "fa-compass",
-    "priority": "ECB",
-    "route": "/support/kb/guides"
-  }
-];
-
 
 export function buildMenuTree(menuItems: MenuItem[]): MenuItem[] {
-  const sortedItems = [...menuItems].sort((a, b) => a.priority.localeCompare(b.priority));
+  const sortedItems = [...menuItems].sort((a, b) => a.t7_2_position.localeCompare(b.t7_2_position));
   const itemMap: { [priority: string]: MenuItem } = {};
   const root: MenuItem[] = [];
 
   for (const item of sortedItems) {
     item.children = [];
-    itemMap[item.priority] = item;
+    itemMap[item.t7_2_position] = item;
 
-    const parentPriority = item.priority.slice(0, -1);
+    const parentPriority = item.t7_2_position.slice(0, -1);
     if (itemMap[parentPriority]) {
       itemMap[parentPriority].children!.push(item);
     } else {
@@ -183,23 +48,32 @@ export class AdminLayout implements OnInit {
   toggleStates = new Map<number, boolean>();
 
   constructor(
-    private authService:Auth
+    private authService:Auth,
+    private menuService:Menu
   ){}
 
-//   ngOnInit() {
-//   const nestedMenu = this.buildNestedMenu(MENU_DATA);
-//   this.menuItems = this.sortMenuItems(nestedMenu);
-//   this.initializeToggleStates(this.menuItems);
-// }
+  ngOnInit(): void {
+    this.getMenus();
+  }
 
-ngOnInit(): void {
-    this.menuItems = buildMenuTree(MENU_DATA);
+  getMenus(){
+    this.menuService.getMenu().subscribe({
+      next:(res:any)=>{
+        console.log(res);
+        if(res.status==200){
+          this.menuItems=buildMenuTree(res.data.Items)
+        }
+      },
+      error:error=>{
+        console.log(error);
+      }
+    })
   }
 
 
   initializeToggleStates(items: MenuItem[]) {
     for (const item of items) {
-      this.toggleStates.set(item.id, false);
+      this.toggleStates.set(item.id_t7_2_menu, false);
       if (item.children?.length) {
         this.initializeToggleStates(item.children);
       }
@@ -218,4 +92,17 @@ ngOnInit(): void {
   logout(){
     this.authService.logout();
   }
+
+  // ====================================================================
+
+  roles: string[] = ['Notetech Admin', 'Company Admin', 'Viewer'];
+selectedRole: string = 'Notetech Admin';
+
+selectRole(role: string) {
+  this.selectedRole = role;
+  // You can also emit an event or trigger logic based on role switch
+  console.log('Switched to role:', role);
+}
+
+
 }

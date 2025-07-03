@@ -35,13 +35,24 @@ export const routes: Routes = [
     ],
   },
   {
-    path: 'admin',
+    path: 'company',
     component: AdminLayout,
     children: [
       {
         path: '',
         loadChildren: () =>
           import('./CompanyPanel/company.module').then((m) => m.CompanyModule),
+      },
+    ],
+  },
+  {
+    path: 'admin',
+    component: AdminLayout,
+    children: [
+      {
+        path: '',
+        loadChildren: () =>
+          import('./AdminPanel/admin.module').then((m) => m.AdminModule),
       },
     ],
   },
