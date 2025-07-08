@@ -21,7 +21,7 @@
           <div class="icon-container me-1">
             <i class="fa-solid fa-right-from-bracket me-2"></i>
           </div>
-          Logout
+          <span *ngIf="!isMenuCollapsed">Logout</span>
         </span>
       </div>
     </div>
@@ -55,7 +55,7 @@
   </nav>
 
     <!-- Router Content -->
-    <main class="p-4 flex-grow-1 overflow-auto" style="height: 490px;">
+    <main class="p-4 flex-grow-1">
       <router-outlet></router-outlet>
     </main>
   </div>
@@ -71,6 +71,8 @@
         class="menu-item d-flex align-items-center py-2 px-3"
         (click)="!item.t7_2_route && item.children?.length ? toggleMenu(item.id_t7_2_menu) : null"
       >
+
+      
         <a
           *ngIf="item.t7_2_route"
           [routerLink]="item.t7_2_route"
@@ -88,7 +90,7 @@
             <i class="fa me-2" [ngClass]="item.icon || 'fa-angle-right'"></i>
           </ng-template>
 
-          {{ item.t7_2_menu_name }}
+          <span *ngIf="!isMenuCollapsed">{{ item.t7_2_menu_name }}</span>
         </a>
 
         <span *ngIf="!item.t7_2_route" class="menu-label d-flex align-items-center w-100">
@@ -103,7 +105,7 @@
               <i class="fa me-2" [ngClass]="item.icon || 'fa-angle-right'"></i>
             </ng-template>
 
-            {{ item.t7_2_menu_name }}
+            <span *ngIf="!isMenuCollapsed">{{ item.t7_2_menu_name }}</span>
           </span>
           <i
             *ngIf="item.children?.length"

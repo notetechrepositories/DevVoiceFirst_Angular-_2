@@ -46,6 +46,9 @@ export function buildMenuTree(menuItems: MenuItem[]): MenuItem[] {
 export class AdminLayout implements OnInit {
   menuItems: MenuItem[] = [];
   toggleStates = new Map<number, boolean>();
+  isMenuCollapsed = false;
+
+
 
   constructor(
     private authService:Auth,
@@ -54,6 +57,15 @@ export class AdminLayout implements OnInit {
 
   ngOnInit(): void {
     this.getMenus();
+    window.addEventListener('resize',()=>{
+      this.checkScreenSize();
+    })
+  }
+
+  checkScreenSize(){
+    if(window.innerWidth < 768){
+      this.isMenuCollapsed = true;
+    }
   }
 
   getMenus(){
@@ -96,13 +108,13 @@ export class AdminLayout implements OnInit {
   // ====================================================================
 
   roles: string[] = ['Notetech Admin', 'Company Admin', 'Viewer'];
-selectedRole: string = 'Notetech Admin';
+  selectedRole: string = 'Notetech Admin';
 
-selectRole(role: string) {
-  this.selectedRole = role;
-  // You can also emit an event or trigger logic based on role switch
-  console.log('Switched to role:', role);
-}
+  selectRole(role: string) {
+    this.selectedRole = role;
+    // You can also emit an event or trigger logic based on role switch
+    console.log('Switched to role:', role);
+  }
 
 
 }

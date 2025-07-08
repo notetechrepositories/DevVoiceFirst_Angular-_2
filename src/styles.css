@@ -1,7 +1,37 @@
 /* You can add global styles to this file, and also import other style files */
+@import "../public/css/overlay.css";
+
 
 html, body { height: 100vh; }
 body{
     margin: 0; 
     font-family: "Nunito Sans", sans-serif;
+}
+
+i{
+  cursor: pointer;
+}
+
+.breadcrumb{
+  font-size: .8rem;
+}
+
+.breadcrumb li a{
+  text-decoration: none;
+}
+
+.pagination {
+  display: flex;
+  list-style: none;
+  gap: 5px;
+  padding: 0;
+}
+
+.page-item {
+  cursor: pointer;
+}
+
+.page-item.disabled .page-link {
+  pointer-events: none;
+  color: #aaa;
 }

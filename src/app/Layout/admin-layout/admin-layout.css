@@ -173,6 +173,7 @@ ul ul {
 @media (max-width: 768px) {
   .menu{
     height: 94.5vh;
+    width: 60px;
   }
 }
 
