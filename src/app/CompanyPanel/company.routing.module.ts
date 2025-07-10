@@ -1,5 +1,7 @@
 import { Routes } from '@angular/router';
 import { CompanyDashboard } from './company-dashboard/company-dashboard';
+import { Roles } from './roles/roles';
+import { BusinessActivity } from './business-activity/business-activity';
 
 
 
@@ -11,5 +13,12 @@ export const CompanyRoutes: Routes = [
     path: 'company-dashboard',
     component: CompanyDashboard
   },
-
+  {
+    path: 'roles',
+    component: Roles
+  },
+  {
+    path: 'business-activity',
+    component: BusinessActivity
+  }
 ];

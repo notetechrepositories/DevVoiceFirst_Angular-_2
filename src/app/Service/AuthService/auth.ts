@@ -25,6 +25,14 @@ export class Auth {
         password: null,
         sub: "113306282126888142011",
         type: "admin"
+      },
+      {
+        id: 2,
+        email: "bincy@notetech.com",
+        name: "Bincy",
+        password: null,
+        sub: "113306282126888142011",
+        type: "company"
       }
     ];
 
