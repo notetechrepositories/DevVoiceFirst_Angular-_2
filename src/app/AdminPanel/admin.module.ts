@@ -7,6 +7,7 @@ import { AdminRoutes } from './admin.routing.module';
 import { AdminDashboard } from './admin-dashboard/admin-dashboard';
 import { SysRoles } from './sys-roles/sys-roles';
 import { TestModule } from './test-module/test-module';
+import { SysBusinessActivity } from './sys-business-activity/sys-business-activity';
 
 
 
@@ -22,6 +23,7 @@ import { TestModule } from './test-module/test-module';
     ReactiveFormsModule,
     AdminDashboard,
     SysRoles,
+    SysBusinessActivity,
     TestModule
   ],
   declarations: [

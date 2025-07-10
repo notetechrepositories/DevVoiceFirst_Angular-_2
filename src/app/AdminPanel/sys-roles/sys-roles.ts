@@ -39,6 +39,69 @@ data = [
 
   ];
 
+  program= [
+    {
+      id: "1",
+      programName: "Company",
+      add: 1,
+      edit: 1,
+      delete: 0,
+      view: 1,
+      print: 0,
+      export: 1,
+      import: 0,
+      download: 1,
+    },
+    {
+      id: "2",
+      programName: "Roles",
+      add: 0,
+      edit: 1,
+      delete: 1,
+      view: 1,
+      print: 1,
+      export: 0,
+      import: 0,
+      download: 1,
+    },
+    {
+      id: "3",
+      programName: "Employee",
+      add: 1,
+      edit: 1,
+      delete: 1,
+      view: 1,
+      print: 1,
+      export: 1,
+      import: 1,
+      download: 1,
+    },
+    {
+      id: "4",
+      programName: "Report",
+      add: 0,
+      edit: 0,
+      delete: 0,
+      view: 1,
+      print: 1,
+      export: 1,
+      import: 0,
+      download: 1,
+    },
+    {
+      id: "5",
+      programName: "Business Activity",
+      add: 1,
+      edit: 0,
+      delete: 0,
+      view: 1,
+      print: 0,
+      export: 1,
+      import: 1,
+      download: 0,
+    }
+  ];
+
   itemsPerPage = 10;
   currentPage = 1;
 

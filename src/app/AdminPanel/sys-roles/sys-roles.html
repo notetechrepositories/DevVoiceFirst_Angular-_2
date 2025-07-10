@@ -17,38 +17,40 @@
         />
         <button class="btn btn-primary" (click)="openModal()">Add</button>
     </div>
+<div class="table-responsive">
+  <table class="table">
+    <thead class="table-light">
+        <tr>
+  <th>#</th>
+  <th>Role Name</th>
+  <th class="text-center">All Location Access</th>
+  <th class="text-center">All Issue Access</th>
+  <th></th>
+</tr>
+</thead>
+<tbody>
+@for (item of pagedData; track item) {
+<tr>
+  <td>{{ (currentPage - 1) * itemsPerPage + pagedData.indexOf(item) + 1 }}</td>
+  <td>{{ item.roleName }}</td>
+  <td class="text-center" [innerHTML]="item.allLocationAccess ? checkIcon : crossIcon "></td>
+  <td class="text-center" [innerHTML]="item.allIssueAccess ? checkIcon : crossIcon "></td>
+  <td class="text-end gap-2">
+    <i class="fa-solid fa-pencil" (click)="editRole(item)"></i>&nbsp;
+    <i class="fa-solid fa-trash" (click)="deleteRole(item)"></i>
+  </td>
+</tr>
+}
 
-<table class="table">
-  <thead class="table-light">
-    <tr>
-      <th>#</th>
-      <th>Role Name</th>
-      <th class="text-center">All Location Access</th>
-      <th class="text-center">All Issue Access</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    @for (item of pagedData; track item) {
-    <tr>
-      <td>{{ (currentPage - 1) * itemsPerPage + pagedData.indexOf(item) + 1 }}</td>
-      <td>{{ item.roleName }}</td>
-      <td class="text-center" [innerHTML]="item.allLocationAccess ? checkIcon : crossIcon "></td>
-      <td class="text-center" [innerHTML]="item.allIssueAccess ? checkIcon : crossIcon "></td>
-      <td class="text-end gap-2">
-        <i class="fa-solid fa-pencil" (click)="editRole(item)"></i>&nbsp;
-        <i class="fa-solid fa-trash" (click)="deleteRole(item)"></i>
-      </td>
-    </tr>
-    }
-
-    @empty {
-      <tr>
-        <td colspan="4" class="text-center">No data found</td>
-      </tr>
-    }
-  </tbody>
+@empty {
+  <tr>
+    <td colspan="4" class="text-center">No data found</td>
+  </tr>
+}
+</tbody>
 </table>
+</div>
+
 
 <!-- Pagination Controls -->
 <nav class="d-flex justify-content-end">

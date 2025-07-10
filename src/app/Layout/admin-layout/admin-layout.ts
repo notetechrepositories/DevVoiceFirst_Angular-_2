@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { Auth } from '../../Service/AuthService/auth';
@@ -44,11 +44,114 @@ export function buildMenuTree(menuItems: MenuItem[]): MenuItem[] {
   styleUrls: ['./admin-layout.css']
 })
 export class AdminLayout implements OnInit {
+
+
+  menuList:any[]=[
+    {
+      "id_t7_2_menu": 13,
+      "t7_2_menu_name": "Dashboard",
+      "t7_2_position": "A",
+      "t7_2_icon": "dashboard",
+      "t7_2_route": "/admin/admin-dashboard"
+    },
+    {
+      "id_t7_2_menu": 1,
+      "t7_2_menu_name": "Company",
+      "t7_2_position": "B",
+      "t7_2_icon": "company",
+      "t7_2_route": ""
+    },
+    {
+      "id_t7_2_menu": 2,
+      "t7_2_menu_name": "Users",
+      "t7_2_position": "BA",
+      "t7_2_icon": "Users",
+      "t7_2_route": "/company/users"
+    },
+    {
+      "id_t7_2_menu": 3,
+      "t7_2_menu_name": "Branch",
+      "t7_2_position": "BB",
+      "t7_2_icon": "Branch",
+      "t7_2_route": "/company/branch"
+    },
+    {
+      "id_t7_2_menu": 4,
+      "t7_2_menu_name": "Section",
+      "t7_2_position": "BC",
+      "t7_2_icon": "Section",
+      "t7_2_route": "/company/section"
+    },
+    {
+      "id_t7_2_menu": 5,
+      "t7_2_menu_name": "Sub Section",
+      "t7_2_position": "BD",
+      "t7_2_icon": "Sub Section",
+      "t7_2_route": "/company/subsection"
+    },
+    {
+      "id_t7_2_menu": 9,
+      "t7_2_menu_name": "Subscription",
+      "t7_2_position": "BE",
+      "t7_2_icon": "Subscription",
+      "t7_2_route": ""
+    },
+    {
+      "id_t7_2_menu": 12,
+      "t7_2_menu_name": "Product",
+      "t7_2_position": "BEF",
+      "t7_2_icon": "Product",
+      "t7_2_route": ""
+    },
+    {
+      "id_t7_2_menu": 7,
+      "t7_2_menu_name": "Sys Entry",
+      "t7_2_position": "C",
+      "t7_2_icon": "Sys Entry",
+      "t7_2_route": ""
+    },
+    {
+      "id_t7_2_menu": 8,
+      "t7_2_menu_name": "Issue Type",
+      "t7_2_position": "CA",
+      "t7_2_icon": "Issue Type",
+      "t7_2_route": "/sysentry/issue-type"
+    },
+    {
+      "id_t7_2_menu": 6,
+      "t7_2_menu_name": "Business Activity",
+      "t7_2_position": "CB",
+      "t7_2_icon": "Business activity",
+      "t7_2_route": "/admin/business-activity"
+    },
+    {
+      "id_t7_2_menu": 10,
+      "t7_2_menu_name": "Roles",
+      "t7_2_position": "CC",
+      "t7_2_icon": "Roles",
+      "t7_2_route": "/admin/system-roles"
+    },
+    {
+      "id_t7_2_menu": 11,
+      "t7_2_menu_name": "Issue Define ",
+      "t7_2_position": "D",
+      "t7_2_icon": "Issue Define ",
+      "t7_2_route": "/issuedefine"
+    },
+    {
+      "id_t7_2_menu": 12,
+      "t7_2_menu_name": "Business Activity",
+      "t7_2_position": "E",
+      "t7_2_icon": "Business Activity",
+      "t7_2_route": "/company/business-activity"
+    }
+  ];
+
   menuItems: MenuItem[] = [];
   toggleStates = new Map<number, boolean>();
   isMenuCollapsed = false;
 
-
+  isSidebarExpanded: boolean = true;
 
   constructor(
     private authService:Auth,
@@ -56,31 +159,42 @@ export class AdminLayout implements OnInit {
   ){}
 
   ngOnInit(): void {
-    this.getMenus();
+    this.menuItems=buildMenuTree(this.menuList)
     window.addEventListener('resize',()=>{
       this.checkScreenSize();
     })
   }
 
-  checkScreenSize(){
-    if(window.innerWidth < 768){
-      this.isMenuCollapsed = true;
-    }
+  toggleSidebar() {
+    this.isSidebarExpanded = !this.isSidebarExpanded;
   }
 
-  getMenus(){
-    this.menuService.getMenu().subscribe({
-      next:(res:any)=>{
-        console.log(res);
-        if(res.status==200){
-          this.menuItems=buildMenuTree(res.data.Items)
-        }
-      },
-      error:error=>{
-        console.log(error);
-      }
-    })
-  }
+  @HostListener('window:resize', [])
+   onWindowResize() {
+     this.checkScreenSize();
+   }
+ 
+   checkScreenSize() {
+     if (window.innerWidth < 768) {
+       this.isSidebarExpanded = false;
+     } else {
+       this.isSidebarExpanded = true;
+     }
+   }
+
+  // getMenus(){
+  //   this.menuService.getMenu().subscribe({
+  //     next:(res:any)=>{
+  //       console.log(res);
+  //       if(res.status==200){
+  //         this.menuItems=buildMenuTree(res.data.Items)
+  //       }
+  //     },
+  //     error:error=>{
+  //       console.log(error);
+  //     }
+  //   })
+  // }
 
 
   initializeToggleStates(items: MenuItem[]) {

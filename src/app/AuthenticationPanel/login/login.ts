@@ -81,6 +81,9 @@ handleLogin(response:any){
               if(res.user?.type=="admin"){
                 this.router.navigate(['admin/admin-dashboard']);
               }
+              else if(res.user?.type=="company"){
+                this.router.navigate(['company/company-dashboard']);
+              }
               else{
                 this.router.navigate(['user/home']);
               }
