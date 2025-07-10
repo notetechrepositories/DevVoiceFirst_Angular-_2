@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { Auth } from '../../Service/AuthService/auth';
 import { Menu } from '../../Service/MenuService/menu';
 
@@ -39,7 +39,7 @@ export function buildMenuTree(menuItems: MenuItem[]): MenuItem[] {
 @Component({
   selector: 'app-admin-layout',
   standalone: true,
-  imports: [RouterLink, FormsModule, ReactiveFormsModule, CommonModule, RouterOutlet],
+  imports: [RouterLink, FormsModule, ReactiveFormsModule, CommonModule, RouterOutlet, RouterLinkActive],
   templateUrl: './admin-layout.html',
   styleUrls: ['./admin-layout.css']
 })
@@ -66,42 +66,42 @@ export class AdminLayout implements OnInit {
       "t7_2_menu_name": "Users",
       "t7_2_position": "BA",
       "t7_2_icon": "Users",
-      "t7_2_route": "/company/users"
+      "t7_2_route": "/admin/under-development"
     },
     {
       "id_t7_2_menu": 3,
       "t7_2_menu_name": "Branch",
       "t7_2_position": "BB",
       "t7_2_icon": "Branch",
-      "t7_2_route": "/company/branch"
+      "t7_2_route": "/admin/under-development"
     },
     {
       "id_t7_2_menu": 4,
       "t7_2_menu_name": "Section",
       "t7_2_position": "BC",
       "t7_2_icon": "Section",
-      "t7_2_route": "/company/section"
+      "t7_2_route": "/admin/under-development"
     },
     {
       "id_t7_2_menu": 5,
       "t7_2_menu_name": "Sub Section",
       "t7_2_position": "BD",
       "t7_2_icon": "Sub Section",
-      "t7_2_route": "/company/subsection"
+      "t7_2_route": "/admin/under-development"
     },
     {
       "id_t7_2_menu": 9,
       "t7_2_menu_name": "Subscription",
       "t7_2_position": "BE",
       "t7_2_icon": "Subscription",
-      "t7_2_route": ""
+      "t7_2_route": "/admin/under-development"
     },
     {
       "id_t7_2_menu": 12,
       "t7_2_menu_name": "Product",
       "t7_2_position": "BEF",
       "t7_2_icon": "Product",
-      "t7_2_route": ""
+      "t7_2_route": "/admin/under-development"
     },
     {
       "id_t7_2_menu": 7,
@@ -115,7 +115,7 @@ export class AdminLayout implements OnInit {
       "t7_2_menu_name": "Issue Type",
       "t7_2_position": "CA",
       "t7_2_icon": "Issue Type",
-      "t7_2_route": "/sysentry/issue-type"
+      "t7_2_route": "/admin/under-development"
     },
     {
       "id_t7_2_menu": 6,
@@ -136,7 +136,7 @@ export class AdminLayout implements OnInit {
       "t7_2_menu_name": "Issue Define ",
       "t7_2_position": "D",
       "t7_2_icon": "Issue Define ",
-      "t7_2_route": "/issuedefine"
+      "t7_2_route": "/admin/under-development"
     },
     {
       "id_t7_2_menu": 12,
@@ -160,27 +160,27 @@ export class AdminLayout implements OnInit {
 
   ngOnInit(): void {
     this.menuItems=buildMenuTree(this.menuList)
-    window.addEventListener('resize',()=>{
-      this.checkScreenSize();
-    })
+    // window.addEventListener('resize',()=>{
+    //   this.checkScreenSize();
+    // })
   }
 
   toggleSidebar() {
     this.isSidebarExpanded = !this.isSidebarExpanded;
   }
 
-  @HostListener('window:resize', [])
-   onWindowResize() {
-     this.checkScreenSize();
-   }
+  // @HostListener('window:resize', [])
+  //  onWindowResize() {
+  //    this.checkScreenSize();
+  //  }
  
-   checkScreenSize() {
-     if (window.innerWidth < 768) {
-       this.isSidebarExpanded = false;
-     } else {
-       this.isSidebarExpanded = true;
-     }
-   }
+  //  checkScreenSize() {
+  //    if (window.innerWidth < 768) {
+  //      this.isSidebarExpanded = false;
+  //    } else {
+  //      this.isSidebarExpanded = true;
+  //    }
+  //  }
 
   // getMenus(){
   //   this.menuService.getMenu().subscribe({
