@@ -33,6 +33,14 @@ export class Auth {
         password: null,
         sub: "113306282126888142011",
         type: "company"
+      },
+      {
+        id: 3,
+        email: "thomasjordy@gmail.com",
+        name: "Thomas Jordy",
+        password: null,
+        sub: "113306282126888142011",
+        type: "admin"
       }
     ];
 
@@ -63,6 +71,24 @@ export class Auth {
     };
     this.userDetails.push(newUser);
   }
+
+  loginWithCredentials(email: string, password: string): Observable<{ success: boolean; user?: User }> {
+    // You can later replace this with a real backend API call.
+    const user = this.userDetails.find(
+      u => u.email.toLowerCase() === email.toLowerCase()
+    );
+  
+    // NOTE: Since your user data has null passwords, this is placeholder logic.
+    // Replace this with hashed password comparison or backend check.
+    if (user && password === '123456') { // Hardcoded for demo; you must improve this
+      return of({ success: true, user });
+    }
+  
+    return of({ success: false });
+  }
+  
+
+  
 
   logout(){
     sessionStorage.clear();

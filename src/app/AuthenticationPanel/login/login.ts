@@ -107,8 +107,38 @@ handleLogin(response:any){
 
   }
 
-  onLogin(){
-
+  onLogin() {
+    if (!this.username || !this.password) {
+      alert("Please enter both username and password.");
+      return;
+    }
+  
+    this.authService.loginWithCredentials(this.username, this.password).subscribe({
+      next: (res) => {
+        if (res.success && res.user) {
+          sessionStorage.setItem("loggedInUser", JSON.stringify(res.user));
+          
+          // Navigate based on user type
+          if (res.user.type === "admin") {
+            this.router.navigate(['admin/admin-dashboard']);
+          } else if (res.user.type === "company") {
+            this.router.navigate(['company/company-dashboard']);
+          } else {
+            this.router.navigate(['user/home']);
+          }
+  
+          // Optionally fetch device info
+          const deviceData = this.deviceInfoService.getFullDeviceInfo();
+          console.log("Device Info:", deviceData);
+  
+        } else {
+          alert("Invalid username or password.");
+        }
+      },
+      error: () => {
+        alert("An error occurred while logging in.");
+      }
+    });
   }
 
 

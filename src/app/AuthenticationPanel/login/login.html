@@ -1,5 +1,6 @@
 <div class="d-flex flex-column justify-content-center align-items-center" style="height: 85vh;">
     <div>
+        <h4>LOGIN</h4>
         <form class="form_container w-100">
             <div class="input_container">
                 <label class="input_label" for="email_field">Email</label>
@@ -30,10 +31,10 @@
                 <input placeholder="Password" name="password" [(ngModel)]="password" type="password" class="input_field" autocomplete="current-password" 
                     id="password_field">
             </div>
-            <div class="forgot_password">
+            <!-- <div class="forgot_password">
                 <p (click)="onForgotPassword()">Forgot password?</p>
-            </div>
-            <button type="submit" class="sign-in_btn" (click)="onLogin()">
+            </div> -->
+            <button type="submit" class="sign-in_btn mt-4" (click)="onLogin()">
                 <span>Sign In</span>
             </button>
 
