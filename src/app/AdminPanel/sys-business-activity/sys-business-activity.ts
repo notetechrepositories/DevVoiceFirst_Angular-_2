@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-sys-business-activity',
@@ -168,6 +169,20 @@ export class SysBusinessActivity {
   
 
   deleteBusinessActivity(id:any){
-    this.filteredData=this.filteredData.filter(item=>item.id!==id);
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'This action cannot be undone!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.filteredData=this.filteredData.filter(item=>item.id!==id);
+      } 
+    });
   }
+
+ 
 }

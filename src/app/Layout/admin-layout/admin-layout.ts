@@ -94,7 +94,7 @@ export class AdminLayout implements OnInit {
       "t7_2_menu_name": "Subscription",
       "t7_2_position": "BE",
       "t7_2_icon": "Subscription",
-      "t7_2_route": "/admin/under-development"
+      "t7_2_route": ""
     },
     {
       "id_t7_2_menu": 12,
@@ -139,7 +139,7 @@ export class AdminLayout implements OnInit {
       "t7_2_route": "/admin/under-development"
     },
     {
-      "id_t7_2_menu": 12,
+      "id_t7_2_menu": 14,
       "t7_2_menu_name": "Business Activity",
       "t7_2_position": "E",
       "t7_2_icon": "Business Activity",
@@ -160,27 +160,27 @@ export class AdminLayout implements OnInit {
 
   ngOnInit(): void {
     this.menuItems=buildMenuTree(this.menuList)
-    // window.addEventListener('resize',()=>{
-    //   this.checkScreenSize();
-    // })
+    window.addEventListener('resize',()=>{
+      this.checkScreenSize();
+    })
   }
 
   toggleSidebar() {
     this.isSidebarExpanded = !this.isSidebarExpanded;
   }
 
-  // @HostListener('window:resize', [])
-  //  onWindowResize() {
-  //    this.checkScreenSize();
-  //  }
+  @HostListener('window:resize', [])
+   onWindowResize() {
+     this.checkScreenSize();
+   }
  
-  //  checkScreenSize() {
-  //    if (window.innerWidth < 768) {
-  //      this.isSidebarExpanded = false;
-  //    } else {
-  //      this.isSidebarExpanded = true;
-  //    }
-  //  }
+   checkScreenSize() {
+     if (window.innerWidth < 768) {
+       this.isSidebarExpanded = false;
+     } else {
+       this.isSidebarExpanded = true;
+     }
+   }
 
   // getMenus(){
   //   this.menuService.getMenu().subscribe({
