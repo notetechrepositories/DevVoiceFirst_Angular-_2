@@ -49,8 +49,8 @@
                             <td class="text-center" [innerHTML]="item.section === 'y' ? checkIcon : crossIcon "></td>
                             <td class="text-center" [innerHTML]="item.sub_section === 'y' ? checkIcon : crossIcon "></td>
                             <td class="text-end">
-                              <i class="fa-solid fa-pencil" (click)="openEditModal(item)"></i>&nbsp;
-                              <i class="fa-solid fa-trash" (click)="deleteBusinessActivity(item.id)"></i>
+                              <i class="pi pi-pen-to-square fw-bold" (click)="openEditModal(item)"></i>&nbsp;
+                              <i class="pi pi-trash fw-bold" (click)="deleteBusinessActivity(item.id)"></i>
                             </td>
                           </tr>
                           }

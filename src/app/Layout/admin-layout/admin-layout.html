@@ -6,7 +6,7 @@
     <div>
       <div class="nav-brand">
         <a  routerLink="/company" class="nav-logo" *ngIf="isSidebarExpanded">
-          <img src="/public/images/logo-vf.png" alt="logo" width="40"/>
+          <img src="images/logo-vf.png" alt="logo" width="40"/>
         </a>
         <i class='bx bx-menu-alt-right nav-toggle' (click)="toggleSidebar()"></i>
       </div>
@@ -32,14 +32,18 @@
   </nav>
 </div>
 
-<div class="header">
-  
-</div>
+
 
 
 <div class="main-content" [ngClass]="{ 'body-pd': !isSidebarExpanded }">
+  <div class="header">
+    <div class="header-card">
+    </div>
+  </div>
 
-  <router-outlet></router-outlet>
+  <div class="main-content-body">
+    <router-outlet></router-outlet>
+  </div>
   
 </div>
 
@@ -50,66 +54,67 @@
 <ng-template #renderMenu let-items="items" let-isRoot="isRoot" let-depth="depth">
   <ng-container *ngFor="let item of items">
     <li>
+      <!-- Menu item with router link -->
       <div
+        *ngIf="item.t7_2_route"
         class="menu-item d-flex align-items-center py-2 px-3"
-        (click)="!item.t7_2_route && item.children?.length ? toggleMenu(item.id_t7_2_menu) : null"
+        [routerLink]="item.t7_2_route"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
       >
-
-      
-        <a
-          *ngIf="item.t7_2_route"
-          [routerLink]="item.t7_2_route"
-          class="label-content text-decoration-none d-flex align-items-center"
-        >
-          <!-- Root items use icon-container -->
+        <span class="label-content d-flex align-items-center">
           <ng-container *ngIf="isRoot; else subIcon">
             <div class="icon-container me-1">
               <i class="fa" [ngClass]="item.icon || 'fa-atom'"></i>
             </div>
           </ng-container>
 
-          <!-- Submenu icon (no square background) -->
           <ng-template #subIcon>
             <i class="fa me-2" [ngClass]="item.icon || 'fa-angle-right'"></i>
           </ng-template>
 
           <span *ngIf="isSidebarExpanded">{{ item.t7_2_menu_name }}</span>
-        </a>
-
-        <span *ngIf="!item.t7_2_route" class="menu-label d-flex align-items-center w-100">
-          <span class="label-content d-flex align-items-center">
-            <ng-container *ngIf="isRoot; else subIconLabel">
-              <div class="icon-container me-1">
-                <i class="fa" [ngClass]="item.icon || 'fa-atom'"></i>
-              </div>
-            </ng-container>
-
-            <ng-template #subIconLabel>
-              <i class="fa me-2" [ngClass]="item.icon || 'fa-angle-right'"></i>
-            </ng-template>
-
-            <span *ngIf="isSidebarExpanded">{{ item.t7_2_menu_name }}</span>
-          </span>
-          <i
-            *ngIf="item.children?.length"
-            class="arrow fa-solid fa-angle-right ms-auto"
-            [ngClass]="{ open: isExpanded(item.id_t7_2_menu) }"
-          ></i>
         </span>
       </div>
 
+      <!-- Menu item for toggling submenus -->
+      <div
+        *ngIf="!item.t7_2_route"
+        class="menu-item d-flex align-items-center py-2 px-3"
+        (click)="item.children?.length ? toggleMenu(item.id_t7_2_menu) : null"
+      >
+        <span class="label-content d-flex align-items-center w-100">
+          <ng-container *ngIf="isRoot; else subIconLabel">
+            <div class="icon-container me-1">
+              <i class="fa" [ngClass]="item.icon || 'fa-atom'"></i>
+            </div>
+          </ng-container>
+
+          <ng-template #subIconLabel>
+            <i class="fa me-2" [ngClass]="item.icon || 'fa-angle-right'"></i>
+          </ng-template>
+
+          <span *ngIf="isSidebarExpanded">{{ item.t7_2_menu_name }}</span>
+        </span>
+        <i
+          *ngIf="item.children?.length"
+          class="arrow fa-solid fa-angle-right ms-auto"
+          [ngClass]="{ open: isExpanded(item.id_t7_2_menu) }"
+        ></i>
+      </div>
+
+      <!-- Submenu -->
       <ul
         *ngIf="item.children?.length && isExpanded(item.id_t7_2_menu)"
-        class="submenu" 
+        class="submenu"
         [ngClass]="'depth-' + (depth + 1)"
       >
-        <ng-container
-          *ngTemplateOutlet="renderMenu; context: { items: item.children, isRoot: false, depth: (depth + 1) }"
-        ></ng-container>
+      <ng-container *ngTemplateOutlet="renderMenu; context: { items: item.children, isRoot: false, depth: depth + 1 }"></ng-container>
+
       </ul>
     </li>
   </ng-container>
-  
 </ng-template>
+
 
 

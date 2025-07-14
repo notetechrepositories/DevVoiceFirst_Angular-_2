@@ -36,8 +36,8 @@
   <td class="text-center" [innerHTML]="item.allLocationAccess ? checkIcon : crossIcon "></td>
   <td class="text-center" [innerHTML]="item.allIssueAccess ? checkIcon : crossIcon "></td>
   <td class="text-end gap-2">
-    <i class="fa-solid fa-pencil" (click)="editRole(item)"></i>&nbsp;
-    <i class="fa-solid fa-trash" (click)="deleteRole(item)"></i>
+    <i class="pi pi-pen-to-square fw-bold" (click)="editRole(item)"></i>&nbsp;
+    <i class="pi pi-trash fw-bold" (click)="deleteRole(item)"></i>
   </td>
 </tr>
 }

@@ -1,0 +1,19 @@
+.under-development-container {
+    text-align: center;
+    padding: 60px;
+    font-family: sans-serif;
+    background-color: #ffffff;
+    border-radius: 12px;
+    margin: 40px auto;
+    max-width: 600px;
+
+  }
+  h2 {
+    font-size: 2rem;
+    margin-bottom: 10px;
+  }
+
+  p{
+    color: #858585;
+  }
+  

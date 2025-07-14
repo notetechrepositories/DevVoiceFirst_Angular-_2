@@ -8,6 +8,7 @@ import { AdminDashboard } from './admin-dashboard/admin-dashboard';
 import { SysRoles } from './sys-roles/sys-roles';
 import { TestModule } from './test-module/test-module';
 import { SysBusinessActivity } from './sys-business-activity/sys-business-activity';
+import { UnderDevelopment } from './under-development/under-development';
 
 
 
@@ -24,7 +25,8 @@ import { SysBusinessActivity } from './sys-business-activity/sys-business-activi
     AdminDashboard,
     SysRoles,
     SysBusinessActivity,
-    TestModule
+    TestModule,
+    UnderDevelopment
   ],
   declarations: [
 

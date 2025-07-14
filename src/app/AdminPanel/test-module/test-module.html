@@ -17,14 +17,15 @@
         />
         <button class="btn btn-primary" (click)="openModal()">Add</button>
     </div>
-
+<div class="table-responsive">
 <table class="table">
-  <thead>
+  <thead class="table-light">
     <tr>
       <th>#</th>
       <th>First</th>
       <th>Last</th>
       <th>Handle</th>
+      <th></th>
     </tr>
   </thead>
   <tbody>
@@ -34,6 +35,10 @@
       <td>{{ item.first }}</td>
       <td>{{ item.last }}</td>
       <td>{{ item.handle }}</td>
+      <td class="text-end">
+        <i class="pi pi-pen-to-square" (click)="editRole(item)"></i>&nbsp;
+        <i class="pi pi-trash" (click)="deleteRole(item)"></i>
+      </td>
     </tr>
     }
 
@@ -61,7 +66,7 @@
     </li>
   </ul>
 </nav>
-
+</div>
 </div>
 
 
@@ -83,3 +88,5 @@
 
 </div>
 }
+
+
