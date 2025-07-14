@@ -19,7 +19,7 @@
     </div>
 <div class="table-responsive">
     <table class="table">
-        <thead>
+        <thead class="table-light">
           <tr>
               <th>#</th>
               <th>Name</th>
@@ -40,8 +40,8 @@
             <td class="text-center" [innerHTML]="item.section === 'y' ? checkIcon : crossIcon "></td>
             <td class="text-center" [innerHTML]="item.sub_section === 'y' ? checkIcon : crossIcon "></td>
             <td class="text-end">
-              <i class="pi pi-pen-to-square" (click)="openEditModal(item)"></i>&nbsp;
-              <i class="pi pi-trash" (click)="deleteBusinessActivity(item.id)"></i>
+              <i class="pi pi-pen-to-square fw-bold" (click)="openEditModal(item)"></i>&nbsp;
+              <i class="pi pi-trash fw-bold" (click)="deleteBusinessActivity(item.id)"></i>
             </td>
           </tr>
           }
