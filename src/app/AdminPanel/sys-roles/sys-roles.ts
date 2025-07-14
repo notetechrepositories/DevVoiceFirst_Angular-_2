@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { Program } from '../../Service/ProgramService/program';
 
 @Component({
   selector: 'app-sys-roles',
@@ -94,7 +95,7 @@ data = [
       add: 1,
       edit: 0,
       delete: 0,
-      view: 1,
+      view: 1,    
       print: 0,
       export: 1,
       import: 1,
@@ -107,6 +108,8 @@ data = [
 
   searchTerm: string = '';
   filteredData = [...this.data];
+  roleForm!: FormGroup;
+  modules: any[] = [];
 
    get totalPages(): number {
     return Math.ceil(this.filteredData.length / this.itemsPerPage);
@@ -122,6 +125,7 @@ data = [
     const start = (this.currentPage - 1) * this.itemsPerPage;
     return this.filteredData.slice(start, start + this.itemsPerPage);
   }
+  
 
   onSearch() {
     const term = this.searchTerm.toLowerCase();
@@ -147,18 +151,55 @@ data = [
 
   isModalVisible:boolean=false;
   isEditModalVisible:boolean=false;
-  roleForm: FormGroup;
+
   checkIcon = '<i class="fa-solid fa-check text-success"></i>';
   crossIcon = '<i class="fa-solid fa-xmark text-danger"></i>';
 
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private fb: FormBuilder,
+    private programService: Program  
+  ) {
 
+  const permissionsGroup: { [key: string]: FormGroup } = {};
+
+  this.program.forEach(mod => {
+    permissionsGroup[mod.id.toString()] = this.fb.group({
+      add: [!!mod.add],
+      edit: [!!mod.edit],
+      delete: [!!mod.delete],
+      view: [!!mod.view],
+      print: [!!mod.print],
+      export: [!!mod.export],
+      import: [!!mod.import],
+      download: [!!mod.download],
+    });
+  });
+  
     this.roleForm = this.fb.group({
       roleName: [''],
       allLocationAccess: [false],
-      allIssueAccess: [false]
+      allIssueAccess: [false],
+      permissions: this.fb.group(permissionsGroup)
     });
+  this.modules = this.program;
   }
+
+  ngOnInit(){
+    this.getPrograms()
+  }
+
+ getPrograms() {
+  this.programService.getPrograms().subscribe({
+    next: (res) => {
+      console.log('Status Code:', res.status);      
+      console.log('Body:', res.body);  
+    },
+    error: (error) => {
+      console.log('Error Status:', error.status);   // 404, 500, etc.
+      console.log('Error Body:', error.error);      // Error details
+    }
+  });
+}
 
   openModal(){
     this.isModalVisible=true;
