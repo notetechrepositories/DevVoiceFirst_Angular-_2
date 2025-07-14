@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-test-module',
@@ -75,5 +76,26 @@ export class TestModule {
 
   closeModal(){
     this.isModalVisible=false;
+  }
+
+  deleteRole(item:any){
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'This action cannot be undone!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#efba2c',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        console.log(item);
+      } 
+    });
+  }
+  
+
+  editRole(item:any){
+    console.log(item);
   }
 }

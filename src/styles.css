@@ -1,6 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
 @import "../public/css/overlay.css";
-
+@import "primeicons/primeicons.css";
 
 html, body { height: 100vh; }
 body{
@@ -10,6 +10,15 @@ body{
 
 i{
   cursor: pointer;
+}
+
+
+.pi-pen-to-square{
+  color: #5f5f5f;
+}
+
+.pi-trash{
+  color: #dc3545;
 }
 
 .breadcrumb{

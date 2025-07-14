@@ -8,7 +8,7 @@
         <a  routerLink="/company" class="nav-logo" *ngIf="isSidebarExpanded">
           <img src="images/logo-vf.png" alt="logo" width="40"/>
         </a>
-        <!-- <i class='bx bx-menu-alt-right nav-toggle' (click)="toggleSidebar()"></i> -->
+        <i class='bx bx-menu-alt-right nav-toggle' (click)="toggleSidebar()"></i>
       </div>
 
       <div class="menu-scroll flex-grow-1 overflow-auto">
@@ -32,14 +32,18 @@
   </nav>
 </div>
 
-<div class="header">
-  
-</div>
+
 
 
 <div class="main-content" [ngClass]="{ 'body-pd': !isSidebarExpanded }">
+  <div class="header">
+    <div class="header-card">
+    </div>
+  </div>
 
-  <router-outlet></router-outlet>
+  <div class="main-content-body">
+    <router-outlet></router-outlet>
+  </div>
   
 </div>
 
@@ -105,9 +109,8 @@
         class="submenu"
         [ngClass]="'depth-' + (depth + 1)"
       >
-        <ng-container
-          *ngTemplateOutlet="renderMenu; context: { items: item.children, isRoot: false, depth: (depth + 1) }"
-        ></ng-container>
+      <ng-container *ngTemplateOutlet="renderMenu; context: { items: item.children, isRoot: false, depth: depth + 1 }"></ng-container>
+
       </ul>
     </li>
   </ng-container>
