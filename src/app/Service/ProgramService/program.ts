@@ -12,8 +12,6 @@ export class Program {
   constructor(private http:HttpClient) { }
 
   getPrograms(){
-    return this.http.get<any>(`${this.apiUrl}/programs`,{
-    observe: 'response' 
-  });
+    return this.http.get<any>(`${this.apiUrl}/programs`,{observe: 'response'});
   }
 }

@@ -1,138 +1,85 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Program } from '../../Service/ProgramService/program';
+import { Role } from '../../Service/RoleService/role';
+
+export interface RoleProgram {
+  id: string;
+  programId: string;
+  create: boolean;
+  update: boolean;
+  view: boolean;
+  delete: boolean;
+  download: boolean;
+  email: boolean;
+}
+
+export interface Roles {
+  id: string;
+  roleName: string;
+  allLocationAccess: boolean;
+  allIssuesAccess: boolean;
+  isActive: boolean;
+  rolePrograms: RoleProgram[];
+}
 
 @Component({
   selector: 'app-sys-roles',
-  imports: [RouterLink,CommonModule,FormsModule,ReactiveFormsModule],
+  standalone: true,
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink],
   templateUrl: './sys-roles.html',
   styleUrl: './sys-roles.css'
 })
 export class SysRoles {
-data = [
-    {
-      roleName:"Admin",
-      allLocationAccess:true,
-      allIssueAccess:true,
-    },
-    {
-      roleName:"User",
-      allLocationAccess:false,
-      allIssueAccess:false,
-    },
-    {
-      roleName:"Manager",
-      allLocationAccess:true,
-      allIssueAccess:true,
-    },
-    {
-      roleName:"Supervisor",
-      allLocationAccess:true,
-      allIssueAccess:true,
-    },
-    {
-      roleName:"Employee",
-      allLocationAccess:false,
-      allIssueAccess:false,
-    }
-
-  ];
-
-  program= [
-    {
-      id: "1",
-      programName: "Company",
-      add: 1,
-      edit: 1,
-      delete: 0,
-      view: 1,
-      print: 0,
-      export: 1,
-      import: 0,
-      download: 1,
-    },
-    {
-      id: "2",
-      programName: "Roles",
-      add: 0,
-      edit: 1,
-      delete: 1,
-      view: 1,
-      print: 1,
-      export: 0,
-      import: 0,
-      download: 1,
-    },
-    {
-      id: "3",
-      programName: "Employee",
-      add: 1,
-      edit: 1,
-      delete: 1,
-      view: 1,
-      print: 1,
-      export: 1,
-      import: 1,
-      download: 1,
-    },
-    {
-      id: "4",
-      programName: "Report",
-      add: 0,
-      edit: 0,
-      delete: 0,
-      view: 1,
-      print: 1,
-      export: 1,
-      import: 0,
-      download: 1,
-    },
-    {
-      id: "5",
-      programName: "Business Activity",
-      add: 1,
-      edit: 0,
-      delete: 0,
-      view: 1,    
-      print: 0,
-      export: 1,
-      import: 1,
-      download: 0,
-    }
-  ];
+  data: Roles[] = [];
+  filteredData: Roles[] = [];
+  modules: any[] = [];
 
   itemsPerPage = 10;
   currentPage = 1;
+  searchTerm = '';
 
-  searchTerm: string = '';
-  filteredData = [...this.data];
   roleForm!: FormGroup;
-  modules: any[] = [];
+  permissionKeys: string[] = [];
 
-   get totalPages(): number {
+  isModalVisible = false;
+  isEditMode = false;
+  selectedRoleId: string | null = null;
+
+  checkIcon = '<i class="fa-solid fa-check text-success"></i>';
+  crossIcon = '<i class="fa-solid fa-xmark text-danger"></i>';
+
+  constructor(
+    private fb: FormBuilder,
+    private programService: Program,
+    private roleService: Role
+  ) {}
+
+  ngOnInit() {
+    this.getRoles();
+  }
+
+  get totalPages(): number {
     return Math.ceil(this.filteredData.length / this.itemsPerPage);
   }
 
   get totalPagesArray(): number[] {
-    return Array(this.totalPages)
-      .fill(0)
-      .map((_, i) => i + 1);
+    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
   }
 
   get pagedData() {
     const start = (this.currentPage - 1) * this.itemsPerPage;
     return this.filteredData.slice(start, start + this.itemsPerPage);
   }
-  
 
   onSearch() {
     const term = this.searchTerm.toLowerCase();
     this.filteredData = this.data.filter(item =>
-      item.roleName.toLowerCase().includes(term) 
+      item.roleName.toLowerCase().includes(term)
     );
-    this.currentPage = 1; // reset to first page
+    this.currentPage = 1;
   }
 
   goToPage(page: number) {
@@ -147,100 +94,114 @@ data = [
     if (this.currentPage < this.totalPages) this.currentPage++;
   }
 
-  // ----------------
-
-  isModalVisible:boolean=false;
-  isEditModalVisible:boolean=false;
-
-  checkIcon = '<i class="fa-solid fa-check text-success"></i>';
-  crossIcon = '<i class="fa-solid fa-xmark text-danger"></i>';
-
-  constructor(
-    private fb: FormBuilder,
-    private programService: Program  
-  ) {
-
-  const permissionsGroup: { [key: string]: FormGroup } = {};
-
-  this.program.forEach(mod => {
-    permissionsGroup[mod.id.toString()] = this.fb.group({
-      add: [!!mod.add],
-      edit: [!!mod.edit],
-      delete: [!!mod.delete],
-      view: [!!mod.view],
-      print: [!!mod.print],
-      export: [!!mod.export],
-      import: [!!mod.import],
-      download: [!!mod.download],
+  getRoles() {
+    this.roleService.getRoles().subscribe({
+      next: res => {
+        this.data = res.body.data;
+        this.filteredData = [...this.data];
+      },
+      error: err => console.error('Error fetching roles:', err)
     });
-  });
-  
+  }
+
+  openModal(editItem?: Roles) {
+    this.isModalVisible = true;
+    this.isEditMode = !!editItem;
+    this.selectedRoleId = editItem?.id || null;
+
+    this.programService.getPrograms().subscribe({
+      next: res => {
+        this.modules = res.body.data;
+        this.buildForm(this.modules, editItem);
+      },
+      error: err => console.error('Program fetch error:', err)
+    });
+  }
+
+  closeModal() {
+    this.isModalVisible = false;
+    if (this.roleForm) this.roleForm.reset();
+  }
+
+  buildForm(modules: any[], item?: Roles) {
+    if (!modules || modules.length === 0) return;
+
+    this.permissionKeys = Object.keys(modules[0]).filter(
+      key => !['id', 'programName', 'label', 'route'].includes(key)
+    );
+
+    const permissionsGroup: any = {};
+    modules.forEach(mod => {
+      const group: any = {};
+      this.permissionKeys.forEach(key => {
+        group[key] = [{ value: false, disabled: !mod[key] }];
+      });
+      permissionsGroup[mod.id] = this.fb.group(group);
+    });
+
     this.roleForm = this.fb.group({
-      roleName: [''],
-      allLocationAccess: [false],
-      allIssueAccess: [false],
+      roleName: [item?.roleName || ''],
+      allLocationAccess: [item?.allLocationAccess || false],
+      allIssuesAccess: [item?.allIssuesAccess || false],
       permissions: this.fb.group(permissionsGroup)
     });
-  this.modules = this.program;
-  }
 
-  ngOnInit(){
-    this.getPrograms()
-  }
-
- getPrograms() {
-  this.programService.getPrograms().subscribe({
-    next: (res) => {
-      console.log('Status Code:', res.status);      
-      console.log('Body:', res.body);  
-    },
-    error: (error) => {
-      console.log('Error Status:', error.status);   // 404, 500, etc.
-      console.log('Error Body:', error.error);      // Error details
+    if (item) {
+      const permissionsForm = this.roleForm.get('permissions') as FormGroup;
+      item.rolePrograms.forEach(rp => {
+        const group = permissionsForm.get(rp.programId) as FormGroup;
+        const mod = modules.find(m => m.id === rp.programId);
+        if (group && mod) {
+          this.permissionKeys.forEach(key => {
+            if (mod[key]) {
+              group.get(key)?.enable();
+              group.get(key)?.setValue(rp[key as keyof RoleProgram]);
+            }
+          });
+        }
+      });
     }
-  });
-}
-
-  openModal(){
-    this.isModalVisible=true;
-    console.log(this.isModalVisible);
   }
 
-  closeModal(){
-    this.isModalVisible=false;
-    this.isEditModalVisible=false;
-    this.roleForm.reset();
+  extractPermissions(): RoleProgram[] {
+    const permissionsForm = this.roleForm.get('permissions') as FormGroup;
+    return this.modules.map(mod => {
+      const modGroup = permissionsForm.get(mod.id) as FormGroup;
+      const permissionData: any = { programId: mod.id };
+      this.permissionKeys.forEach(key => {
+        permissionData[key] = modGroup.get(key)?.disabled ? false : modGroup.get(key)?.value;
+      });
+      return permissionData;
+    });
   }
 
-  addRole(){
-    console.log("addRole");
-    console.log(this.roleForm.value);
-    this.filteredData.push(this.roleForm.value);
+  submitForm() {
+    const rolePrograms = this.extractPermissions();
+    const payload = {
+      id: this.selectedRoleId || undefined,
+      roleName: this.roleForm.value.roleName,
+      allLocationAccess: this.roleForm.value.allLocationAccess,
+      allIssuesAccess: this.roleForm.value.allIssuesAccess,
+      rolePrograms
+    };
+
+    if (this.isEditMode) {
+      console.log('Update role:', payload);
+      this.roleService.updateRole(payload).subscribe({
+        next: () => this.getRoles(),
+        error: err => console.error('Update role error:', err)
+      });
+    } else {
+      this.roleService.createRole(payload).subscribe({
+        next: () => this.getRoles(),
+        error: err => console.error('Create role error:', err)
+      });
+    }
+
     this.closeModal();
   }
 
-  editRole(item:any){
-    console.log(item);
-    this.roleForm.patchValue(item);
-    this.isEditModalVisible=true;
-  }
-
-  saveChanges(){
-    console.log(this.roleForm.value);
-    // Find the index of the item being edited in filteredData and update it
-    const index = this.filteredData.findIndex(
-      (item: any) => item.roleName === this.roleForm.value.roleName
-    );
-    if (index !== -1) {
-      this.filteredData[index] = { ...this.roleForm.value };
-    } 
-    this.closeModal();
-  }
-
-  deleteRole(item:any){
-    console.log(item);
-    this.filteredData = this.filteredData.filter(
-      (role: any) => role !== item
-    );
+  deleteRole(role: Roles) {
+    this.filteredData = this.filteredData.filter(r => r.id !== role.id);
   }
 }
