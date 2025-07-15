@@ -5,7 +5,7 @@ import { HttpClient } from '@angular/common/http';
 @Injectable({
   providedIn: 'root'
 })
-export class Role {
+export class RoleService {
 
   private apiUrl = environment.apiUrl;
   
@@ -23,5 +23,13 @@ export class Role {
 
   updateRole(data:any){
     return this.http.put<any>(`${this.apiUrl}/roles`, data,{observe: 'response'});
+  }
+
+  deleteRole(data:any){
+    return this.http.delete<any>(`${this.apiUrl}/roles`, {body: data, observe: 'response'});
+  }
+
+  updateRoleStatus(data:any){
+    return this.http.patch<any>(`${this.apiUrl}/roles`, data,{observe: 'response'});
   }
 }
