@@ -5,7 +5,7 @@ import { HttpClient } from '@angular/common/http';
 @Injectable({
   providedIn: 'root'
 })
-export class Program {
+export class ProgramService {
 
   private apiUrl = environment.apiUrl;
   

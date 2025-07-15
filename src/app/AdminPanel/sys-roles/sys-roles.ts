@@ -1,9 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Program } from '../../Service/ProgramService/program';
-import { Role } from '../../Service/RoleService/role';
+import { RoleService } from '../../Service/RoleService/role';
+import { ProgramService } from '../../Service/ProgramService/program';
+import Swal from 'sweetalert2';
+import { UtilityService } from '../../Service/UtilityService/utility-service';
 
 export interface RoleProgram {
   id: string;
@@ -48,13 +50,17 @@ export class SysRoles {
   isEditMode = false;
   selectedRoleId: string | null = null;
 
-  checkIcon = '<i class="fa-solid fa-check text-success"></i>';
-  crossIcon = '<i class="fa-solid fa-xmark text-danger"></i>';
+  selectedRoleIds: string[] = [];
+  isAllSelected = false;
+
+  checkIcon = '<i class="pi pi-check-square text-success"></i>';
+  crossIcon = '<i class="pi pi-times-circle text-danger"></i>';
 
   constructor(
     private fb: FormBuilder,
-    private programService: Program,
-    private roleService: Role
+    private programService: ProgramService,
+    private roleService: RoleService,
+    private utilityService: UtilityService
   ) {}
 
   ngOnInit() {
@@ -125,27 +131,29 @@ export class SysRoles {
 
   buildForm(modules: any[], item?: Roles) {
     if (!modules || modules.length === 0) return;
-
+  
     this.permissionKeys = Object.keys(modules[0]).filter(
-      key => !['id', 'programName', 'label', 'route'].includes(key)
+      key => !['programName', 'label', 'route', 'id'].includes(key)
     );
-
+  
     const permissionsGroup: any = {};
     modules.forEach(mod => {
       const group: any = {};
       this.permissionKeys.forEach(key => {
         group[key] = [{ value: false, disabled: !mod[key] }];
       });
+  
+      group['Id'] = [null]; 
       permissionsGroup[mod.id] = this.fb.group(group);
     });
-
+  
     this.roleForm = this.fb.group({
-      roleName: [item?.roleName || ''],
+      roleName: [item?.roleName || '' , Validators.required],
       allLocationAccess: [item?.allLocationAccess || false],
       allIssuesAccess: [item?.allIssuesAccess || false],
       permissions: this.fb.group(permissionsGroup)
     });
-
+  
     if (item) {
       const permissionsForm = this.roleForm.get('permissions') as FormGroup;
       item.rolePrograms.forEach(rp => {
@@ -158,24 +166,42 @@ export class SysRoles {
               group.get(key)?.setValue(rp[key as keyof RoleProgram]);
             }
           });
+  
+          // Set existing RoleProgram Id
+          group.get('Id')?.setValue(rp.id);
         }
       });
     }
+  
+    this.modules = modules; // For extractPermissions
   }
+  
 
   extractPermissions(): RoleProgram[] {
     const permissionsForm = this.roleForm.get('permissions') as FormGroup;
+  
     return this.modules.map(mod => {
       const modGroup = permissionsForm.get(mod.id) as FormGroup;
-      const permissionData: any = { programId: mod.id };
+      const permissionData: any = {
+        programId: mod.id,
+        id: modGroup.get('Id')?.value // Include Id from form for updates
+      };
+  
       this.permissionKeys.forEach(key => {
         permissionData[key] = modGroup.get(key)?.disabled ? false : modGroup.get(key)?.value;
       });
+  
       return permissionData;
     });
   }
+  
 
   submitForm() {
+    if (this.roleForm.invalid) {
+      this.roleForm.markAllAsTouched();
+      return;
+    }
+
     const rolePrograms = this.extractPermissions();
     const payload = {
       id: this.selectedRoleId || undefined,
@@ -201,7 +227,74 @@ export class SysRoles {
     this.closeModal();
   }
 
-  deleteRole(role: Roles) {
-    this.filteredData = this.filteredData.filter(r => r.id !== role.id);
+  toggleSelection(id: string, event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+  
+    if (checked) {
+      if (!this.selectedRoleIds.includes(id)) {
+        this.selectedRoleIds.push(id);
+      }
+    } else {
+      this.selectedRoleIds = this.selectedRoleIds.filter(x => x !== id);
+    }
+  
+    this.updateSelectAllStatus();
+  }
+  
+  toggleSelectAll(event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+  
+    if (checked) {
+      this.selectedRoleIds = this.pagedData.map(x => x.id);
+    } else {
+      this.selectedRoleIds = [];
+    }
+  
+    this.isAllSelected = checked;
+  }
+  
+  updateSelectAllStatus() {
+    this.isAllSelected = this.pagedData.length > 0 && this.pagedData.every(x => this.selectedRoleIds.includes(x.id));
+  }
+
+  deleteRoles() {
+
+    Swal.fire({
+      title: 'Are you sure?',
+      text: `Delete ${this.selectedRoleIds.length} roles`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#eb1313',
+      cancelButtonColor: '#565656',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.roleService.deleteRole(this.selectedRoleIds).subscribe({
+          next: () => this.getRoles(),
+          error: err => console.error('Delete role error:', err)
+        });
+        this.selectedRoleIds = [];
+        this.isAllSelected = false;
+      } 
+    });
+  }
+
+  toggleStatus(item: any) {
+    const updatedStatus = !item.isActive;
+    const payload = {
+      id: item.id,
+      isActive: updatedStatus
+    };
+  
+    this.roleService.updateRoleStatus(payload).subscribe({
+      next: () => {
+        item.isActive = updatedStatus; // Optimistic update
+        this.utilityService.success('Status updated successfully');
+      },
+      error: err => {
+        console.error('Status update failed', err);
+        // Optional: show a toast or revert UI if needed
+      }
+    });
   }
 }

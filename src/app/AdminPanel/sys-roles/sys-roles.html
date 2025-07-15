@@ -16,34 +16,65 @@
     <table class="table">
       <thead class="table-light">
         <tr>
-          <th>#</th>
+          <th>
+            <input
+              type="checkbox" class="form-check-input"
+              [checked]="isAllSelected"
+              (change)="toggleSelectAll($event)"
+            />
+          </th>
           <th>Role Name</th>
           <th class="text-center">All Location Access</th>
           <th class="text-center">All Issue Access</th>
-          <th></th>
+          <th>Status</th>
+          <th class="text-end">
+            @if (selectedRoleIds.length > 0) {
+            <i
+              class="pi pi-trash text-danger"
+              (click)="deleteRoles()"
+            ></i>
+            }
+          </th>
         </tr>
       </thead>
       <tbody>
         @for (item of pagedData; track item.id) {
-        <tr>
-          <td>{{ (currentPage - 1) * itemsPerPage + pagedData.indexOf(item) + 1 }}</td>
-          <td>{{ item.roleName }}</td>
-          <td class="text-center" [innerHTML]="item.allLocationAccess ? checkIcon : crossIcon"></td>
-          <td class="text-center" [innerHTML]="item.allIssuesAccess ? checkIcon : crossIcon"></td>
-          <td class="text-end gap-2">
-            <i class="pi pi-pen-to-square fw-bold" (click)="openModal(item)"></i>&nbsp;
-            <i class="pi pi-trash fw-bold" (click)="deleteRole(item)"></i>
-          </td>
-        </tr>
+          <tr>
+            <td>
+              <input
+              type="checkbox" class="form-check-input"
+                [checked]="selectedRoleIds.includes(item.id)"
+                (change)="toggleSelection(item.id, $event)"
+              />
+            </td>
+            <td>{{ item.roleName }}</td>
+            <td class="text-center" [innerHTML]="item.allLocationAccess ? checkIcon : crossIcon"></td>
+            <td class="text-center" [innerHTML]="item.allIssuesAccess ? checkIcon : crossIcon"></td>
+            <td>
+              <span
+                class="badge"
+                [ngClass]="item.isActive ? 'bg-success' : 'bg-secondary'"
+                style="cursor: pointer;"
+                (click)="toggleStatus(item)"
+              >
+                {{ item.isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+            
+            <td class="text-end gap-2">
+              <i class="pi pi-pen-to-square" (click)="openModal(item)"></i>&nbsp;
+            </td>
+          </tr>
         }
         @empty {
-        <tr>
-          <td colspan="5" class="text-center">No data found</td>
-        </tr>
+          <tr>
+            <td colspan="5" class="text-center">No data found</td>
+          </tr>
         }
       </tbody>
     </table>
   </div>
+  
 
   <!-- Pagination -->
   <nav class="d-flex justify-content-end">
@@ -72,7 +103,8 @@
         <form [formGroup]="roleForm" (ngSubmit)="submitForm()">
           <div class="form-group mb-3">
             <label class="mb-1">Role Name</label>
-            <input type="text" class="form-control" formControlName="roleName" />
+            <input type="text" class="form-control" formControlName="roleName" /> 
+            <small class="text-danger" *ngIf="roleForm.get('roleName')?.errors?.['required'] && roleForm.get('roleName')?.touched">Role Name is required</small>
           </div>
 
           <div class="d-flex justify-content-center gap-5 mb-3">
