@@ -3,6 +3,9 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import Swal from 'sweetalert2';
+import { BusinessActivityService } from '../../Service/BusinessActivityService/business-activity';
+import { BusinessActivityModel } from '../../Models/BusinessActivityModel';
+
 
 @Component({
   selector: 'app-sys-business-activity',
@@ -11,38 +14,14 @@ import Swal from 'sweetalert2';
   styleUrl: './sys-business-activity.css'
 })
 export class SysBusinessActivity {
-  data = [
-    {
-      "id": "010110101",
-      "business_activity_name": "Restaurant",
-      "company": "y",
-      "branch": "y",
-      "section": "y",
-      "sub_section": "y"
-    },
-    {
-      "id": "010110111",
-      "business_activity_name": "Textiles",
-      "company": "y",
-      "branch": "y",
-      "section": "y",
-      "sub_section": "y"
-    },
-    {
-      "id": "010110011",
-      "business_activity_name": "Jewellery",
-      "company": "y",
-      "branch": "y",
-      "section": "n",
-      "sub_section": "n"
-    }
-  ];
+  data: BusinessActivityModel[] = [];
+  filteredData: BusinessActivityModel[] = [];
 
   itemsPerPage = 10;
   currentPage = 1;
   searchTerm: string = '';
-  filteredData = [...this.data];
 
+ 
    get totalPages(): number {
     return Math.ceil(this.filteredData.length / this.itemsPerPage);
   }
@@ -58,13 +37,13 @@ export class SysBusinessActivity {
     return this.filteredData.slice(start, start + this.itemsPerPage);
   }
 
-  onSearch() {
-    const term = this.searchTerm.toLowerCase();
-    this.filteredData = this.data.filter(item =>
-      item.business_activity_name.toLowerCase().includes(term)
-    );
-    this.currentPage = 1; // reset to first page
-  }
+  // onSearch() {
+  //   const term = this.searchTerm.toLowerCase();
+  //   this.filteredData = this.data.filter(item =>
+  //     item.business_activity_name.toLowerCase().includes(term)
+  //   );
+  //   this.currentPage = 1; // reset to first page
+  // }
 
   goToPage(page: number) {
     this.currentPage = page;
@@ -85,19 +64,20 @@ export class SysBusinessActivity {
   businessActivityForm!:FormGroup;
   checkIcon = '<i class="fa-solid fa-check text-success"></i>';
   crossIcon = '<i class="fa-solid fa-xmark text-danger"></i>';
-
-  constructor(private fb:FormBuilder){}
+  businessActivities: any[] = [];
+  
+  constructor(private fb:FormBuilder,private businessActivityService:BusinessActivityService){}
 
   ngOnInit(){
+    this.getBusinessActivity();
     this.businessActivityForm = this.fb.group({
-      id: [''], // <-- include this!
-      business_activity_name: [''],
+      id: [''],
+      activityName: [''],
       company: [false],
       branch: [false],
       section: [false],
-      sub_section: [false]
+      subSection: [false]
     });
-    
   }
 
   openModal(){
@@ -108,64 +88,107 @@ export class SysBusinessActivity {
   closeModal(){
     this.isModalVisible=false;
     this.isEditModalVisible=false;
+    this.businessActivities=[];
     this.businessActivityForm.reset();
   }
-
-  addBusinessActivity() {
-    const formValue = this.businessActivityForm.value;
   
-    const newItem = {
-      id: Date.now().toString(), // or use UUID if needed
-      business_activity_name: formValue.business_activity_name,
-      company: formValue.company ? 'y' : 'n',
-      branch: formValue.branch ? 'y' : 'n',
-      section: formValue.section ? 'y' : 'n',
-      sub_section: formValue.sub_section ? 'y' : 'n'
-    };
-  
-    this.data.push(newItem);
-    this.filteredData = [...this.data];
-    this.closeModal();
+  getBusinessActivity(){
+    this.businessActivityService.getBusinessActivity().subscribe({
+      next:res=>{
+        console.log(res.body.data);
+        this.data=res.body.data;
+        this.filteredData = [...this.data];
+      },
+        error: err => console.error('Error fetching BusinessActivity:', err)
+    });
   }
 
+  addBusinessActivity(): void {
+  const activityObj  = this.businessActivityForm.value;
+
+  if (activityObj.activityName?.trim()) {
+    this.businessActivities.push({
+      activityName:activityObj.activityName,
+      company:activityObj.company,
+      branch: activityObj.branch,
+      section: activityObj.section,
+      subSection: activityObj.subSection
+    });
+    this.businessActivityForm.reset();
+  }
+}
+
+  removeActivity(index: number): void {
+    this.businessActivities.splice(index, 1);
+  }
+
+  submitAllActivities() {
+    const payload = this.businessActivities.map(({ activityName, company, branch, section, subSection }) => ({
+      activityName,
+      company: !!company,
+      branch: !!branch,
+      section: !!section,
+      subSection: !!subSection
+    }));
+    this.businessActivityService.createBusinessActivity(payload).subscribe({
+      next:()=>{
+        this.getBusinessActivity(),
+          this.closeModal();
+        },
+          error: err => {
+            console.error('Create business activity error:', err);
+           alert('Failed to submit business activities. Please try again.');
+          }
+    });
+  }
+
+  
+
+originalItem: any;
   openEditModal(item: any) {
     this.isEditModalVisible = true;
-  
+      this.originalItem = { ...item };
     this.businessActivityForm.patchValue({
       id: item.id,
-      business_activity_name: item.business_activity_name,
-      company: item.company === 'y',
-      branch: item.branch === 'y',
-      section: item.section === 'y',
-      sub_section: item.sub_section === 'y'
+      activityName: item.activityName,
+      company: item.company ,
+      branch: item.branch ,
+      section: item.section ,
+      subSection: item.subSection 
     });
   }
   
 
-  saveChanges() {
-    const formValue = this.businessActivityForm.value;
-  
-    const updatedItem = {
-      id: formValue.id,
-      business_activity_name: formValue.business_activity_name,
-      company: formValue.company ? 'y' : 'n',
-      branch: formValue.branch ? 'y' : 'n',
-      section: formValue.section ? 'y' : 'n',
-      sub_section: formValue.sub_section ? 'y' : 'n'
-    };
-  
-    const index = this.filteredData.findIndex(item => item.id === updatedItem.id);
-    if (index !== -1) {
-      this.filteredData[index] = updatedItem;
+saveChanges() {
+  const formValue = this.businessActivityForm.value;
+
+  // Always include ID for identification
+  const updatedFields: any = { id: formValue.id };
+
+  // Compare with originalItem and include only changed fields
+  Object.keys(formValue).forEach(key => {
+    if (formValue[key] !== this.originalItem[key]) {
+      updatedFields[key] = formValue[key];
     }
-  
-    const dataIndex = this.data.findIndex(item => item.id === updatedItem.id);
-    if (dataIndex !== -1) {
-      this.data[dataIndex] = updatedItem;
-    }
-  
+  });
+
+  // If no fields changed (only ID present), do nothing
+  if (Object.keys(updatedFields).length === 1) {
+    console.log('No changes detected.');
     this.closeModal();
+    return;
   }
+
+  // Send only changed fields to backend
+  this.businessActivityService.updateBusinessActivity(updatedFields).subscribe({
+    next: () => {
+      this.getBusinessActivity(); 
+      this.closeModal();
+    },
+    error: err => console.error('Update business activity error:', err)
+  });
+}
+
   
 
   deleteBusinessActivity(id:any){
