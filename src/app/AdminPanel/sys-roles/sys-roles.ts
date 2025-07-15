@@ -7,6 +7,7 @@ import { ProgramService } from '../../Service/ProgramService/program';
 import Swal from 'sweetalert2';
 import { UtilityService } from '../../Service/UtilityService/utility-service';
 
+
 export interface RoleProgram {
   id: string;
   programId: string;
@@ -129,52 +130,61 @@ export class SysRoles {
     if (this.roleForm) this.roleForm.reset();
   }
 
+
+  originalRolePrograms: RoleProgram[] = [];
+  
   buildForm(modules: any[], item?: Roles) {
     if (!modules || modules.length === 0) return;
   
     this.permissionKeys = Object.keys(modules[0]).filter(
-      key => !['programName', 'label', 'route', 'id'].includes(key)
+      key => !['id', 'programName', 'label', 'route'].includes(key)
     );
   
     const permissionsGroup: any = {};
+    const roleProgramsMap = new Map(item?.rolePrograms?.map(rp => [rp.programId, rp]));
+  
     modules.forEach(mod => {
       const group: any = {};
+      const existingRoleProgram = roleProgramsMap.get(mod.id);
+  
       this.permissionKeys.forEach(key => {
         group[key] = [{ value: false, disabled: !mod[key] }];
       });
   
-      group['Id'] = [null]; 
+      if (existingRoleProgram) {
+        group['Id'] = [existingRoleProgram.id];
+      }
+  
       permissionsGroup[mod.id] = this.fb.group(group);
     });
   
     this.roleForm = this.fb.group({
-      roleName: [item?.roleName || '' , Validators.required],
+      roleName: [item?.roleName || '', Validators.required],
       allLocationAccess: [item?.allLocationAccess || false],
       allIssuesAccess: [item?.allIssuesAccess || false],
       permissions: this.fb.group(permissionsGroup)
     });
   
-    if (item) {
+    this.originalRolePrograms = item?.rolePrograms || [];
+  
+    if (item?.rolePrograms) {
       const permissionsForm = this.roleForm.get('permissions') as FormGroup;
       item.rolePrograms.forEach(rp => {
         const group = permissionsForm.get(rp.programId) as FormGroup;
-        const mod = modules.find(m => m.id === rp.programId);
-        if (group && mod) {
+        if (group) {
           this.permissionKeys.forEach(key => {
-            if (mod[key]) {
+            if (group.get(key)) {
               group.get(key)?.enable();
               group.get(key)?.setValue(rp[key as keyof RoleProgram]);
             }
           });
-  
-          // Set existing RoleProgram Id
-          group.get('Id')?.setValue(rp.id);
         }
       });
     }
   
-    this.modules = modules; // For extractPermissions
+    this.modules = modules;
   }
+  
   
 
   extractPermissions(): RoleProgram[] {
@@ -194,15 +204,88 @@ export class SysRoles {
       return permissionData;
     });
   }
-  
 
   submitForm() {
     if (this.roleForm.invalid) {
       this.roleForm.markAllAsTouched();
       return;
     }
+  
+    if (this.isEditMode) {
+      this.handleUpdate();
+    } else {
+      this.handleCreate();
+    }
+  }
 
+
+  private handleUpdate(): void {
+    const form = this.roleForm;
+    const updatedFields: any = { id: this.selectedRoleId };
+    const rolePrograms: RoleProgram[] = [];
+  
+    // Top-level dirty fields
+    this.utilityService.setIfDirty(form, 'roleName', updatedFields);
+    this.utilityService.setIfDirty(form, 'allLocationAccess', updatedFields);
+    this.utilityService.setIfDirty(form, 'allIssuesAccess', updatedFields);
+  
+    const permissionsForm = form.get('permissions') as FormGroup;
+  
+    this.modules.forEach(mod => {
+      const modGroup = permissionsForm.get(mod.id) as FormGroup;
+      if (!modGroup || !modGroup.dirty) return;
+  
+      const permissionData: any = { programId: mod.id };
+      let hasChanges = false;
+  
+      this.permissionKeys.forEach(key => {
+        const control = modGroup.get(key);
+        if (control?.dirty) {
+          permissionData[key] = control.value;
+          hasChanges = true;
+        }
+      });
+  
+      const idControl = modGroup.get('Id');
+      if (idControl?.value) {
+        permissionData.id = idControl.value;
+      }
+  
+      if (hasChanges) {
+        rolePrograms.push(permissionData);
+      }
+    });
+  
+    // Always include rolePrograms (even if empty)
+    updatedFields.rolePrograms = rolePrograms;
+  
+    console.log('Update payload:', updatedFields);
+  
+    const hasUpdates =
+      Object.keys(updatedFields).length > 1 || rolePrograms.length > 0;
+  
+    if (hasUpdates) {
+      this.roleService.updateRoleDynamic(updatedFields).subscribe({
+        next: (res) => {
+          console.log(res);
+            this.getRoles();
+            this.closeModal();
+            this.utilityService.success(res.body.message);
+        },
+        error: err => {
+
+            this.utilityService.showError(err.status);
+          
+        }
+      });
+    } else {
+      this.utilityService.warning('No changes detected');
+    }
+  }
+
+  private handleCreate(): void {
     const rolePrograms = this.extractPermissions();
+  
     const payload = {
       id: this.selectedRoleId || undefined,
       roleName: this.roleForm.value.roleName,
@@ -210,22 +293,46 @@ export class SysRoles {
       allIssuesAccess: this.roleForm.value.allIssuesAccess,
       rolePrograms
     };
-
-    if (this.isEditMode) {
-      console.log('Update role:', payload);
-      this.roleService.updateRole(payload).subscribe({
-        next: () => this.getRoles(),
-        error: err => console.error('Update role error:', err)
-      });
-    } else {
-      this.roleService.createRole(payload).subscribe({
-        next: () => this.getRoles(),
-        error: err => console.error('Create role error:', err)
-      });
-    }
-
-    this.closeModal();
+  
+    this.roleService.createRole(payload).subscribe({
+      next: () => {
+        this.getRoles();
+        this.closeModal();
+      },
+      error: err => console.error('Create role error:', err)
+    });
   }
+  
+  // submitForm() {
+  //   if (this.roleForm.invalid) {
+  //     this.roleForm.markAllAsTouched();
+  //     return;
+  //   }
+
+  //   const rolePrograms = this.extractPermissions();
+  //   const payload = {
+  //     id: this.selectedRoleId || undefined,
+  //     roleName: this.roleForm.value.roleName,
+  //     allLocationAccess: this.roleForm.value.allLocationAccess,
+  //     allIssuesAccess: this.roleForm.value.allIssuesAccess,
+  //     rolePrograms
+  //   };
+
+  //   if (this.isEditMode) {
+  //     console.log('Update role:', payload);
+  //     this.roleService.updateRole(payload).subscribe({
+  //       next: () => this.getRoles(),
+  //       error: err => console.error('Update role error:', err)
+  //     });
+  //   } else {
+  //     this.roleService.createRole(payload).subscribe({
+  //       next: () => this.getRoles(),
+  //       error: err => console.error('Create role error:', err)
+  //     });
+  //   }
+
+  //   this.closeModal();
+  // }
 
   toggleSelection(id: string, event: Event) {
     const checked = (event.target as HTMLInputElement).checked;

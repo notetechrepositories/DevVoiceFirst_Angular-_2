@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { FormGroup } from '@angular/forms';
 import Swal from 'sweetalert2';
 
 @Injectable({
@@ -7,6 +8,8 @@ import Swal from 'sweetalert2';
 export class UtilityService {
 
   constructor() { }
+
+  // ----------- Toast Messages ------------
 
   private toast = Swal.mixin({
     toast: true,
@@ -38,5 +41,36 @@ export class UtilityService {
 
   warning(message: string) {
     this.show('warning', message);
+  }
+
+
+  // ----------- Error Messages ------------
+
+  showError(statusCode: number) {
+
+    if(statusCode === 500){
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Something went wrong!",
+      });
+    }
+
+    if(statusCode === 400){
+      Swal.fire({
+        icon: "error",
+        title: "Bad Request",
+        text: "Please check your request and try again.",
+      });
+    }
+  }
+
+  // ----------- Set If Dirty ------------
+
+  setIfDirty(form: FormGroup, key: string, target: any): void {
+    const control = form.get(key);
+    if (control?.dirty) {
+      target[key] = control.value;
+    }
   }
 }
