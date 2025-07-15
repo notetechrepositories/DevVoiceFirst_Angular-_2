@@ -1,132 +1,122 @@
 <div>
-    <h3>Manage System Roles</h3>
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Dashboard</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Roles</li>
-        </ol>
-    </nav>
+  <h3>Manage System Roles</h3>
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Dashboard</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Roles</li>
+    </ol>
+  </nav>
 
-    <div class="page-header d-flex justify-content-between mb-3 mt-4">
-        <input
-        type="text"
-        class="form-control w-25"
-        placeholder="Search"
-        [(ngModel)]="searchTerm"
-        (input)="onSearch()"
-        />
-        <button class="btn btn-primary" (click)="openModal()">Add</button>
-    </div>
-<div class="table-responsive">
-  <table class="table">
-    <thead class="table-light">
+  <div class="page-header d-flex justify-content-between mb-3 mt-4">
+    <input type="text" class="form-control w-25" placeholder="Search" [(ngModel)]="searchTerm" (input)="onSearch()" />
+    <button type="button" class="btn btn-primary" (click)="openModal()">Add</button>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table">
+      <thead class="table-light">
         <tr>
-  <th>#</th>
-  <th>Role Name</th>
-  <th class="text-center">All Location Access</th>
-  <th class="text-center">All Issue Access</th>
-  <th></th>
-</tr>
-</thead>
-<tbody>
-@for (item of pagedData; track item) {
-<tr>
-  <td>{{ (currentPage - 1) * itemsPerPage + pagedData.indexOf(item) + 1 }}</td>
-  <td>{{ item.roleName }}</td>
-  <td class="text-center" [innerHTML]="item.allLocationAccess ? checkIcon : crossIcon "></td>
-  <td class="text-center" [innerHTML]="item.allIssueAccess ? checkIcon : crossIcon "></td>
-  <td class="text-end gap-2">
-    <i class="pi pi-pen-to-square fw-bold" (click)="editRole(item)"></i>&nbsp;
-    <i class="pi pi-trash fw-bold" (click)="deleteRole(item)"></i>
-  </td>
-</tr>
-}
+          <th>#</th>
+          <th>Role Name</th>
+          <th class="text-center">All Location Access</th>
+          <th class="text-center">All Issue Access</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of pagedData; track item.id) {
+        <tr>
+          <td>{{ (currentPage - 1) * itemsPerPage + pagedData.indexOf(item) + 1 }}</td>
+          <td>{{ item.roleName }}</td>
+          <td class="text-center" [innerHTML]="item.allLocationAccess ? checkIcon : crossIcon"></td>
+          <td class="text-center" [innerHTML]="item.allIssuesAccess ? checkIcon : crossIcon"></td>
+          <td class="text-end gap-2">
+            <i class="pi pi-pen-to-square fw-bold" (click)="openModal(item)"></i>&nbsp;
+            <i class="pi pi-trash fw-bold" (click)="deleteRole(item)"></i>
+          </td>
+        </tr>
+        }
+        @empty {
+        <tr>
+          <td colspan="5" class="text-center">No data found</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
 
-@empty {
-  <tr>
-    <td colspan="4" class="text-center">No data found</td>
-  </tr>
-}
-</tbody>
-</table>
-</div>
-
-
-<!-- Pagination Controls -->
-<nav class="d-flex justify-content-end">
-  <ul class="pagination">
-    <li class="page-item" [class.disabled]="currentPage === 1">
-      <a class="page-link" (click)="previousPage()"><i class="fa-solid fa-angle-left"></i></a>
-    </li>
-    @for (page of totalPagesArray; track page) {
+  <!-- Pagination -->
+  <nav class="d-flex justify-content-end">
+    <ul class="pagination">
+      <li class="page-item" [class.disabled]="currentPage === 1">
+        <a class="page-link" (click)="previousPage()"><i class="fa-solid fa-angle-left"></i></a>
+      </li>
+      @for (page of totalPagesArray; track page) {
       <li class="page-item" [class.active]="page === currentPage">
         <a class="page-link" (click)="goToPage(page)">{{ page }}</a>
       </li>
-    }
-    <li class="page-item" [class.disabled]="currentPage === totalPages">
-      <a class="page-link" (click)="nextPage()"><i class="fa-solid fa-angle-right"></i></a>
-    </li>
-  </ul>
-</nav>
+      }
+      <li class="page-item" [class.disabled]="currentPage === totalPages">
+        <a class="page-link" (click)="nextPage()"><i class="fa-solid fa-angle-right"></i></a>
+      </li>
+    </ul>
+  </nav>
 
-</div>
+  <!-- Shared Modal -->
+@if (isModalVisible && roleForm) {
+    <div class="overlay">
+      <div class="modal-content">
+        <i class="fa-solid fa-xmark text-end" (click)="closeModal()"></i>
+        <h4 class="mb-3">{{ isEditMode ? 'Edit Role' : 'Add Role' }}</h4>
 
+        <form [formGroup]="roleForm" (ngSubmit)="submitForm()">
+          <div class="form-group mb-3">
+            <label class="mb-1">Role Name</label>
+            <input type="text" class="form-control" formControlName="roleName" />
+          </div>
 
-<!-- Modal -->
+          <div class="d-flex justify-content-center gap-5 mb-3">
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input" id="location" formControlName="allLocationAccess" />
+              <label class="form-check-label" for="location">All Location Access</label>
+            </div>
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input" id="issues" formControlName="allIssuesAccess" />
+              <label class="form-check-label" for="issues">All Issue Access</label>
+            </div>
+          </div>
 
-@if(isModalVisible){
-<div class="overlay" >
-<div class="modal-content">
-  <i class="fa-solid fa-xmark text-end" (click)="closeModal()"></i>
-  <h4>Add Role</h4>
-  
-  <form [formGroup]="roleForm">
-    <div class="form-group">
-      <label for="roleName">Role Name</label>
-      <input type="text" class="form-control" id="roleName" formControlName="roleName" placeholder="Enter role name">
+          <h6>Permissions</h6>
+          <div formGroupName="permissions" class="table-responsive">
+            <table class="table text-start align-middle">
+              <thead class="table-light text-center">
+                <tr>
+                  <th class="text-start">Module</th>
+                  @for (key of permissionKeys; track key) {
+                    <th class="text-capitalize">{{ key }}</th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (mod of modules; track mod.id) {
+                  <tr [formGroupName]="mod.id">
+                    <td class="text-capitalize">{{ mod.label }}</td>
+                    @for (key of permissionKeys; track key) {
+                      <td class="text-center">
+                        <input type="checkbox" class="form-check-input" [formControlName]="key" />
+                      </td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <button type="submit" class="btn mt-4 w-100" [ngClass]="isEditMode ? 'btn-success' : 'btn-primary'">
+            {{ isEditMode ? 'Save Changes' : 'Add' }}
+          </button>
+        </form>
+      </div>
     </div>
-    <div class="d-flex justify-content-center gap-5 mb-2 mt-4">
-      <div class="form-group form-check">
-        <input type="checkbox" class="form-check-input" id="allLocationAccess" formControlName="allLocationAccess">
-        <label class="form-check-label" for="allLocationAccess" >All Location Access</label>
-      </div>
-      <div class="form-group form-check">
-        <input type="checkbox" class="form-check-input" id="allIssueAccess"  formControlName="allIssueAccess">
-        <label class="form-check-label" for="allIssueAccess">All Issue access</label>
-      </div>
-    </div>
-    
-    <button class="btn btn-primary w-100 mt-4" (click)="addRole()">Add</button>
-  </form>
+  }
 </div>
-
-</div>
-}
-
-<!-- Edit Role Modal -->
-@if(isEditModalVisible) {
-<div class="overlay">
-  <div class="modal-content">
-    <i class="fa-solid fa-xmark text-end" (click)="closeModal()"></i>
-    <h4>Edit Role</h4>
-    <form [formGroup]="roleForm">
-      <div class="form-group">
-        <label for="editRoleName">Role Name</label>
-        <input type="text" class="form-control" id="editRoleName" formControlName="roleName" placeholder="Enter role name">
-      </div>
-      <div class="d-flex justify-content-center gap-5 mb-2 mt-4">
-        <div class="form-group form-check">
-          <input type="checkbox" class="form-check-input" id="editAllLocationAccess" formControlName="allLocationAccess">
-          <label class="form-check-label" for="editAllLocationAccess">All Location Access</label>
-        </div>
-        <div class="form-group form-check">
-          <input type="checkbox" class="form-check-input" id="editAllIssueAccess" formControlName="allIssueAccess">
-          <label class="form-check-label" for="editAllIssueAccess">All Issue access</label>
-        </div>
-      </div>
-      <button class="btn btn-success w-100 mt-4" (click)="saveChanges()">Save Changes</button>
-    </form>
-  </div>
-</div>
-}
-
