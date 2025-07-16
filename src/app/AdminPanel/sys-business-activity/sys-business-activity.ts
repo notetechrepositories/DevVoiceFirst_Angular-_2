@@ -5,6 +5,7 @@ import { RouterLink } from '@angular/router';
 import Swal from 'sweetalert2';
 import { BusinessActivityService } from '../../Service/BusinessActivityService/business-activity';
 import { BusinessActivityModel } from '../../Models/BusinessActivityModel';
+import { BusinessActivity } from '../../CompanyPanel/business-activity/business-activity';
 
 
 @Component({
@@ -20,7 +21,8 @@ export class SysBusinessActivity {
   itemsPerPage = 10;
   currentPage = 1;
   searchTerm: string = '';
-
+  selectedactivityIds: string[] = [];
+  isAllSelected = false;
  
    get totalPages(): number {
     return Math.ceil(this.filteredData.length / this.itemsPerPage);
@@ -37,13 +39,13 @@ export class SysBusinessActivity {
     return this.filteredData.slice(start, start + this.itemsPerPage);
   }
 
-  // onSearch() {
-  //   const term = this.searchTerm.toLowerCase();
-  //   this.filteredData = this.data.filter(item =>
-  //     item.business_activity_name.toLowerCase().includes(term)
-  //   );
-  //   this.currentPage = 1; // reset to first page
-  // }
+  onSearch() {
+    const term = this.searchTerm.toLowerCase();
+    this.filteredData = this.data.filter(item =>
+      item.activityName.toLowerCase().includes(term)
+    );
+    this.currentPage = 1; 
+  }
 
   goToPage(page: number) {
     this.currentPage = page;
@@ -62,6 +64,8 @@ export class SysBusinessActivity {
   isModalVisible:boolean=false;
   isEditModalVisible:boolean=false;
   businessActivityForm!:FormGroup;
+  isEditMode : boolean = false;
+  originalItem: any;
   checkIcon = '<i class="fa-solid fa-check text-success"></i>';
   crossIcon = '<i class="fa-solid fa-xmark text-danger"></i>';
   businessActivities: any[] = [];
@@ -80,8 +84,12 @@ export class SysBusinessActivity {
     });
   }
 
-  openModal(){
+  openModal(editItem?:BusinessActivityModel){
     this.isModalVisible=true;
+    this.isEditMode = !!editItem;
+    if(editItem){
+      this.originalItem = { ...editItem };
+    }
     console.log(this.isModalVisible);
   }
 
@@ -142,9 +150,47 @@ export class SysBusinessActivity {
     });
   }
 
+
+submitActivity() {
+  const formValue = this.businessActivityForm.value;
+ 
+
+  const payload = {
+    activityName: formValue.activityName,
+    company: !!formValue.company,
+    branch: !!formValue.branch,
+    section: !!formValue.section,
+    subSection: !!formValue.subSection
+  };
+
+   console.log(payload);
+
+  if (this.isEditMode) {
+    
+  }
+ 
+  
+  else{
+     console.log(payload);
+    this.businessActivityService.createBusinessActivity(payload).subscribe({
+      next: () => {
+        this.getBusinessActivity();  // Refresh the list
+        this.closeModal();           // Close the modal or form
+      },
+      error: err => {
+        console.error('Create business activity error:', err);
+        alert('Failed to submit activity. Please try again.');
+      }
+    });
+  }
+
+  
+}
+
+
   
 
-originalItem: any;
+
   openEditModal(item: any) {
     this.isEditModalVisible = true;
       this.originalItem = { ...item };
@@ -191,10 +237,10 @@ saveChanges() {
 
   
 
-  deleteBusinessActivity(id:any){
+  deleteBusinessActivity(){
     Swal.fire({
       title: 'Are you sure?',
-      text: 'This action cannot be undone!',
+     text: `Delete ${this.selectedactivityIds.length} activities`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
@@ -202,10 +248,49 @@ saveChanges() {
       confirmButtonText: 'Yes, delete it!'
     }).then((result) => {
       if (result.isConfirmed) {
-        this.filteredData=this.filteredData.filter(item=>item.id!==id);
+        console.log(this.selectedactivityIds);
+        
+        this.businessActivityService.deleteBusinessActivity(this.selectedactivityIds).subscribe({
+          next:()=>this.getBusinessActivity(),
+          error: err => console.error('Delete role error:', err)
+        });
+        this.selectedactivityIds = [];
+        this.isAllSelected = false;
+       
       } 
     });
   }
+     
 
+
+  updateSelectAllStatus() {
+  this.isAllSelected = this.selectedactivityIds.length === this.pagedData.length;
+}
+
+    toggleSelection(id: string, event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+  
+    if (checked) {
+      if (!this.selectedactivityIds.includes(id)) {
+        this.selectedactivityIds.push(id);
+      }
+    } else {
+      this.selectedactivityIds = this.selectedactivityIds.filter(x => x !== id);
+    }
+  
+    // this.updateSelectAllStatus();
+  }
+  
+  toggleSelectAll(event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+  
+    if (checked) {
+      this.selectedactivityIds = this.pagedData.map(x => x.id);
+    } else {
+      this.selectedactivityIds = [];
+    }
+  
+    this.isAllSelected = checked;
+  }
  
 }
