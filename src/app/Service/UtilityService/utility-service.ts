@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import Swal from 'sweetalert2';
+import Swal, { SweetAlertResult } from 'sweetalert2';
 
 @Injectable({
   providedIn: 'root'
@@ -44,6 +44,39 @@ export class UtilityService {
   }
 
 
+  // ----------- Confirmation Messages ------------
+
+  confirmDialog(message: string,action:string): Promise<SweetAlertResult<any>> {
+
+    if(action === 'delete'){
+      return Swal.fire({
+        title: 'Are you sure?',
+        text: message,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#eb1313',
+        cancelButtonColor: '#565656',
+        confirmButtonText: 'Yes, delete it!'
+      });
+    }
+
+    if(action === 'update'){
+      return Swal.fire({
+        title: 'Change Status',
+        text: message,
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonColor: '#2daf1f',
+        cancelButtonColor: '#565656',
+        confirmButtonText: 'Yes, update it!'
+      });
+    }
+
+    return Promise.resolve({ isConfirmed: false } as SweetAlertResult<any>);
+
+  }
+
+
   // ----------- Error Messages ------------
 
   showError(statusCode: number , message?:string) {
@@ -62,11 +95,11 @@ export class UtilityService {
         title: "Bad Request",
         text: "Please check your request and try again.",
       });
-
     }
+
     if(statusCode === 409){
       Swal.fire({
-        icon: "warning",
+        icon: "info",
         title: "Conflict",
         text: `${message}`,
       });

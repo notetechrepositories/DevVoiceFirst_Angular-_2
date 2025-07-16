@@ -289,3 +289,31 @@ ul ul {
   align-items: center;
   gap: .6rem; /* Space between icons */
 }
+
+/* user dropdown */
+
+.user-avatar {
+  object-fit: cover;
+  border: 1px solid #dee2e6;
+}
+
+.dropdown-menu {
+  min-width: 200px;
+  font-size: 0.95rem;
+  position: absolute;
+  inset: 0px 0px auto auto;
+  margin: 0px;
+  transform: translate(13px, 45px);
+}
+
+.dropdown-item {
+  border-radius: 5px;
+  padding: 8px 12px;
+  transition: background-color 0.2s;
+}
+
+.dropdown-item:hover,
+.hover-bg-light:hover {
+  background-color: #f1f1f1;
+}
+
