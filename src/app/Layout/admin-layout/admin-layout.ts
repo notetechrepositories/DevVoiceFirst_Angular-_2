@@ -150,8 +150,9 @@ export class AdminLayout implements OnInit {
   menuItems: MenuItem[] = [];
   toggleStates = new Map<number, boolean>();
   isMenuCollapsed = false;
-
   isSidebarExpanded: boolean = true;
+
+  loggedInUser:any;
 
   constructor(
     private authService:Auth,
@@ -163,6 +164,9 @@ export class AdminLayout implements OnInit {
     window.addEventListener('resize',()=>{
       this.checkScreenSize();
     })
+
+    this.loggedInUser=this.authService.getLoggedInUser();
+    console.log(this.loggedInUser);
   }
 
   toggleSidebar() {

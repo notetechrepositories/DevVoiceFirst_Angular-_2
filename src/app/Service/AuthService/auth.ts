@@ -86,8 +86,11 @@ export class Auth {
   
     return of({ success: false });
   }
-  
 
+  getLoggedInUser() {
+    const userData = sessionStorage.getItem('loggedInUser');
+    return userData ? JSON.parse(userData) : null;
+  }
   
 
   logout(){
