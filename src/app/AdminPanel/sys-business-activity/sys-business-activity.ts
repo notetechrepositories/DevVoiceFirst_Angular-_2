@@ -1,8 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import Swal from 'sweetalert2';
+import { BusinessActivityService } from '../../Service/BusinessActivityService/business-activity';
+import { BusinessActivityModel } from '../../Models/BusinessActivityModel';
+import { BusinessActivity } from '../../CompanyPanel/business-activity/business-activity';
+import { UtilityService } from '../../Service/UtilityService/utility-service';
+
 
 @Component({
   selector: 'app-sys-business-activity',
@@ -11,38 +16,15 @@ import Swal from 'sweetalert2';
   styleUrl: './sys-business-activity.css'
 })
 export class SysBusinessActivity {
-  data = [
-    {
-      "id": "010110101",
-      "business_activity_name": "Restaurant",
-      "company": "y",
-      "branch": "y",
-      "section": "y",
-      "sub_section": "y"
-    },
-    {
-      "id": "010110111",
-      "business_activity_name": "Textiles",
-      "company": "y",
-      "branch": "y",
-      "section": "y",
-      "sub_section": "y"
-    },
-    {
-      "id": "010110011",
-      "business_activity_name": "Jewellery",
-      "company": "y",
-      "branch": "y",
-      "section": "n",
-      "sub_section": "n"
-    }
-  ];
+  data: BusinessActivityModel[] = [];
+  filteredData: BusinessActivityModel[] = [];
 
   itemsPerPage = 10;
   currentPage = 1;
   searchTerm: string = '';
-  filteredData = [...this.data];
-
+  selectedactivityIds: string[] = [];
+  isAllSelected = false;
+ 
    get totalPages(): number {
     return Math.ceil(this.filteredData.length / this.itemsPerPage);
   }
@@ -61,9 +43,9 @@ export class SysBusinessActivity {
   onSearch() {
     const term = this.searchTerm.toLowerCase();
     this.filteredData = this.data.filter(item =>
-      item.business_activity_name.toLowerCase().includes(term)
+      item.activityName.toLowerCase().includes(term)
     );
-    this.currentPage = 1; // reset to first page
+    this.currentPage = 1; 
   }
 
   goToPage(page: number) {
@@ -83,95 +65,212 @@ export class SysBusinessActivity {
   isModalVisible:boolean=false;
   isEditModalVisible:boolean=false;
   businessActivityForm!:FormGroup;
+  isEditMode : boolean = false;
+  originalItem: any;
   checkIcon = '<i class="fa-solid fa-check text-success"></i>';
   crossIcon = '<i class="fa-solid fa-xmark text-danger"></i>';
-
-  constructor(private fb:FormBuilder){}
+  businessActivities: any[] = [];
+  
+  constructor(private fb:FormBuilder,private businessActivityService:BusinessActivityService,
+     private utilityService: UtilityService
+  ){}
 
   ngOnInit(){
+    this.getBusinessActivity();
     this.businessActivityForm = this.fb.group({
-      id: [''], // <-- include this!
-      business_activity_name: [''],
+      id: [''],
+      activityName: ['', Validators.required],
       company: [false],
       branch: [false],
       section: [false],
-      sub_section: [false]
+      subSection: [false]
     });
-    
   }
-
-  openModal(){
+  selectedActivityId: string | null = null;
+  openModal(editItem?:BusinessActivityModel){
     this.isModalVisible=true;
-    console.log(this.isModalVisible);
+    this.isEditMode = !!editItem;
+      this.selectedActivityId = editItem?.id || null;
+    if(editItem){
+      this.originalItem = { ...editItem };
+          this.businessActivityForm.patchValue({
+            id: editItem.id,
+            activityName: editItem.activityName,
+            company: editItem.company,
+            branch: editItem.branch,
+            section: editItem.section,
+            subSection: editItem.subSection
+    });
+    }
   }
 
   closeModal(){
     this.isModalVisible=false;
     this.isEditModalVisible=false;
+    this.businessActivities=[];
     this.businessActivityForm.reset();
   }
-
-  addBusinessActivity() {
-    const formValue = this.businessActivityForm.value;
   
-    const newItem = {
-      id: Date.now().toString(), // or use UUID if needed
-      business_activity_name: formValue.business_activity_name,
-      company: formValue.company ? 'y' : 'n',
-      branch: formValue.branch ? 'y' : 'n',
-      section: formValue.section ? 'y' : 'n',
-      sub_section: formValue.sub_section ? 'y' : 'n'
-    };
-  
-    this.data.push(newItem);
-    this.filteredData = [...this.data];
-    this.closeModal();
-  }
-
-  openEditModal(item: any) {
-    this.isEditModalVisible = true;
-  
-    this.businessActivityForm.patchValue({
-      id: item.id,
-      business_activity_name: item.business_activity_name,
-      company: item.company === 'y',
-      branch: item.branch === 'y',
-      section: item.section === 'y',
-      sub_section: item.sub_section === 'y'
+  getBusinessActivity(){
+    this.businessActivityService.getBusinessActivity().subscribe({
+      next:res=>{
+        console.log(res.body.data);
+        this.data=res.body.data;
+        this.filteredData = [...this.data];
+      },
+        error: err => console.error('Error fetching BusinessActivity:', err)
     });
   }
-  
 
-  saveChanges() {
-    const formValue = this.businessActivityForm.value;
-  
-    const updatedItem = {
-      id: formValue.id,
-      business_activity_name: formValue.business_activity_name,
-      company: formValue.company ? 'y' : 'n',
-      branch: formValue.branch ? 'y' : 'n',
-      section: formValue.section ? 'y' : 'n',
-      sub_section: formValue.sub_section ? 'y' : 'n'
-    };
-  
-    const index = this.filteredData.findIndex(item => item.id === updatedItem.id);
-    if (index !== -1) {
-      this.filteredData[index] = updatedItem;
-    }
-  
-    const dataIndex = this.data.findIndex(item => item.id === updatedItem.id);
-    if (dataIndex !== -1) {
-      this.data[dataIndex] = updatedItem;
-    }
-  
-    this.closeModal();
+//   addBusinessActivity(): void {
+//   const activityObj  = this.businessActivityForm.value;
+
+//   if (activityObj.activityName?.trim()) {
+//     this.businessActivities.push({
+//       activityName:activityObj.activityName,
+//       company:activityObj.company,
+//       branch: activityObj.branch,
+//       section: activityObj.section,
+//       subSection: activityObj.subSection
+//     });
+//     this.businessActivityForm.reset();
+//   }
+// }
+
+  removeActivity(index: number): void {
+    this.businessActivities.splice(index, 1);
   }
+
+  // submitAllActivities() {
+  //   const payload = this.businessActivities.map(({ activityName, company, branch, section, subSection }) => ({
+  //     activityName,
+  //     company: !!company,
+  //     branch: !!branch,
+  //     section: !!section,
+  //     subSection: !!subSection
+  //   }));
+  //   this.businessActivityService.createBusinessActivity(payload).subscribe({
+  //     next:()=>{
+  //       this.getBusinessActivity(),
+  //         this.closeModal();
+  //       },
+  //         error: err => {
+  //           console.error('Create business activity error:', err);
+  //          alert('Failed to submit business activities. Please try again.');
+  //         }
+  //   });
+  // }
+
+
+submitActivity() {
+    const form = this.businessActivityForm;
+    const formValue = form.value;
+    const payload = {
+      activityName: formValue.activityName,
+      company: !!formValue.company,
+      branch: !!formValue.branch,
+      section: !!formValue.section,
+      subSection: !!formValue.subSection
+    };
+  if (this.isEditMode) {
+      const updatedFields: any = { id: this.selectedActivityId };
+
+    this.utilityService.setIfDirty(form, 'activityName', updatedFields);
+    this.utilityService.setIfDirty(form, 'company', updatedFields);
+    this.utilityService.setIfDirty(form, 'branch', updatedFields);
+    this.utilityService.setIfDirty(form, 'section', updatedFields);
+    this.utilityService.setIfDirty(form, 'subSection', updatedFields);
+    // Only send update if any field has changed
+     if (Object.keys(updatedFields).length === 1) {
+     this.utilityService.warning('No changes detected.');
+      return;
+    }
+    this.businessActivityService.updateBusinessActivity(updatedFields).subscribe({
+      next: (res) => {
+        this.getBusinessActivity();
+        this.closeModal();
+        this.utilityService.success(res.body?.message || 'Activity updated.');
+      },
+      error: err => {
+        this.utilityService.showError(err.status, err.error?.message || 'Update failed.');
+      }
+    });
+  }
+ 
+  
+  else{
+     console.log(payload);
+    this.businessActivityService.createBusinessActivity(payload).subscribe({
+      next: (res) => {
+        this.getBusinessActivity(); 
+        this.closeModal(); 
+        this.utilityService.success(res.body.message);
+      },
+      error: err => {
+        console.log(err);
+        
+        this.utilityService.showError(err.status, err.error.message);
+      }
+    });
+  }
+
+  
+}
+
+
   
 
-  deleteBusinessActivity(id:any){
+
+  // openEditModal(item: any) {
+  //   this.isEditModalVisible = true;
+  //     this.originalItem = { ...item };
+  //   this.businessActivityForm.patchValue({
+  //     id: item.id,
+  //     activityName: item.activityName,
+  //     company: item.company ,
+  //     branch: item.branch ,
+  //     section: item.section ,
+  //     subSection: item.subSection 
+  //   });
+  // }
+  
+
+saveChanges() {
+  const formValue = this.businessActivityForm.value;
+
+  // Always include ID for identification
+  const updatedFields: any = { id: formValue.id };
+
+  // Compare with originalItem and include only changed fields
+  Object.keys(formValue).forEach(key => {
+    if (formValue[key] !== this.originalItem[key]) {
+      updatedFields[key] = formValue[key];
+    }
+  });
+
+  // If no fields changed (only ID present), do nothing
+  if (Object.keys(updatedFields).length === 1) {
+    console.log('No changes detected.');
+    this.closeModal();
+    return;
+  }
+
+  // Send only changed fields to backend
+  this.businessActivityService.updateBusinessActivity(updatedFields).subscribe({
+    next: () => {
+      this.getBusinessActivity(); 
+      this.closeModal();
+    },
+    error: err => console.error('Update business activity error:', err)
+  });
+}
+
+  
+
+  deleteBusinessActivity(){
     Swal.fire({
       title: 'Are you sure?',
-      text: 'This action cannot be undone!',
+     text: `Delete ${this.selectedactivityIds.length} activities`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
@@ -179,10 +278,55 @@ export class SysBusinessActivity {
       confirmButtonText: 'Yes, delete it!'
     }).then((result) => {
       if (result.isConfirmed) {
-        this.filteredData=this.filteredData.filter(item=>item.id!==id);
+        console.log(this.selectedactivityIds);
+        
+        this.businessActivityService.deleteBusinessActivity(this.selectedactivityIds).subscribe({
+          next:()=>this.getBusinessActivity(),
+          error: err => console.error('Delete role error:', err)
+        });
+        this.selectedactivityIds = [];
+        this.isAllSelected = false;
+       
       } 
     });
   }
+     
 
- 
+
+  updateSelectAllStatus() {
+  this.isAllSelected = this.selectedactivityIds.length === this.pagedData.length;
+}
+
+    toggleSelection(id: string, event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+  
+    if (checked) {
+      if (!this.selectedactivityIds.includes(id)) {
+        this.selectedactivityIds.push(id);
+      }
+    } else {
+      this.selectedactivityIds = this.selectedactivityIds.filter(x => x !== id);
+    }
+  
+    // this.updateSelectAllStatus();
+  }
+  
+  toggleSelectAll(event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+  
+    if (checked) {
+      this.selectedactivityIds = this.pagedData.map(x => x.id);
+    } else {
+      this.selectedactivityIds = [];
+    }
+  
+    this.isAllSelected = checked;
+  }
+   toggleStatus(item: any) {
+    const updatedStatus = !item.status;
+    const payload = {
+      id: item.id,
+      status: updatedStatus
+    };
+  }
 }
