@@ -28,12 +28,14 @@
           <th class="text-center">All Issue Access</th>
           <th>Status</th>
           <th class="text-end">
-            @if (selectedRoleIds.length > 0) {
-            <i
-              class="pi pi-trash text-danger"
-              (click)="deleteRoles()"
-            ></i>
-            }
+            <!-- @if (selectedRoleIds.length > 0) { -->
+              <button class="delete-btn btn-danger" (click)="deleteRoles()"  [disabled]="selectedRoleIds.length === 0"> 
+                <i
+                class="pi pi-trash text-white"
+              ></i>
+              </button>
+        
+            <!-- } -->
           </th>
         </tr>
       </thead>

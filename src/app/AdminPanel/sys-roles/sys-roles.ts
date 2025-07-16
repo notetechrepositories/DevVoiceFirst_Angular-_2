@@ -368,7 +368,7 @@ export class SysRoles {
 
     Swal.fire({
       title: 'Are you sure?',
-      text: `Delete ${this.selectedRoleIds.length} roles`,
+      text: `Delete ${this.selectedRoleIds.length} role(s)`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#eb1313',
