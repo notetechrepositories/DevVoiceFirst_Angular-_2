@@ -13,6 +13,8 @@ i{
 }
 
 
+/* primeicons */
+
 .pi-pen-to-square{
   color: #5f5f5f;
 }
@@ -21,6 +23,9 @@ i{
   color: #dc3545;
 }
 
+
+/* breadcrumb */
+
 .breadcrumb{
   font-size: .8rem;
 }
@@ -28,6 +33,9 @@ i{
 .breadcrumb li a{
   text-decoration: none;
 }
+
+
+/* pagination */
 
 .pagination {
   display: flex;
@@ -44,3 +52,27 @@ i{
   pointer-events: none;
   color: #aaa;
 }
+
+
+/* delete btn */
+
+.delete-btn{
+  padding: .5rem .4rem;
+  height: 2rem;
+  width: 2rem;
+  background-color: #f82f2f;
+  font-size: .8rem;
+  border: none;
+  border-radius: 9px;
+}
+
+.delete-btn:disabled{
+  background-color: #f16464;
+  cursor: not-allowed;
+}
+
+.delete-btn:disabled, .delete-btn:disabled i{
+  background-color: #a5a5a5;
+  cursor: not-allowed;
+}
+

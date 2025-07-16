@@ -262,7 +262,8 @@ export class SysRoles {
     console.log('Update payload:', updatedFields);
   
     const hasUpdates =
-      Object.keys(updatedFields).length > 1 || rolePrograms.length > 0;
+      Object.keys(updatedFields).length > 2 || rolePrograms.length > 0;
+  
   
     if (hasUpdates) {
       this.roleService.updateRoleDynamic(updatedFields).subscribe({
@@ -274,12 +275,14 @@ export class SysRoles {
         },
         error: err => {
 
-            this.utilityService.showError(err.status);
+            this.utilityService.showError(err.status , err.error.message);
           
         }
       });
-    } else {
+    } 
+    else {
       this.utilityService.warning('No changes detected');
+      return;
     }
   }
 
@@ -299,7 +302,9 @@ export class SysRoles {
         this.getRoles();
         this.closeModal();
       },
-      error: err => console.error('Create role error:', err)
+      error: err => {
+        this.utilityService.showError(err.status , err.error.message);
+      }
     });
   }
   
@@ -364,35 +369,34 @@ export class SysRoles {
     this.isAllSelected = this.pagedData.length > 0 && this.pagedData.every(x => this.selectedRoleIds.includes(x.id));
   }
 
-  deleteRoles() {
-
-    Swal.fire({
-      title: 'Are you sure?',
-      text: `Delete ${this.selectedRoleIds.length} role(s)`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#eb1313',
-      cancelButtonColor: '#565656',
-      confirmButtonText: 'Yes, delete it!'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.roleService.deleteRole(this.selectedRoleIds).subscribe({
-          next: () => this.getRoles(),
-          error: err => console.error('Delete role error:', err)
-        });
-        this.selectedRoleIds = [];
-        this.isAllSelected = false;
-      } 
-    });
+  async deleteRoles(): Promise<void> {
+    const message = `Delete ${this.selectedRoleIds.length} role(s)`;
+    const result = await this.utilityService.confirmDialog(message, 'delete');
+  
+    if (result.isConfirmed) {
+      this.roleService.deleteRole(this.selectedRoleIds).subscribe({
+        next: () => this.getRoles(),
+        error: err => console.error('Delete role error:', err),
+        complete: () => {
+          this.selectedRoleIds = [];
+          this.isAllSelected = false;
+        }
+      });
+    }
   }
+  
 
-  toggleStatus(item: any) {
+  async toggleStatus(item: any): Promise<void>  {
     const updatedStatus = !item.isActive;
     const payload = {
       id: item.id,
       isActive: updatedStatus
     };
-  
+
+    const message = `Are you sure you want to set this role as ${updatedStatus ? 'Active' : 'Inactive'}?`;
+    const result = await this.utilityService.confirmDialog(message, 'update');
+
+    if (result.isConfirmed) {
     this.roleService.updateRoleStatus(payload).subscribe({
       next: () => {
         item.isActive = updatedStatus; // Optimistic update
@@ -400,8 +404,9 @@ export class SysRoles {
       },
       error: err => {
         console.error('Status update failed', err);
-        // Optional: show a toast or revert UI if needed
-      }
-    });
+          // Optional: show a toast or revert UI if needed
+        }
+      });
+    }
   }
 }

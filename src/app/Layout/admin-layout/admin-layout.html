@@ -38,6 +38,34 @@
 <div class="main-content" [ngClass]="{ 'body-pd': !isSidebarExpanded }">
   <div class="header">
     <div class="header-card">
+    <div class="d-flex align-items-center justify-content-end h-100 pe-4" style="height: 65px;">
+      <div class="dropdown">
+        <a class="d-flex align-items-center text-decoration-none dropdown-toggle user-dropdown-toggle"
+           href="#" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+          <img [src]="loggedInUser?.picture || 'images/user-default.png'" alt="User Avatar"
+               width="33" height="33" class="rounded-circle me-2 user-avatar">
+               @if(isSidebarExpanded){
+                <span class="fw-semibold me-2">{{loggedInUser.name}}</span>
+               }
+        </a>
+      
+        <ul class="dropdown-menu  shadow-sm rounded-3 p-2 mt-2 ms-2 user-dropdown"
+            aria-labelledby="userDropdown">
+          <li>
+            <a class="dropdown-item d-flex align-items-center gap-2 text-dark hover-bg-light" href="#">
+              <i class="fa fa-user-cog"></i> Manage Account
+            </a>
+          </li>
+          <li><hr class="dropdown-divider"></li>
+          <li>
+            <a class="dropdown-item d-flex align-items-center gap-2 text-danger hover-bg-light" (click)="logout()">
+              <i class="fa fa-sign-out-alt"></i> Logout
+            </a>
+          </li>
+        </ul>
+      </div>
+      
+    </div>
     </div>
   </div>
 
