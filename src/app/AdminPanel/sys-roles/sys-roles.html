@@ -56,11 +56,11 @@
             <td>
               <span
                 class="badge"
-                [ngClass]="item.isActive ? 'bg-success' : 'bg-secondary'"
+                [ngClass]="item.status ? 'bg-success' : 'bg-secondary'"
                 style="cursor: pointer;"
                 (click)="toggleStatus(item)"
               >
-                {{ item.isActive ? 'Active' : 'Inactive' }}
+                {{ item.status ? 'Active' : 'Inactive' }}
               </span>
             </td>
             

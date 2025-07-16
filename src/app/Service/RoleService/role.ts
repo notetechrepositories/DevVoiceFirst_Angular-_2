@@ -14,7 +14,7 @@ export class RoleService {
   //------------- System Roles -------------
 
   getRoles(){
-    return this.http.get<any>(`${this.apiUrl}/roles`,{observe: 'response'});
+    return this.http.get<any>(`${this.apiUrl}/roles/all`,{observe: 'response'});
   }
 
   createRole(data:any){
@@ -25,9 +25,9 @@ export class RoleService {
     return this.http.put<any>(`${this.apiUrl}/roles`, data,{observe: 'response'});
   }
 
-  updateRoleDynamic(data:any){
-    return this.http.put<any>(`${this.apiUrl}/roles/dynamic`, data,{observe: 'response'});
-  }
+  // updateRoleDynamic(data:any){
+  //   return this.http.put<any>(`${this.apiUrl}/roles/dynamic`, data,{observe: 'response'});
+  // }
 
   deleteRole(data:any){
     return this.http.delete<any>(`${this.apiUrl}/roles`, {body: data, observe: 'response'});

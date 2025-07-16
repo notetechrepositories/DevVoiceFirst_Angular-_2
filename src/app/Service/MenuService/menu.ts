@@ -15,6 +15,6 @@ export class Menu {
   ) { }
 
   getMenu(){
-    return this.http.get<MenuItem[]>(this.apiUrl+'/menu/get-menu');
+    return this.http.get<any>(this.apiUrl+'/menus/web');
   }
 }

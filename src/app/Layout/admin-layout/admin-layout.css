@@ -166,7 +166,7 @@ h1, p {
 .menu-item {
   display: flex;
   align-items: center;
-  padding: 10px 15px;
+  padding: 10px 5px;
   cursor: pointer;
   user-select: none;
   color: #dbdbdb;

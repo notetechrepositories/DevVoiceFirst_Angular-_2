@@ -43,9 +43,9 @@
         <a class="d-flex align-items-center text-decoration-none dropdown-toggle user-dropdown-toggle"
            href="#" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
           <img [src]="loggedInUser?.picture || 'images/user-default.png'" alt="User Avatar"
-               width="33" height="33" class="rounded-circle me-2 user-avatar">
+               width="30" height="30" class="rounded-circle me-2 user-avatar">
                @if(isSidebarExpanded){
-                <span class="fw-semibold me-2">{{loggedInUser.name}}</span>
+                <span class="fw-semibold me-2 font-size-10">{{loggedInUser.name}}</span>
                }
         </a>
       
@@ -84,56 +84,56 @@
     <li>
       <!-- Menu item with router link -->
       <div
-        *ngIf="item.t7_2_route"
-        class="menu-item d-flex align-items-center py-2 px-3"
-        [routerLink]="item.t7_2_route"
+        *ngIf="item.route"
+        class="menu-item d-flex align-items-center py-2"
+        [routerLink]="item.route"
         routerLinkActive="active"
         [routerLinkActiveOptions]="{ exact: true }"
       >
         <span class="label-content d-flex align-items-center">
           <ng-container *ngIf="isRoot; else subIcon">
             <div class="icon-container me-1">
-              <i class="fa" [ngClass]="item.icon || 'fa-atom'"></i>
+              <i class="fa" [ngClass]="getMappedIcon(item.icon) || 'fa-atom'"></i>
             </div>
           </ng-container>
 
           <ng-template #subIcon>
-            <i class="fa me-2" [ngClass]="item.icon || 'fa-angle-right'"></i>
+            <i class="fa me-2" [ngClass]="getMappedIcon(item.icon) || 'fa-angle-right'"></i>
           </ng-template>
 
-          <span *ngIf="isSidebarExpanded">{{ item.t7_2_menu_name }}</span>
+          <span *ngIf="isSidebarExpanded">{{ item.name }}</span>
         </span>
       </div>
 
       <!-- Menu item for toggling submenus -->
       <div
-        *ngIf="!item.t7_2_route"
-        class="menu-item d-flex align-items-center py-2 px-3"
-        (click)="item.children?.length ? toggleMenu(item.id_t7_2_menu) : null"
+        *ngIf="!item.route"
+        class="menu-item d-flex align-items-center py-2"
+        (click)="item.children?.length ? toggleMenu(item.id) : null"
       >
         <span class="label-content d-flex align-items-center w-100">
           <ng-container *ngIf="isRoot; else subIconLabel">
             <div class="icon-container me-1">
-              <i class="fa" [ngClass]="item.icon || 'fa-atom'"></i>
+              <i class="fa" [ngClass]="getMappedIcon(item.icon) || 'fa-atom'"></i>
             </div>
           </ng-container>
 
           <ng-template #subIconLabel>
-            <i class="fa me-2" [ngClass]="item.icon || 'fa-angle-right'"></i>
+            <i class="fa me-2" [ngClass]="getMappedIcon(item.icon) || 'fa-angle-right'"></i>
           </ng-template>
 
-          <span *ngIf="isSidebarExpanded">{{ item.t7_2_menu_name }}</span>
+          <span *ngIf="isSidebarExpanded">{{ item.name }}</span>
         </span>
         <i
           *ngIf="item.children?.length"
           class="arrow fa-solid fa-angle-right ms-auto"
-          [ngClass]="{ open: isExpanded(item.id_t7_2_menu) }"
+          [ngClass]="{ open: isExpanded(item.id) }"
         ></i>
       </div>
 
       <!-- Submenu -->
       <ul
-        *ngIf="item.children?.length && isExpanded(item.id_t7_2_menu)"
+        *ngIf="item.children?.length && isExpanded(item.id)"
         class="submenu"
         [ngClass]="'depth-' + (depth + 1)"
       >
