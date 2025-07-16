@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import Swal from 'sweetalert2';
 import { BusinessActivityService } from '../../Service/BusinessActivityService/business-activity';
 import { BusinessActivityModel } from '../../Models/BusinessActivityModel';
 import { BusinessActivity } from '../../CompanyPanel/business-activity/business-activity';
+import { UtilityService } from '../../Service/UtilityService/utility-service';
 
 
 @Component({
@@ -70,27 +71,37 @@ export class SysBusinessActivity {
   crossIcon = '<i class="fa-solid fa-xmark text-danger"></i>';
   businessActivities: any[] = [];
   
-  constructor(private fb:FormBuilder,private businessActivityService:BusinessActivityService){}
+  constructor(private fb:FormBuilder,private businessActivityService:BusinessActivityService,
+     private utilityService: UtilityService
+  ){}
 
   ngOnInit(){
     this.getBusinessActivity();
     this.businessActivityForm = this.fb.group({
       id: [''],
-      activityName: [''],
+      activityName: ['', Validators.required],
       company: [false],
       branch: [false],
       section: [false],
       subSection: [false]
     });
   }
-
+  selectedActivityId: string | null = null;
   openModal(editItem?:BusinessActivityModel){
     this.isModalVisible=true;
     this.isEditMode = !!editItem;
+      this.selectedActivityId = editItem?.id || null;
     if(editItem){
       this.originalItem = { ...editItem };
+          this.businessActivityForm.patchValue({
+            id: editItem.id,
+            activityName: editItem.activityName,
+            company: editItem.company,
+            branch: editItem.branch,
+            section: editItem.section,
+            subSection: editItem.subSection
+    });
     }
-    console.log(this.isModalVisible);
   }
 
   closeModal(){
@@ -111,75 +122,94 @@ export class SysBusinessActivity {
     });
   }
 
-  addBusinessActivity(): void {
-  const activityObj  = this.businessActivityForm.value;
+//   addBusinessActivity(): void {
+//   const activityObj  = this.businessActivityForm.value;
 
-  if (activityObj.activityName?.trim()) {
-    this.businessActivities.push({
-      activityName:activityObj.activityName,
-      company:activityObj.company,
-      branch: activityObj.branch,
-      section: activityObj.section,
-      subSection: activityObj.subSection
-    });
-    this.businessActivityForm.reset();
-  }
-}
+//   if (activityObj.activityName?.trim()) {
+//     this.businessActivities.push({
+//       activityName:activityObj.activityName,
+//       company:activityObj.company,
+//       branch: activityObj.branch,
+//       section: activityObj.section,
+//       subSection: activityObj.subSection
+//     });
+//     this.businessActivityForm.reset();
+//   }
+// }
 
   removeActivity(index: number): void {
     this.businessActivities.splice(index, 1);
   }
 
-  submitAllActivities() {
-    const payload = this.businessActivities.map(({ activityName, company, branch, section, subSection }) => ({
-      activityName,
-      company: !!company,
-      branch: !!branch,
-      section: !!section,
-      subSection: !!subSection
-    }));
-    this.businessActivityService.createBusinessActivity(payload).subscribe({
-      next:()=>{
-        this.getBusinessActivity(),
-          this.closeModal();
-        },
-          error: err => {
-            console.error('Create business activity error:', err);
-           alert('Failed to submit business activities. Please try again.');
-          }
-    });
-  }
+  // submitAllActivities() {
+  //   const payload = this.businessActivities.map(({ activityName, company, branch, section, subSection }) => ({
+  //     activityName,
+  //     company: !!company,
+  //     branch: !!branch,
+  //     section: !!section,
+  //     subSection: !!subSection
+  //   }));
+  //   this.businessActivityService.createBusinessActivity(payload).subscribe({
+  //     next:()=>{
+  //       this.getBusinessActivity(),
+  //         this.closeModal();
+  //       },
+  //         error: err => {
+  //           console.error('Create business activity error:', err);
+  //          alert('Failed to submit business activities. Please try again.');
+  //         }
+  //   });
+  // }
 
 
 submitActivity() {
-  const formValue = this.businessActivityForm.value;
- 
-
-  const payload = {
-    activityName: formValue.activityName,
-    company: !!formValue.company,
-    branch: !!formValue.branch,
-    section: !!formValue.section,
-    subSection: !!formValue.subSection
-  };
-
-   console.log(payload);
-
+    const form = this.businessActivityForm;
+    const formValue = form.value;
+    const payload = {
+      activityName: formValue.activityName,
+      company: !!formValue.company,
+      branch: !!formValue.branch,
+      section: !!formValue.section,
+      subSection: !!formValue.subSection
+    };
   if (this.isEditMode) {
-    
+      const updatedFields: any = { id: this.selectedActivityId };
+
+    this.utilityService.setIfDirty(form, 'activityName', updatedFields);
+    this.utilityService.setIfDirty(form, 'company', updatedFields);
+    this.utilityService.setIfDirty(form, 'branch', updatedFields);
+    this.utilityService.setIfDirty(form, 'section', updatedFields);
+    this.utilityService.setIfDirty(form, 'subSection', updatedFields);
+    // Only send update if any field has changed
+     if (Object.keys(updatedFields).length === 1) {
+     this.utilityService.warning('No changes detected.');
+      return;
+    }
+    this.businessActivityService.updateBusinessActivity(updatedFields).subscribe({
+      next: (res) => {
+        this.getBusinessActivity();
+        this.closeModal();
+        this.utilityService.success(res.body?.message || 'Activity updated.');
+      },
+      error: err => {
+        this.utilityService.showError(err.status, err.error?.message || 'Update failed.');
+      }
+    });
   }
  
   
   else{
      console.log(payload);
     this.businessActivityService.createBusinessActivity(payload).subscribe({
-      next: () => {
-        this.getBusinessActivity();  // Refresh the list
-        this.closeModal();           // Close the modal or form
+      next: (res) => {
+        this.getBusinessActivity(); 
+        this.closeModal(); 
+        this.utilityService.success(res.body.message);
       },
       error: err => {
-        console.error('Create business activity error:', err);
-        alert('Failed to submit activity. Please try again.');
+        console.log(err);
+        
+        this.utilityService.showError(err.status, err.error.message);
       }
     });
   }
@@ -191,18 +221,18 @@ submitActivity() {
   
 
 
-  openEditModal(item: any) {
-    this.isEditModalVisible = true;
-      this.originalItem = { ...item };
-    this.businessActivityForm.patchValue({
-      id: item.id,
-      activityName: item.activityName,
-      company: item.company ,
-      branch: item.branch ,
-      section: item.section ,
-      subSection: item.subSection 
-    });
-  }
+  // openEditModal(item: any) {
+  //   this.isEditModalVisible = true;
+  //     this.originalItem = { ...item };
+  //   this.businessActivityForm.patchValue({
+  //     id: item.id,
+  //     activityName: item.activityName,
+  //     company: item.company ,
+  //     branch: item.branch ,
+  //     section: item.section ,
+  //     subSection: item.subSection 
+  //   });
+  // }
   
 
 saveChanges() {
@@ -292,5 +322,11 @@ saveChanges() {
   
     this.isAllSelected = checked;
   }
- 
+   toggleStatus(item: any) {
+    const updatedStatus = !item.status;
+    const payload = {
+      id: item.id,
+      status: updatedStatus
+    };
+  }
 }

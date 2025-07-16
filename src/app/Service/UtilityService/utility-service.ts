@@ -46,7 +46,7 @@ export class UtilityService {
 
   // ----------- Error Messages ------------
 
-  showError(statusCode: number) {
+  showError(statusCode: number , message?:string) {
 
     if(statusCode === 500){
       Swal.fire({
@@ -61,6 +61,14 @@ export class UtilityService {
         icon: "error",
         title: "Bad Request",
         text: "Please check your request and try again.",
+      });
+
+    }
+    if(statusCode === 409){
+      Swal.fire({
+        icon: "warning",
+        title: "Conflict",
+        text: `${message}`,
       });
     }
   }

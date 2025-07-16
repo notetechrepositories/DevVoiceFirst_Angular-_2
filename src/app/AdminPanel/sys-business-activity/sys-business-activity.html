@@ -33,6 +33,7 @@
               <th class="text-center">Branch</th>
               <th class="text-center">Section</th>
               <th class="text-center">Sub Section</th>
+               <th>Status</th>
               <th class="text-end">
             @if (selectedactivityIds.length > 0) {
             <i
@@ -60,7 +61,16 @@
             <td class="text-center" [innerHTML]="item.branch ? checkIcon : crossIcon"></td>
             <td class="text-center" [innerHTML]="item.section ? checkIcon : crossIcon"></td>
             <td class="text-center" [innerHTML]="item.subSection ? checkIcon : crossIcon"></td>
-
+            <td>
+              <span
+                class="badge"
+                [ngClass]="item.status ? 'bg-success' : 'bg-secondary'"
+                style="cursor: pointer;"
+                (click)="toggleStatus(item)"
+              >
+                {{ item.status ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
             <td class="text-end">
               <i class="pi pi-pen-to-square fw-bold" (click)="openModal(item)"></i>&nbsp;
              
@@ -70,7 +80,7 @@
       
           @empty {
             <tr>
-              <td colspan="4" class="text-center">No data found</td>
+              <td colspan="8" class="text-center">No data found</td>
             </tr>
           }
         </tbody>
@@ -110,7 +120,11 @@
 
         <div class="form-group">
           <label for="activityName" class="mb-2">Business Activity Name</label>
-          <input type="text" class="form-control" id="activityName"  placeholder="Enter BusinessActivity"  formControlName="activityName" />
+          <input type="text" class="form-control" id="activityName"  placeholder="Enter BusinessActivity"  formControlName="activityName"
+           [ngClass]="{'is-invalid': businessActivityForm.get('activityName')?.invalid && businessActivityForm.get('activityName')?.touched}" />
+           <div class="invalid-feedback" *ngIf="businessActivityForm.get('activityName')?.touched && businessActivityForm.get('activityName')?.hasError('required')">
+              Business Activity Name is required.
+           </div>
         </div>
   
       <div class="d-flex gap-3 align-items-center mt-3 mb-2 justify-content-between">
