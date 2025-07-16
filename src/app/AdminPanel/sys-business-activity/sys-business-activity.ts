@@ -322,11 +322,25 @@ saveChanges() {
   
     this.isAllSelected = checked;
   }
-   toggleStatus(item: any) {
-    const updatedStatus = !item.status;
-    const payload = {
-      id: item.id,
-      status: updatedStatus
-    };
-  }
+toggleStatus(item: any) {
+  const updatedStatus = !item.status;
+  console.log('Toggling status for ID:', item.id, 'New Status:', updatedStatus);
+
+  const payload = {
+    id: item.id,
+    status: updatedStatus
+  };
+
+  this.businessActivityService.updateBusinessActivityStatus(payload).subscribe({
+    next: () => {
+      console.log('Status updated on backend');
+      item.status = updatedStatus;
+      this.utilityService.success('Status updated successfully');
+    },
+    error: err => {
+      console.error('Status update failed', err);
+    }
+  });
+}
+
 }

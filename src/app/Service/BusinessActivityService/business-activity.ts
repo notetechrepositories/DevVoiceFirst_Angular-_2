@@ -28,4 +28,7 @@ export class BusinessActivityService {
    deleteBusinessActivity(data:any){
     return this.http.delete<any>(`${this.apiUrl}/business-activities`, {body: data, observe: 'response'});
   }
+   updateBusinessActivityStatus(data:any){
+    return this.http.patch<any>(`${this.apiUrl}/business-activities`, data,{observe: 'response'});
+  }
 }
