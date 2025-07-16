@@ -11,7 +11,7 @@ import { UtilityService } from '../../Service/UtilityService/utility-service';
 
 @Component({
   selector: 'app-sys-business-activity',
-  imports: [RouterLink,CommonModule,FormsModule,ReactiveFormsModule],
+  imports: [RouterLink, CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './sys-business-activity.html',
   styleUrl: './sys-business-activity.css'
 })
@@ -24,8 +24,8 @@ export class SysBusinessActivity {
   searchTerm: string = '';
   selectedactivityIds: string[] = [];
   isAllSelected = false;
- 
-   get totalPages(): number {
+
+  get totalPages(): number {
     return Math.ceil(this.filteredData.length / this.itemsPerPage);
   }
 
@@ -45,7 +45,7 @@ export class SysBusinessActivity {
     this.filteredData = this.data.filter(item =>
       item.activityName.toLowerCase().includes(term)
     );
-    this.currentPage = 1; 
+    this.currentPage = 1;
   }
 
   goToPage(page: number) {
@@ -62,20 +62,20 @@ export class SysBusinessActivity {
 
   // ----------------
 
-  isModalVisible:boolean=false;
-  isEditModalVisible:boolean=false;
-  businessActivityForm!:FormGroup;
-  isEditMode : boolean = false;
+  isModalVisible: boolean = false;
+  isEditModalVisible: boolean = false;
+  businessActivityForm!: FormGroup;
+  isEditMode: boolean = false;
   originalItem: any;
   checkIcon = '<i class="fa-solid fa-check text-success"></i>';
   crossIcon = '<i class="fa-solid fa-xmark text-danger"></i>';
   businessActivities: any[] = [];
-  
-  constructor(private fb:FormBuilder,private businessActivityService:BusinessActivityService,
-     private utilityService: UtilityService
-  ){}
 
-  ngOnInit(){
+  constructor(private fb: FormBuilder, private businessActivityService: BusinessActivityService,
+    private utilityService: UtilityService
+  ) { }
+
+  ngOnInit() {
     this.getBusinessActivity();
     this.businessActivityForm = this.fb.group({
       id: [''],
@@ -87,55 +87,54 @@ export class SysBusinessActivity {
     });
   }
   selectedActivityId: string | null = null;
-  openModal(editItem?:BusinessActivityModel){
-    this.isModalVisible=true;
+  openModal(editItem?: BusinessActivityModel) {
+    this.isModalVisible = true;
     this.isEditMode = !!editItem;
-      this.selectedActivityId = editItem?.id || null;
-    if(editItem){
+    this.selectedActivityId = editItem?.id || null;
+    if (editItem) {
       this.originalItem = { ...editItem };
-          this.businessActivityForm.patchValue({
-            id: editItem.id,
-            activityName: editItem.activityName,
-            company: editItem.company,
-            branch: editItem.branch,
-            section: editItem.section,
-            subSection: editItem.subSection
-    });
+      this.businessActivityForm.patchValue({
+        id: editItem.id,
+        activityName: editItem.activityName,
+        company: editItem.company,
+        branch: editItem.branch,
+        section: editItem.section,
+        subSection: editItem.subSection
+      });
     }
   }
 
-  closeModal(){
-    this.isModalVisible=false;
-    this.isEditModalVisible=false;
-    this.businessActivities=[];
+  closeModal() {
+    this.isModalVisible = false;
+    this.isEditModalVisible = false;
+    this.businessActivities = [];
     this.businessActivityForm.reset();
   }
-  
-  getBusinessActivity(){
+
+  getBusinessActivity() {
     this.businessActivityService.getBusinessActivity().subscribe({
-      next:res=>{
-        console.log(res.body.data);
-        this.data=res.body.data;
+      next: res => {
+        this.data = res.body.data;
         this.filteredData = [...this.data];
       },
-        error: err => console.error('Error fetching BusinessActivity:', err)
+      error: err => { this.utilityService.showError(err.status, err.error?.message || 'Get failed.') }
     });
   }
 
-//   addBusinessActivity(): void {
-//   const activityObj  = this.businessActivityForm.value;
+  //   addBusinessActivity(): void {
+  //   const activityObj  = this.businessActivityForm.value;
 
-//   if (activityObj.activityName?.trim()) {
-//     this.businessActivities.push({
-//       activityName:activityObj.activityName,
-//       company:activityObj.company,
-//       branch: activityObj.branch,
-//       section: activityObj.section,
-//       subSection: activityObj.subSection
-//     });
-//     this.businessActivityForm.reset();
-//   }
-// }
+  //   if (activityObj.activityName?.trim()) {
+  //     this.businessActivities.push({
+  //       activityName:activityObj.activityName,
+  //       company:activityObj.company,
+  //       branch: activityObj.branch,
+  //       section: activityObj.section,
+  //       subSection: activityObj.subSection
+  //     });
+  //     this.businessActivityForm.reset();
+  //   }
+  // }
 
   removeActivity(index: number): void {
     this.businessActivities.splice(index, 1);
@@ -162,7 +161,7 @@ export class SysBusinessActivity {
   // }
 
 
-submitActivity() {
+  submitActivity() {
     const form = this.businessActivityForm;
     const formValue = form.value;
     const payload = {
@@ -172,53 +171,63 @@ submitActivity() {
       section: !!formValue.section,
       subSection: !!formValue.subSection
     };
-  if (this.isEditMode) {
+      if(this.businessActivityForm.invalid){
+         this.businessActivityForm.markAllAsTouched();
+          return;
+      }
+    if (this.isEditMode) {
       const updatedFields: any = { id: this.selectedActivityId };
 
-    this.utilityService.setIfDirty(form, 'activityName', updatedFields);
-    this.utilityService.setIfDirty(form, 'company', updatedFields);
-    this.utilityService.setIfDirty(form, 'branch', updatedFields);
-    this.utilityService.setIfDirty(form, 'section', updatedFields);
-    this.utilityService.setIfDirty(form, 'subSection', updatedFields);
-    // Only send update if any field has changed
-     if (Object.keys(updatedFields).length === 1) {
-     this.utilityService.warning('No changes detected.');
-      return;
+      this.utilityService.setIfDirty(form, 'activityName', updatedFields);
+      this.utilityService.setIfDirty(form, 'company', updatedFields);
+      this.utilityService.setIfDirty(form, 'branch', updatedFields);
+      this.utilityService.setIfDirty(form, 'section', updatedFields);
+      this.utilityService.setIfDirty(form, 'subSection', updatedFields);
+      // Only send update if any field has changed
+      if (Object.keys(updatedFields).length === 1) {
+        this.utilityService.warning('No changes detected.');
+        return;
+      }
+      this.businessActivityService.updateBusinessActivity(updatedFields).subscribe({
+        next: (res) => {
+          const updatedItem = res.body?.data;
+
+          if (updatedItem) {
+            const filteredIndex = this.filteredData.findIndex(item => item.id === updatedItem.id);
+            if (filteredIndex !== -1) {
+              this.filteredData[filteredIndex] = updatedItem;
+            }
+          }
+          this.closeModal();
+          this.utilityService.success(res.body?.message || 'Activity updated.');
+        },
+        error: err => {
+          this.utilityService.showError(err.status, err.error?.message || 'Update failed.');
+        }
+      });
     }
-    this.businessActivityService.updateBusinessActivity(updatedFields).subscribe({
-      next: (res) => {
-        this.getBusinessActivity();
-        this.closeModal();
-        this.utilityService.success(res.body?.message || 'Activity updated.');
-      },
-      error: err => {
-        this.utilityService.showError(err.status, err.error?.message || 'Update failed.');
-      }
-    });
-  }
- 
-  
-  else{
-     console.log(payload);
-    this.businessActivityService.createBusinessActivity(payload).subscribe({
-      next: (res) => {
-        this.getBusinessActivity(); 
-        this.closeModal(); 
-        this.utilityService.success(res.body.message);
-      },
-      error: err => {
-        console.log(err);
-        
-        this.utilityService.showError(err.status, err.error.message);
-      }
-    });
+    else {
+    
+      this.businessActivityService.createBusinessActivity(payload).subscribe({
+        next: (res) => {
+          const newItem = res.body?.data;
+          if (newItem) {
+            this.filteredData.push(newItem);
+          }
+          this.closeModal();
+          this.utilityService.success(res.body.message);
+        },
+        error: err => {
+          this.utilityService.showError(err.status, err.error.message);
+        }
+      });
+    }
+
+
   }
 
-  
-}
 
 
-  
 
 
   // openEditModal(item: any) {
@@ -233,73 +242,72 @@ submitActivity() {
   //     subSection: item.subSection 
   //   });
   // }
-  
 
-saveChanges() {
-  const formValue = this.businessActivityForm.value;
 
-  // Always include ID for identification
-  const updatedFields: any = { id: formValue.id };
+  // saveChanges() {
+  //   const formValue = this.businessActivityForm.value;
 
-  // Compare with originalItem and include only changed fields
-  Object.keys(formValue).forEach(key => {
-    if (formValue[key] !== this.originalItem[key]) {
-      updatedFields[key] = formValue[key];
+  //   // Always include ID for identification
+  //   const updatedFields: any = { id: formValue.id };
+
+  //   // Compare with originalItem and include only changed fields
+  //   Object.keys(formValue).forEach(key => {
+  //     if (formValue[key] !== this.originalItem[key]) {
+  //       updatedFields[key] = formValue[key];
+  //     }
+  //   });
+
+  //   // If no fields changed (only ID present), do nothing
+  //   if (Object.keys(updatedFields).length === 1) {
+  //     this.closeModal();
+  //     return;
+  //   }
+
+  //   // Send only changed fields to backend
+  //   this.businessActivityService.updateBusinessActivity(updatedFields).subscribe({
+  //     next: () => {
+  //       this.getBusinessActivity();
+  //       this.closeModal();
+  //     },
+  //     error: err => console.error('Update business activity error:', err)
+  //   });
+  // }
+
+
+
+  async deleteBusinessActivity(): Promise<void> {
+    const message = `Delete ${this.selectedactivityIds.length} business activity(s)`;
+    const result = await this.utilityService.confirmDialog(message, 'delete');
+    if (result.isConfirmed) {
+      this.businessActivityService.deleteBusinessActivity(this.selectedactivityIds).subscribe({
+        next: (res) => {
+          const deletedIds: string[] = res.body?.data || [];
+          this.filteredData = this.filteredData.filter(item => !deletedIds.includes(item.id));
+          this.selectedactivityIds = [];
+          this.isAllSelected = false;
+          this.utilityService.success(res.body?.message || 'Deleted successfully.');
+        },
+        error: (err) => {
+          this.utilityService.showError(err.status, err.error?.message || 'Failed to delete items.');
+        }
+
+
+      });
+      this.selectedactivityIds = [];
+      this.isAllSelected = false;
+
     }
-  });
-
-  // If no fields changed (only ID present), do nothing
-  if (Object.keys(updatedFields).length === 1) {
-    console.log('No changes detected.');
-    this.closeModal();
-    return;
   }
 
-  // Send only changed fields to backend
-  this.businessActivityService.updateBusinessActivity(updatedFields).subscribe({
-    next: () => {
-      this.getBusinessActivity(); 
-      this.closeModal();
-    },
-    error: err => console.error('Update business activity error:', err)
-  });
-}
-
-  
-
-  deleteBusinessActivity(){
-    Swal.fire({
-      title: 'Are you sure?',
-     text: `Delete ${this.selectedactivityIds.length} activities`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Yes, delete it!'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        console.log(this.selectedactivityIds);
-        
-        this.businessActivityService.deleteBusinessActivity(this.selectedactivityIds).subscribe({
-          next:()=>this.getBusinessActivity(),
-          error: err => console.error('Delete role error:', err)
-        });
-        this.selectedactivityIds = [];
-        this.isAllSelected = false;
-       
-      } 
-    });
-  }
-     
 
 
   updateSelectAllStatus() {
-  this.isAllSelected = this.selectedactivityIds.length === this.pagedData.length;
-}
+    this.isAllSelected = this.selectedactivityIds.length === this.pagedData.length;
+  }
 
-    toggleSelection(id: string, event: Event) {
+  toggleSelection(id: string, event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
-  
+
     if (checked) {
       if (!this.selectedactivityIds.includes(id)) {
         this.selectedactivityIds.push(id);
@@ -307,26 +315,42 @@ saveChanges() {
     } else {
       this.selectedactivityIds = this.selectedactivityIds.filter(x => x !== id);
     }
-  
+
     // this.updateSelectAllStatus();
   }
-  
+
   toggleSelectAll(event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
-  
+
     if (checked) {
       this.selectedactivityIds = this.pagedData.map(x => x.id);
     } else {
       this.selectedactivityIds = [];
     }
-  
+
     this.isAllSelected = checked;
   }
-   toggleStatus(item: any) {
+  async toggleStatus(item: any): Promise<void> {
     const updatedStatus = !item.status;
     const payload = {
       id: item.id,
       status: updatedStatus
     };
+    const message = `Are you sure you want to set this role as ${updatedStatus ? 'Active' : 'Inactive'}?`;
+    const result = await this.utilityService.confirmDialog(message, 'update');
+
+    if (result.isConfirmed) {
+
+      this.businessActivityService.updateBusinessActivityStatus(payload).subscribe({
+        next: () => {
+          item.status = updatedStatus;
+          this.utilityService.success('Status updated successfully');
+        },
+        error: err => {
+          this.utilityService.showError(err.status, err.error?.message || 'Failed to Update Status.')
+
+        }
+      });
+    }
   }
 }
