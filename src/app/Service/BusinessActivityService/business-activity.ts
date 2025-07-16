@@ -14,7 +14,7 @@ export class BusinessActivityService {
   //------------- System BusinessActivity -------------
 
   getBusinessActivity(){
-    return this.http.get<any>(`${this.apiUrl}/business-activities`,{observe: 'response'});
+    return this.http.get<any>(`${this.apiUrl}/business-activities/all`,{observe: 'response'});
   }
 
   createBusinessActivity(data:any){
