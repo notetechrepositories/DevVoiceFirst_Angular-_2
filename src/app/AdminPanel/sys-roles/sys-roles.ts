@@ -262,7 +262,8 @@ export class SysRoles {
     console.log('Update payload:', updatedFields);
   
     const hasUpdates =
-      Object.keys(updatedFields).length > 1 || rolePrograms.length > 0;
+      Object.keys(updatedFields).length > 2 || rolePrograms.length > 0;
+  
   
     if (hasUpdates) {
       this.roleService.updateRoleDynamic(updatedFields).subscribe({
@@ -278,7 +279,8 @@ export class SysRoles {
           
         }
       });
-    } else {
+    } 
+    else {
       this.utilityService.warning('No changes detected');
     }
   }
