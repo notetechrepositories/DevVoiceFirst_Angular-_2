@@ -16,9 +16,9 @@ import { CountryModel } from '../../Models/CountryModel';
 export class Country {
   data: CountryModel[] = [];
   filteredData: CountryModel[] = [];
-  itemsPerPage = 3;
+  itemsPerPage = 10;
   currentPage = 1;
-
+  statusFilter: string = '';
   searchTerm: string = '';
   countryForm!: FormGroup;
   isEditMode: boolean = false;
@@ -63,6 +63,15 @@ export class Country {
       item.country.toLowerCase().includes(term)
     );
     this.currentPage = 1; // reset to first page
+  }
+
+  onStatusFilterChange() {
+    this.currentPage = 1;
+    this.filteredData = this.data.filter(item => {
+      if (this.statusFilter === '') return true;
+      return Boolean(item.status) === (this.statusFilter === 'true');
+    });
+    this.updateSelectAllStatus();
   }
 
   goToPage(page: number) {
