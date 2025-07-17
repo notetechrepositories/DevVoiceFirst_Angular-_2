@@ -24,7 +24,7 @@ export interface Roles {
   roleName: string;
   allLocationAccess: boolean;
   allIssuesAccess: boolean;
-  isActive: boolean;
+  status: boolean;
   rolePrograms: RoleProgram[];
 }
 
@@ -266,7 +266,7 @@ export class SysRoles {
   
   
     if (hasUpdates) {
-      this.roleService.updateRoleDynamic(updatedFields).subscribe({
+      this.roleService.updateRole(updatedFields).subscribe({
         next: (res) => {
           console.log(res);
             this.getRoles();
@@ -274,9 +274,7 @@ export class SysRoles {
             this.utilityService.success(res.body.message);
         },
         error: err => {
-
             this.utilityService.showError(err.status , err.error.message);
-          
         }
       });
     } 
@@ -288,7 +286,6 @@ export class SysRoles {
 
   private handleCreate(): void {
     const rolePrograms = this.extractPermissions();
-  
     const payload = {
       id: this.selectedRoleId || undefined,
       roleName: this.roleForm.value.roleName,
@@ -296,11 +293,11 @@ export class SysRoles {
       allIssuesAccess: this.roleForm.value.allIssuesAccess,
       rolePrograms
     };
-  
     this.roleService.createRole(payload).subscribe({
-      next: () => {
+      next: (res) => {
         this.getRoles();
         this.closeModal();
+        this.utilityService.success(res.body.message);
       },
       error: err => {
         this.utilityService.showError(err.status , err.error.message);
@@ -376,7 +373,9 @@ export class SysRoles {
     if (result.isConfirmed) {
       this.roleService.deleteRole(this.selectedRoleIds).subscribe({
         next: () => this.getRoles(),
-        error: err => console.error('Delete role error:', err),
+        error: err => {
+          this.utilityService.showError(err.status , err.error.message);
+        },
         complete: () => {
           this.selectedRoleIds = [];
           this.isAllSelected = false;
@@ -387,24 +386,25 @@ export class SysRoles {
   
 
   async toggleStatus(item: any): Promise<void>  {
-    const updatedStatus = !item.isActive;
+    const updatedStatus = !item.status;
     const payload = {
       id: item.id,
-      isActive: updatedStatus
+      status: updatedStatus
     };
 
+    console.log(payload);
     const message = `Are you sure you want to set this role as ${updatedStatus ? 'Active' : 'Inactive'}?`;
     const result = await this.utilityService.confirmDialog(message, 'update');
 
     if (result.isConfirmed) {
     this.roleService.updateRoleStatus(payload).subscribe({
       next: () => {
-        item.isActive = updatedStatus; // Optimistic update
+        item.status = updatedStatus; // Optimistic update
         this.utilityService.success('Status updated successfully');
       },
       error: err => {
         console.error('Status update failed', err);
-          // Optional: show a toast or revert UI if needed
+        this.utilityService.showError(err.status , err.error.message);
         }
       });
     }

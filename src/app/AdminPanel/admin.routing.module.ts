@@ -20,7 +20,7 @@ export const AdminRoutes: Routes = [
     component:SysRoles
   },
   {
-    path:'business-activity',
+    path:'system-business-activity',
     component:SysBusinessActivity
   },
   {
