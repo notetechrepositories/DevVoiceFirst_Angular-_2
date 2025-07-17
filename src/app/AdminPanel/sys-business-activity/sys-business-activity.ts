@@ -107,7 +107,7 @@ export class SysBusinessActivity {
     this.isEditMode = !!editItem;
     this.selectedActivityId = editItem?.id || null;
     if (editItem) {
-      this.originalItem = { ...editItem };
+      
       this.businessActivityForm.patchValue({
         id: editItem.id,
         activityName: editItem.activityName,
