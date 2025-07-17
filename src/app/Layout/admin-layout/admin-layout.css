@@ -210,18 +210,19 @@ ul ul {
   background-color: #12192c;
   transition: all 0.3s ease;
   overflow: hidden;
+  font-size: 0.9rem;
 }
 
 .menuitem:hover ul ul {
   color: #dbdbdb;
 }
 
-.submenu i.fa {
+.submenu i {
   font-size: 0.75rem;
   color: #9ca3af;
 }
 
-.menu-item:hover .submenu i.fa {
+.menu-item:hover .submenu i {
   color: #fff;
 }
 

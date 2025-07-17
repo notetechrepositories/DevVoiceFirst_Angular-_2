@@ -43,7 +43,7 @@ export class SysRoles {
   itemsPerPage = 10;
   currentPage = 1;
   searchTerm = '';
-
+  statusFilter = '';
   roleForm!: FormGroup;
   permissionKeys: string[] = [];
 
@@ -89,6 +89,15 @@ export class SysRoles {
     this.currentPage = 1;
   }
 
+  onStatusFilterChange() {
+    this.currentPage = 1;
+    this.filteredData = this.data.filter(item => {
+      if (this.statusFilter === '') return true;
+      return item.status === (this.statusFilter === 'true');
+    });
+    this.updateSelectAllStatus();
+  }
+  
   goToPage(page: number) {
     this.currentPage = page;
   }

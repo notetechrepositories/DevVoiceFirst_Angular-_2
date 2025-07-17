@@ -7,14 +7,27 @@
         </ol>
     </nav>
 
-    <div class="page-header d-flex justify-content-between mb-3 mt-4">
-        <input
-        type="text"
-        class="form-control w-25"
-        placeholder="Search"
-        [(ngModel)]="searchTerm"
-        (input)="onSearch()"
-        />
+    <div class="page-header d-flex justify-content-between align-items-center mb-3 mt-4">
+      <div class="d-flex flex-wrap gap-2 align-items-center">
+        <div class="input-group w-auto" style="min-width: 300px;">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Search"
+            [(ngModel)]="searchTerm"
+            (input)="onSearch()"
+          />
+        </div>
+        <select
+          class="form-select w-auto"
+          [(ngModel)]="statusFilter"
+          (change)="onStatusFilterChange()"
+        >
+          <option value="">All Status</option>
+          <option value="true">Active</option>
+          <option value="false">Inactive</option>
+        </select>
+      </div>
         <button class="btn btn-primary" (click)="openModal()">Add</button>
     </div>
 <div class="table-responsive">
@@ -33,14 +46,14 @@
               <th class="text-center">Branch</th>
               <th class="text-center">Section</th>
               <th class="text-center">Sub Section</th>
-               <th>Status</th>
+              <th>Status</th>
               <th class="text-end">
-            @if (selectedactivityIds.length > 0) {
-            <i
-              class="pi pi-trash text-danger"
-              (click)="deleteBusinessActivity()"
-            ></i>
-            }
+              <button
+                class="delete-btn btn-danger"
+                (click)="deleteBusinessActivity()"
+                [disabled]="selectedactivityIds.length === 0">
+                <i class="pi pi-trash text-white"></i>
+              </button>
           </th>
           </tr>
         </thead>

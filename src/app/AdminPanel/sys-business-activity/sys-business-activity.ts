@@ -22,6 +22,7 @@ export class SysBusinessActivity {
   itemsPerPage = 10;
   currentPage = 1;
   searchTerm: string = '';
+  statusFilter: string = '';
   selectedactivityIds: string[] = [];
   isAllSelected = false;
 
@@ -47,6 +48,17 @@ export class SysBusinessActivity {
     );
     this.currentPage = 1;
   }
+
+  onStatusFilterChange() {
+    this.currentPage = 1;
+    this.filteredData = this.data.filter(item => {
+      if (this.statusFilter === '') return true;
+      return Boolean(item.status) === (this.statusFilter === 'true');
+
+    });
+    this.updateSelectAllStatus();
+  }
+  
 
   goToPage(page: number) {
     this.currentPage = page;
@@ -330,6 +342,7 @@ export class SysBusinessActivity {
 
     this.isAllSelected = checked;
   }
+  
   async toggleStatus(item: any): Promise<void> {
     const updatedStatus = !item.status;
     const payload = {

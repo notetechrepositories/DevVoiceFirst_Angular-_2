@@ -7,10 +7,30 @@
     </ol>
   </nav>
 
-  <div class="page-header d-flex justify-content-between mb-3 mt-4">
-    <input type="text" class="form-control w-25" placeholder="Search" [(ngModel)]="searchTerm" (input)="onSearch()" />
+  <div class="page-header d-flex justify-content-between align-items-center mb-3 mt-4">
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      <div class="input-group w-auto" style="min-width: 300px;">
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Search"
+          [(ngModel)]="searchTerm"
+          (input)="onSearch()"
+        />
+      </div>
+      <select
+        class="form-select w-auto"
+        [(ngModel)]="statusFilter"
+        (change)="onStatusFilterChange()"
+      >
+        <option value="">All Status</option>
+        <option value="true">Active</option>
+        <option value="false">Inactive</option>
+      </select>
+    </div>
     <button type="button" class="btn btn-primary" (click)="openModal()">Add</button>
   </div>
+  
 
   <div class="table-responsive">
     <table class="table">
