@@ -1,1 +1,128 @@
-<h1>work</h1>
+<div>
+    <h3>Manage Countries</h3>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Country</li>
+        </ol>
+    </nav>
+
+    <div class="page-header d-flex justify-content-between mb-3 mt-4">
+        <input type="text" class="form-control w-25" placeholder="Search" [(ngModel)]="searchTerm"
+            (input)="onSearch()" />
+        <button class="btn btn-primary" (click)="openModal()">Add</button>
+    </div>
+    <div class="table-responsive">
+        <table class="table">
+            <thead class="table-light">
+                <tr>
+                    <th>
+                        <input type="checkbox" class="form-check-input" [checked]="isAllSelected"
+                            (change)="toggleSelectAll($event)" />
+                    </th>
+                    <th>Country</th>
+                    <th>Division One</th>
+                    <th>Division Two</th>
+                    <th>Division Three</th>
+                    <th>Status</th>
+                  
+                    <th class="text-end">
+                        <button class="delete-btn btn-danger" (click)="deleteCountry()"
+                            [disabled]="selectedCountryIds.length === 0">
+                            <i class="pi pi-trash text-white"></i>
+                        </button>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (item of pagedData; track item) {
+                <tr>
+                    <td>
+                        <input type="checkbox" class="form-check-input" [checked]="selectedCountryIds.includes(item.id)"
+                            (change)="toggleSelection(item.id, $event)" />
+                    </td>
+                    <td>{{ item.country }}</td>
+                    <td>{{ item.divisionOneLabel }}</td>
+                    <td>{{ item.divisionTwoLabel }}</td>
+                    <td>{{ item.divisionThreeName }}</td>
+                    <td> <span
+                class="badge"
+                [ngClass]="item.status ? 'bg-success' : 'bg-secondary'"
+                style="cursor: pointer;"
+                (click)="toggleStatus(item)"
+              >
+                {{ item.status ? 'Active' : 'Inactive' }}
+              </span></td>
+                    <td class="text-end">
+                        <i class="pi pi-pen-to-square" (click)="openModal(item)"></i>&nbsp;
+                    </td>
+                </tr>
+                }
+
+                @empty {
+                <tr>
+                    <td colspan="4" class="text-center">No data found</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+
+        <!-- Pagination Controls -->
+        <nav class="d-flex justify-content-end">
+            <ul class="pagination">
+                <li class="page-item" [class.disabled]="currentPage === 1">
+                    <a class="page-link" (click)="previousPage()"><i class="fa-solid fa-angle-left"></i></a>
+                </li>
+                @for (page of totalPagesArray; track page) {
+                <li class="page-item" [class.active]="page === currentPage">
+                    <a class="page-link" (click)="goToPage(page)">{{ page }}</a>
+                </li>
+                }
+                <li class="page-item" [class.disabled]="currentPage === totalPages">
+                    <a class="page-link" (click)="nextPage()"><i class="fa-solid fa-angle-right"></i></a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<!-- Modal -->
+
+@if(isModalVisible){
+<div class="overlay">
+    <div class="modal-content">
+        <i class="fa-solid fa-xmark text-end" (click)="closeModal()"></i>
+        <h4 class="mb-3">{{ isEditMode ? 'Edit Country' : 'Add Country' }}</h4>
+
+        <form [formGroup]="countryForm" (ngSubmit)="submitForm()">
+            <div class="form-group mb-3">
+                <label for="roleName">Country</label>
+                <input type="text" class="form-control" id="country" placeholder="Enter country"
+                    formControlName="country">
+            </div>
+            <div class="form-group mb-3">
+                <label for="roleName">Division One Label Name</label>
+                <input type="text" class="form-control" id="divisionOneLabel" placeholder="Enter division one "
+                    formControlName="divisionOneLabel">
+            </div>
+            <div class="form-group mb-3">
+                <label for="roleName">Division Two Label Name</label>
+                <input type="text" class="form-control" id="divisionTwoLabel" placeholder="Enter division two"
+                    formControlName="divisionTwoLabel">
+            </div>
+            <div class="form-group mb-3">
+                <label for="roleName">Division Three Label Name</label>
+                <input type="text" class="form-control" id="divisionThreeName" placeholder="Enter division three"
+                    formControlName="divisionThreeName">
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn mt-4 w-100" [ngClass]="isEditMode ? 'btn-success' : 'btn-primary'">
+                    {{ isEditMode ? 'Save Changes' : 'Add' }}
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+}

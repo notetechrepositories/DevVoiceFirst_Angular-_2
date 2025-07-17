@@ -66,7 +66,6 @@ export class SysBusinessActivity {
   isEditModalVisible: boolean = false;
   businessActivityForm!: FormGroup;
   isEditMode: boolean = false;
-  originalItem: any;
   checkIcon = '<i class="fa-solid fa-check text-success"></i>';
   crossIcon = '<i class="fa-solid fa-xmark text-danger"></i>';
   businessActivities: any[] = [];
@@ -92,7 +91,7 @@ export class SysBusinessActivity {
     this.isEditMode = !!editItem;
     this.selectedActivityId = editItem?.id || null;
     if (editItem) {
-      this.originalItem = { ...editItem };
+      
       this.businessActivityForm.patchValue({
         id: editItem.id,
         activityName: editItem.activityName,
