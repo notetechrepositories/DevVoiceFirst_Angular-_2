@@ -97,7 +97,7 @@ export class SysRoles {
     });
     this.updateSelectAllStatus();
   }
-  
+
   goToPage(page: number) {
     this.currentPage = page;
   }
@@ -268,8 +268,6 @@ export class SysRoles {
     // Always include rolePrograms (even if empty)
     updatedFields.rolePrograms = rolePrograms;
   
-    console.log('Update payload:', updatedFields);
-  
     const hasUpdates =
       Object.keys(updatedFields).length > 2 || rolePrograms.length > 0;
   
@@ -277,8 +275,13 @@ export class SysRoles {
     if (hasUpdates) {
       this.roleService.updateRole(updatedFields).subscribe({
         next: (res) => {
-          console.log(res);
-            this.getRoles();
+          const updatedItem = res.body?.data;
+          if (updatedItem) {
+            const filteredIndex = this.filteredData.findIndex(item => item.id === updatedItem.id);
+            if (filteredIndex !== -1) {
+              this.filteredData[filteredIndex] = updatedItem;
+            }
+          }
             this.closeModal();
             this.utilityService.success(res.body.message);
         },
@@ -304,7 +307,10 @@ export class SysRoles {
     };
     this.roleService.createRole(payload).subscribe({
       next: (res) => {
-        this.getRoles();
+        const insertedItem = res.body?.data;
+        if (insertedItem) {
+          this.filteredData.push(insertedItem);
+        }
         this.closeModal();
         this.utilityService.success(res.body.message);
       },
@@ -381,7 +387,15 @@ export class SysRoles {
   
     if (result.isConfirmed) {
       this.roleService.deleteRole(this.selectedRoleIds).subscribe({
-        next: () => this.getRoles(),
+        next: (res) => {
+          this.selectedRoleIds.forEach(id => {
+            const filteredIndex = this.filteredData.findIndex(item => item.id === id);
+            if (filteredIndex !== -1) {
+              this.filteredData.splice(filteredIndex, 1);
+            }
+          });
+          this.utilityService.success(res.body.message);
+        },
         error: err => {
           this.utilityService.showError(err.status , err.error.message);
         },

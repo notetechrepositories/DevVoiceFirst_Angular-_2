@@ -21,11 +21,20 @@
     padding: 2rem;
     box-shadow: 0 2px 16px rgba(0,0,0,0.2);
     position: relative;
+  }
 
+  .modal-content-2 {
+    background: #fff;
+    border-radius: 8px;
+    max-width: 600px;
+    width: 100%;
+    padding: 2rem;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.2);
+    position: relative;
   }
 
   @media (max-width: 600px) {
-    .modal-content {
+    .modal-content, .modal-content-2 {
       padding: 1rem;
       max-width: 95vw;
     }
@@ -38,7 +47,7 @@
   }
 
   @media (max-width: 400px) {
-    .modal-content {
+    .modal-content, .modal-content-2 {
       padding: 0.5rem;
     }
     .table th, .table td {
