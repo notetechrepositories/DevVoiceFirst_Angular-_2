@@ -76,3 +76,52 @@ i{
   cursor: not-allowed;
 }
 
+
+/* tooltip */
+
+.tooltip-container {
+  display: inline-block;
+  position: relative;
+}
+
+.tooltip-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: .5rem;
+}
+
+.tooltipText {
+  position: absolute;
+  bottom: 119%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #000;
+  color: #fff;
+  padding: 6px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 10;
+}
+
+.tooltipText::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: #000 transparent transparent transparent;
+}
+
+.tooltip-button:hover .tooltipText {
+  opacity: 1;
+}
+
+

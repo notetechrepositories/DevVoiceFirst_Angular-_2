@@ -122,7 +122,7 @@
             <i class="fa me-2" [ngClass]="getMappedIcon(item.icon) || 'fa-angle-right'"></i>
           </ng-template>
 
-          <span *ngIf="isSidebarExpanded">{{ item.name }}</span>
+          <span *ngIf="isSidebarExpanded" >{{ item.name }}</span>
         </span>
         <i
           *ngIf="item.children?.length"

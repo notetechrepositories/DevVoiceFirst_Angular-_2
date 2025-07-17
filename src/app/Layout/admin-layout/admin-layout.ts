@@ -87,6 +87,7 @@ export class AdminLayout implements OnInit {
     roles: 'pi pi-id-card',
     organization: 'pi pi-sitemap',
     product: 'pi pi-box',
+    country: 'pi pi-globe',
     // Add more mappings as needed
   };
 

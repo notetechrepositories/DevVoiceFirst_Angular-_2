@@ -5,6 +5,7 @@ import { TestModule } from './test-module/test-module';
 import { SysBusinessActivity } from './sys-business-activity/sys-business-activity';
 import { UnderDevelopment } from './under-development/under-development';
 import { Country } from './country/country';
+import { SysAnswerType } from './sys-answer-type/sys-answer-type';
 
 
 export const AdminRoutes: Routes = [
@@ -22,6 +23,10 @@ export const AdminRoutes: Routes = [
   {
     path:'system-business-activity',
     component:SysBusinessActivity
+  },
+  {
+    path:'system-answer-type',
+    component:SysAnswerType
   },
   {
     path:'test',

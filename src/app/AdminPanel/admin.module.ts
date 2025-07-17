@@ -9,6 +9,7 @@ import { SysRoles } from './sys-roles/sys-roles';
 import { TestModule } from './test-module/test-module';
 import { SysBusinessActivity } from './sys-business-activity/sys-business-activity';
 import { UnderDevelopment } from './under-development/under-development';
+import { SysAnswerType } from './sys-answer-type/sys-answer-type';
 import { Country } from './country/country';
 
 
@@ -28,6 +29,7 @@ import { Country } from './country/country';
     SysBusinessActivity,
     TestModule,
     UnderDevelopment,
+    SysAnswerType,
     Country
   ],
   declarations: [

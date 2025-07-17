@@ -1,14 +1,14 @@
 <div>
-    <h3>Manage Business Activities</h3>
+    <h3>Manage Answer Type</h3>
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Dashboard</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Business Activity</li>
+            <li class="breadcrumb-item active" aria-current="page">Answer Type</li>
         </ol>
     </nav>
 
     <div class="page-header d-flex justify-content-between align-items-center mb-3 mt-4">
-      <div class="d-flex flex-wrap gap-2 align-items-center">
+      <div class="d-flex flex-wrap gap-2 align-items-center col-md">
         <div class="input-group w-auto" style="min-width: 300px;">
           <input
             type="text"
@@ -32,10 +32,12 @@
         <div class="tooltip-container">
             <button class="btn btn-primary tooltip-button" (click)="openModal()">
               <i class="pi pi-plus"></i>
-              <span class="tooltipText">Add Activity</span>
+              <span class="tooltipText">Add Answer Type</span>
             </button>
           </div>
       </div>
+
+      
     </div>
 <div class="table-responsive">
     <table class="table">
@@ -49,16 +51,12 @@
             />
           </th>
               <th>Name</th>
-              <th class="text-center">Company</th>
-              <th class="text-center">Branch</th>
-              <th class="text-center">Section</th>
-              <th class="text-center">Sub Section</th>
               <th>Status</th>
               <th class="text-end">
               <button
                 class="delete-btn btn-danger"
                 (click)="deleteBusinessActivity()"
-                [disabled]="selectedactivityIds.length === 0">
+                [disabled]="selectedAnswerTypeIds.length === 0">
                 <i class="pi pi-trash text-white"></i>
               </button>
           </th>
@@ -70,17 +68,14 @@
              <td>
               <input
               type="checkbox" class="form-check-input"
-                [checked]="selectedactivityIds.includes(item.id)"
+                [checked]="selectedAnswerTypeIds.includes(item.id)"
                 (change)="toggleSelection(item.id, $event)"
               />
             </td>
             <!-- <td>{{ (currentPage - 1) * itemsPerPage + pagedData.indexOf(item) + 1 }}</td> -->
             
-            <td>{{ item.activityName }}</td>
-            <td class="text-center" [innerHTML]="item.company ? checkIcon : crossIcon"></td>
-            <td class="text-center" [innerHTML]="item.branch ? checkIcon : crossIcon"></td>
-            <td class="text-center" [innerHTML]="item.section ? checkIcon : crossIcon"></td>
-            <td class="text-center" [innerHTML]="item.subSection ? checkIcon : crossIcon"></td>
+            <td>{{ item.name }}</td>
+            
             <td>
               <span
                 class="badge"
@@ -132,40 +127,21 @@
 
 @if(isModalVisible){
 <div class="overlay">
-  <div class="modal-content">
-    <i class="fa-solid fa-xmark text-end" (click)="closeModal()"></i>
-     <h4 class="mb-3">{{ isEditMode ? 'Edit BusinessActivity' : 'Add BusinessActivity' }}</h4>
+  <div class="modal-content-2">
+    <i class="fa-solid fa-xmark text-end w-100" (click)="closeModal()"></i>
+     <h4 class="mb-3">{{ isEditMode ? 'Edit Answer Type' : 'Add Answer Type' }}</h4>
 
-    <form class="mt-3" [formGroup]="businessActivityForm" (ngSubmit)="submitActivity()">
+    <form class="mt-3" [formGroup]="answerTypeForm" (ngSubmit)="submitActivity()">
 
         <div class="form-group">
-          <label for="activityName" class="mb-2">Business Activity Name</label>
-          <input type="text" class="form-control" id="activityName"  placeholder="Enter BusinessActivity"  formControlName="activityName"
-           [ngClass]="{'is-invalid': businessActivityForm.get('activityName')?.invalid && businessActivityForm.get('activityName')?.touched}" />
-           <div class="invalid-feedback" *ngIf="businessActivityForm.get('activityName')?.touched && businessActivityForm.get('activityName')?.hasError('required')">
-              Business Activity Name is required.
+          <label for="name" class="mb-2">Answer Type</label>
+          <input type="text" class="form-control" id="name"  placeholder="Enter Answer Type Name"  formControlName="name"
+           [ngClass]="{'is-invalid': answerTypeForm.get('name')?.invalid && answerTypeForm.get('name')?.touched}" />
+           <div class="invalid-feedback" *ngIf="answerTypeForm.get('name')?.touched && answerTypeForm.get('name')?.hasError('required')">
+              Answer Type Name is required.
            </div>
         </div>
   
-      <div class="d-flex gap-3 align-items-center mt-3 mb-2 justify-content-between">
-        <div class="form-check">
-          <input class="form-check-input" type="checkbox" id="companyCheckbox" formControlName="company">
-          <label class="form-check-label" for="companyCheckbox">Company</label>
-        </div>
-        <div class="form-check">
-          <input class="form-check-input" type="checkbox" id="branchCheckbox" formControlName="branch">
-          <label class="form-check-label" for="branchCheckbox">Branch</label>
-        </div>
-        <div class="form-check">
-          <input class="form-check-input" type="checkbox" id="sectionCheckbox" formControlName="section">
-          <label class="form-check-label" for="sectionCheckbox">Section</label>
-        </div>
-        <div class="form-check">
-          <input class="form-check-input" type="checkbox" id="subSectionCheckbox" formControlName="subSection">
-          <label class="form-check-label" for="subSectionCheckbox">Sub Section</label>
-        </div>
-      </div>
-
 
       <div class="col-md d-flex align-items-end">
         <button type="submit" class="btn mt-4 w-100" [ngClass]="isEditMode ? 'btn-success' : 'btn-primary'" >

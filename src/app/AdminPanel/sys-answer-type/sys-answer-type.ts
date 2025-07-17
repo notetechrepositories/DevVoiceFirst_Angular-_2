@@ -1,55 +1,48 @@
-import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-import Swal from 'sweetalert2';
+import { CommonModule } from '@angular/common';
 import { BusinessActivityService } from '../../Service/BusinessActivityService/business-activity';
-import { BusinessActivityModel } from '../../Models/BusinessActivityModel';
-import { BusinessActivity } from '../../CompanyPanel/business-activity/business-activity';
 import { UtilityService } from '../../Service/UtilityService/utility-service';
-
+import { RouterLink } from '@angular/router';
+import { AnswerTypeModel } from '../../Models/AnswerTypeModel';
 
 @Component({
-  selector: 'app-sys-business-activity',
-  imports: [RouterLink, CommonModule, FormsModule, ReactiveFormsModule],
-  templateUrl: './sys-business-activity.html',
-  styleUrl: './sys-business-activity.css'
+  selector: 'app-sys-answer-type',
+  imports: [ CommonModule,FormsModule,ReactiveFormsModule,RouterLink ],
+  standalone: true,
+  templateUrl: './sys-answer-type.html',
+  styleUrl: './sys-answer-type.css'
 })
-export class SysBusinessActivity {
-  data: BusinessActivityModel[] = [];
-  filteredData: BusinessActivityModel[] = [];
+export class SysAnswerType {
+  data: AnswerTypeModel[] = [];
+  filteredData: AnswerTypeModel[] = [];
 
   itemsPerPage = 10;
   currentPage = 1;
   searchTerm: string = '';
   statusFilter: string = '';
-  selectedactivityIds: string[] = [];
+  selectedAnswerTypeIds: string[] = [];
   isAllSelected = false;
   isModalVisible: boolean = false;
   isEditModalVisible: boolean = false;
-  businessActivityForm!: FormGroup;
+  answerTypeForm!: FormGroup;
   isEditMode: boolean = false;
   originalItem: any;
+  
+  answerTypes: any[] = [];
+  selectedAnswerTypeId: string | null = null;
 
-  checkIcon = '<i class="pi pi-check text-success"></i>';
-  crossIcon = '<i class="pi pi-times-circle text-danger"></i>';
-
-  businessActivities: any[] = [];
-  selectedActivityId: string | null = null;
-
-  constructor(private fb: FormBuilder, private businessActivityService: BusinessActivityService,
+  constructor(
+    private fb: FormBuilder, 
+    private businessActivityService: BusinessActivityService,
     private utilityService: UtilityService
   ) { }
 
   ngOnInit() {
-    this.getBusinessActivity();
-    this.businessActivityForm = this.fb.group({
+    this.getAnswerType();
+    this.answerTypeForm = this.fb.group({
       id: [''],
-      activityName: ['', Validators.required],
-      company: [false],
-      branch: [false],
-      section: [false],
-      subSection: [false]
+      name: ['', Validators.required],
     });
   }
 
@@ -71,7 +64,7 @@ export class SysBusinessActivity {
   onSearch() {
     const term = this.searchTerm.toLowerCase();
     this.filteredData = this.data.filter(item =>
-      item.activityName.toLowerCase().includes(term)
+      item.name.toLowerCase().includes(term)
     );
     this.currentPage = 1;
   }
@@ -102,31 +95,27 @@ export class SysBusinessActivity {
   // ----------------
 
 
-  openModal(editItem?: BusinessActivityModel) {
+  openModal(editItem?: AnswerTypeModel) {
     this.isModalVisible = true;
     this.isEditMode = !!editItem;
-    this.selectedActivityId = editItem?.id || null;
+    this.selectedAnswerTypeId = editItem?.id || null;
     if (editItem) {
-      
-      this.businessActivityForm.patchValue({
+      this.originalItem = { ...editItem };
+      this.answerTypeForm.patchValue({
         id: editItem.id,
-        activityName: editItem.activityName,
-        company: editItem.company,
-        branch: editItem.branch,
-        section: editItem.section,
-        subSection: editItem.subSection
+        name: editItem.name,
+       
       });
     }
   }
 
   closeModal() {
     this.isModalVisible = false;
-    this.isEditModalVisible = false;
-    this.businessActivities = [];
-    this.businessActivityForm.reset();
+    this.answerTypes = [];
+    this.answerTypeForm.reset();
   }
 
-  getBusinessActivity() {
+  getAnswerType() {
     this.businessActivityService.getBusinessActivity().subscribe({
       next: res => {
         this.data = res.body.data;
@@ -137,26 +126,26 @@ export class SysBusinessActivity {
   }
 
   //   addBusinessActivity(): void {
-  //   const activityObj  = this.businessActivityForm.value;
+  //   const activityObj  = this.answerTypeForm.value;
 
   //   if (activityObj.activityName?.trim()) {
-  //     this.businessActivities.push({
+  //     this.answerTypes.push({
   //       activityName:activityObj.activityName,
   //       company:activityObj.company,
   //       branch: activityObj.branch,
   //       section: activityObj.section,
   //       subSection: activityObj.subSection
   //     });
-  //     this.businessActivityForm.reset();
+  //     this.answerTypeForm.reset();
   //   }
   // }
 
   removeActivity(index: number): void {
-    this.businessActivities.splice(index, 1);
+    this.answerTypes.splice(index, 1);
   }
 
   // submitAllActivities() {
-  //   const payload = this.businessActivities.map(({ activityName, company, branch, section, subSection }) => ({
+  //   const payload = this.answerTypes.map(({ activityName, company, branch, section, subSection }) => ({
   //     activityName,
   //     company: !!company,
   //     branch: !!branch,
@@ -177,7 +166,7 @@ export class SysBusinessActivity {
 
 
   submitActivity() {
-    const form = this.businessActivityForm;
+    const form = this.answerTypeForm;
     const formValue = form.value;
     const payload = {
       activityName: formValue.activityName,
@@ -186,12 +175,12 @@ export class SysBusinessActivity {
       section: !!formValue.section,
       subSection: !!formValue.subSection
     };
-      if(this.businessActivityForm.invalid){
-         this.businessActivityForm.markAllAsTouched();
+      if(this.answerTypeForm.invalid){
+         this.answerTypeForm.markAllAsTouched();
           return;
       }
     if (this.isEditMode) {
-      const updatedFields: any = { id: this.selectedActivityId };
+      const updatedFields: any = { id: this.selectedAnswerTypeId };
 
       this.utilityService.setIfDirty(form, 'activityName', updatedFields);
       this.utilityService.setIfDirty(form, 'company', updatedFields);
@@ -248,7 +237,7 @@ export class SysBusinessActivity {
   // openEditModal(item: any) {
   //   this.isEditModalVisible = true;
   //     this.originalItem = { ...item };
-  //   this.businessActivityForm.patchValue({
+  //   this.answerTypeForm.patchValue({
   //     id: item.id,
   //     activityName: item.activityName,
   //     company: item.company ,
@@ -260,7 +249,7 @@ export class SysBusinessActivity {
 
 
   // saveChanges() {
-  //   const formValue = this.businessActivityForm.value;
+  //   const formValue = this.answerTypeForm.value;
 
   //   // Always include ID for identification
   //   const updatedFields: any = { id: formValue.id };
@@ -291,14 +280,14 @@ export class SysBusinessActivity {
 
 
   async deleteBusinessActivity(): Promise<void> {
-    const message = `Delete ${this.selectedactivityIds.length} business activity(s)`;
+    const message = `Delete ${this.selectedAnswerTypeIds.length} business activity(s)`;
     const result = await this.utilityService.confirmDialog(message, 'delete');
     if (result.isConfirmed) {
-      this.businessActivityService.deleteBusinessActivity(this.selectedactivityIds).subscribe({
+      this.businessActivityService.deleteBusinessActivity(this.selectedAnswerTypeIds).subscribe({
         next: (res) => {
           const deletedIds: string[] = res.body?.data || [];
           this.filteredData = this.filteredData.filter(item => !deletedIds.includes(item.id));
-          this.selectedactivityIds = [];
+          this.selectedAnswerTypeIds = [];
           this.isAllSelected = false;
           this.utilityService.success(res.body?.message || 'Deleted successfully.');
         },
@@ -308,7 +297,7 @@ export class SysBusinessActivity {
 
 
       });
-      this.selectedactivityIds = [];
+      this.selectedAnswerTypeIds = [];
       this.isAllSelected = false;
 
     }
@@ -317,18 +306,18 @@ export class SysBusinessActivity {
 
 
   updateSelectAllStatus() {
-    this.isAllSelected = this.selectedactivityIds.length === this.pagedData.length;
+    this.isAllSelected = this.selectedAnswerTypeIds.length === this.pagedData.length;
   }
 
   toggleSelection(id: string, event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
 
     if (checked) {
-      if (!this.selectedactivityIds.includes(id)) {
-        this.selectedactivityIds.push(id);
+      if (!this.selectedAnswerTypeIds.includes(id)) {
+        this.selectedAnswerTypeIds.push(id);
       }
     } else {
-      this.selectedactivityIds = this.selectedactivityIds.filter(x => x !== id);
+      this.selectedAnswerTypeIds = this.selectedAnswerTypeIds.filter(x => x !== id);
     }
 
     // this.updateSelectAllStatus();
@@ -338,9 +327,9 @@ export class SysBusinessActivity {
     const checked = (event.target as HTMLInputElement).checked;
 
     if (checked) {
-      this.selectedactivityIds = this.pagedData.map(x => x.id);
+      this.selectedAnswerTypeIds = this.pagedData.map(x => x.id);
     } else {
-      this.selectedactivityIds = [];
+      this.selectedAnswerTypeIds = [];
     }
 
     this.isAllSelected = checked;
