@@ -27,7 +27,6 @@ export class Country {
 
   constructor(
     private fb: FormBuilder,
-    private programService: ProgramService,
     private countryService: CountryService,
     private utilityService: UtilityService
   ) { }
@@ -89,12 +88,14 @@ export class Country {
   // ----------------
 
   isModalVisible: boolean = false;
-selectedCountryId:string|null=null;
+  selectedCountryId:string|null=null;
   openModal(editItem?:CountryModel) {
     this.isModalVisible = true;
     this.isEditMode=!!editItem;
     this.selectedCountryId=editItem?.id ||null
     if(editItem){
+      console.log("working");
+      
       this.countryForm.patchValue({
         id:editItem.id,
         country:editItem.country,
@@ -108,6 +109,8 @@ selectedCountryId:string|null=null;
 
   closeModal() {
     this.isModalVisible = false;
+    this.isEditMode=false;
+    this.countryForm.reset(); 
   }
 
 
