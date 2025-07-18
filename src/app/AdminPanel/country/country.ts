@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { CountryService } from '../../Service/CountryService/country-service';
 import { ProgramService } from '../../Service/ProgramService/program';
 import { UtilityService } from '../../Service/UtilityService/utility-service';
@@ -27,8 +27,10 @@ export class Country {
 
   constructor(
     private fb: FormBuilder,
+    private programService: ProgramService,
     private countryService: CountryService,
-    private utilityService: UtilityService
+    private utilityService: UtilityService,
+    private router: Router
   ) { }
 
   get totalPages(): number {
@@ -56,6 +58,7 @@ export class Country {
       divisionThreeName:[''],
     })
   }
+
   onSearch() {
     const term = this.searchTerm.toLowerCase();
     this.filteredData = this.data.filter(item =>
@@ -89,6 +92,7 @@ export class Country {
 
   isModalVisible: boolean = false;
   selectedCountryId:string|null=null;
+
   openModal(editItem?:CountryModel) {
     this.isModalVisible = true;
     this.isEditMode=!!editItem;
@@ -186,10 +190,9 @@ export class Country {
         }
       });
     }
-
-
-
   }
+
+
  async deleteCountry(): Promise<void> {
     const message = `Delete ${this.selectedCountryIds.length} Country(s)`;
     const result = await this.utilityService.confirmDialog(message, 'delete');
@@ -207,7 +210,6 @@ export class Country {
       });
       this.selectedCountryIds = [];
       this.isAllSelected = false;
-
   }
 
 
@@ -224,9 +226,13 @@ export class Country {
 
     this.updateSelectAllStatus();
   }
+
+
   updateSelectAllStatus() {
     this.isAllSelected = this.pagedData.length > 0 && this.pagedData.every(x => this.selectedCountryIds.includes(x.id));
   }
+
+
   toggleSelectAll(event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
 
@@ -260,5 +266,9 @@ export class Country {
         }
       });
     }
+  }
+
+  onManageDivisions(item:any){
+    this.router.navigate(['/admin/divisions', item.id], { state: { country: item } });
   }
 }

@@ -6,6 +6,7 @@ import { SysBusinessActivity } from './sys-business-activity/sys-business-activi
 import { UnderDevelopment } from './under-development/under-development';
 import { Country } from './country/country';
 import { SysAnswerType } from './sys-answer-type/sys-answer-type';
+import { Divisions } from './divisions/divisions';
 
 
 export const AdminRoutes: Routes = [
@@ -36,9 +37,13 @@ export const AdminRoutes: Routes = [
     path:'under-development',
     component:UnderDevelopment
   },
-   {
+  {
     path:'country',
     component:Country
+  },
+  {
+    path:'divisions/:id',
+    component:Divisions
   }
 
 ];

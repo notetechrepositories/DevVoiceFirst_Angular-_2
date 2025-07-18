@@ -11,6 +11,7 @@ import { SysBusinessActivity } from './sys-business-activity/sys-business-activi
 import { UnderDevelopment } from './under-development/under-development';
 import { SysAnswerType } from './sys-answer-type/sys-answer-type';
 import { Country } from './country/country';
+import { Divisions } from './divisions/divisions';
 
 
 
@@ -30,7 +31,8 @@ import { Country } from './country/country';
     TestModule,
     UnderDevelopment,
     SysAnswerType,
-    Country
+    Country,
+    Divisions
   ],
   declarations: [
 

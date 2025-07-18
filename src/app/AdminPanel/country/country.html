@@ -49,6 +49,7 @@
                     <th>Division One</th>
                     <th>Division Two</th>
                     <th>Division Three</th>
+                    <th></th>
                     <th>Status</th>
                   
                     <th class="text-end">
@@ -70,14 +71,16 @@
                     <td>{{ item.divisionOneLabel }}</td>
                     <td>{{ item.divisionTwoLabel }}</td>
                     <td>{{ item.divisionThreeName }}</td>
+                    <td><a (click)="onManageDivisions(item)">Manage</a></td>
                     <td> <span
-                class="badge"
-                [ngClass]="item.status ? 'bg-success' : 'bg-secondary'"
-                style="cursor: pointer;"
-                (click)="toggleStatus(item)"
-              >
-                {{ item.status ? 'Active' : 'Inactive' }}
-              </span></td>
+                            class="badge"
+                            [ngClass]="item.status ? 'bg-success' : 'bg-secondary'"
+                            style="cursor: pointer;"
+                            (click)="toggleStatus(item)"
+                        >
+                            {{ item.status ? 'Active' : 'Inactive' }}
+                        </span>
+                    </td>
                     <td class="text-end">
                         <i class="pi pi-pen-to-square" (click)="openModal(item)"></i>&nbsp;
                     </td>
@@ -116,8 +119,8 @@
 
 @if(isModalVisible){
 <div class="overlay">
-    <div class="modal-content">
-        <i class="fa-solid fa-xmark text-end" (click)="closeModal()"></i>
+    <div class="modal-content-2">
+        <i class="fa-solid fa-xmark text-end w-100" (click)="closeModal()"></i>
         <h4 class="mb-3">{{ isEditMode ? 'Edit Country' : 'Add Country' }}</h4>
 
         <form [formGroup]="countryForm" (ngSubmit)="submitForm()">
