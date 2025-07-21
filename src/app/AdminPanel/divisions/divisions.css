@@ -1,0 +1,26 @@
+.card-container{
+    border:none;
+    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+    border-radius: 5px;
+    min-height: 78.4vh;
+}
+
+/* Target scrollable areas */
+.division-list::-webkit-scrollbar {
+    width: 3px;              /* Thin scrollbar */
+  }
+  
+  .division-list::-webkit-scrollbar-track {
+    background: transparent; /* Optional: transparent track */
+  }
+  
+  .division-list::-webkit-scrollbar-thumb {
+    background-color: #ccc;  /* Light gray thumb */
+    border-radius: 4px;      /* Rounded edges */
+  }
+  
+  /* Remove scrollbar buttons (up/down arrows) */
+  .division-list::-webkit-scrollbar-button {
+    display: none;
+  }
+  

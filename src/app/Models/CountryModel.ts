@@ -1,9 +1,8 @@
 export interface CountryModel{
-id:string;
+    id:string;
     country:string;
     divisionOneLabel:string;
     divisionTwoLabel:string;
     divisionThreeName:string;
     status:string;
-
 }

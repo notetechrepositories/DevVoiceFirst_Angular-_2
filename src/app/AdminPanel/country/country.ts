@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { CountryService } from '../../Service/CountryService/country-service';
 import { ProgramService } from '../../Service/ProgramService/program';
 import { UtilityService } from '../../Service/UtilityService/utility-service';
@@ -29,7 +29,8 @@ export class Country {
     private fb: FormBuilder,
     private programService: ProgramService,
     private countryService: CountryService,
-    private utilityService: UtilityService
+    private utilityService: UtilityService,
+    private router: Router
   ) { }
 
   get totalPages(): number {
@@ -57,6 +58,7 @@ export class Country {
       divisionThreeName:[''],
     })
   }
+
   onSearch() {
     const term = this.searchTerm.toLowerCase();
     this.filteredData = this.data.filter(item =>
@@ -89,12 +91,15 @@ export class Country {
   // ----------------
 
   isModalVisible: boolean = false;
-selectedCountryId:string|null=null;
+  selectedCountryId:string|null=null;
+
   openModal(editItem?:CountryModel) {
     this.isModalVisible = true;
     this.isEditMode=!!editItem;
     this.selectedCountryId=editItem?.id ||null
     if(editItem){
+      console.log("working");
+      
       this.countryForm.patchValue({
         id:editItem.id,
         country:editItem.country,
@@ -108,6 +113,8 @@ selectedCountryId:string|null=null;
 
   closeModal() {
     this.isModalVisible = false;
+    this.isEditMode=false;
+    this.countryForm.reset(); 
   }
 
 
@@ -183,10 +190,9 @@ selectedCountryId:string|null=null;
         }
       });
     }
-
-
-
   }
+
+
  async deleteCountry(): Promise<void> {
     const message = `Delete ${this.selectedCountryIds.length} Country(s)`;
     const result = await this.utilityService.confirmDialog(message, 'delete');
@@ -204,7 +210,6 @@ selectedCountryId:string|null=null;
       });
       this.selectedCountryIds = [];
       this.isAllSelected = false;
-
   }
 
 
@@ -221,9 +226,13 @@ selectedCountryId:string|null=null;
 
     this.updateSelectAllStatus();
   }
+
+
   updateSelectAllStatus() {
     this.isAllSelected = this.pagedData.length > 0 && this.pagedData.every(x => this.selectedCountryIds.includes(x.id));
   }
+
+
   toggleSelectAll(event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
 
@@ -257,5 +266,9 @@ selectedCountryId:string|null=null;
         }
       });
     }
+  }
+
+  onManageDivisions(item:any){
+    this.router.navigate(['/admin/divisions', item.id], { state: { country: item } });
   }
 }
