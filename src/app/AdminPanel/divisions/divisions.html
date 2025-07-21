@@ -137,7 +137,7 @@
                           <div class="d-flex justify-content-between align-items-center">
                             <div class="d-flex align-items-center">
                               <input class="form-check-input me-2" type="checkbox"
-                                     [checked]="selectedDivisionTwoIds?.includes(item.id)"
+                                     [checked]="selectedDivisionTwoIds.includes(item.id)"
                                      (click)="$event.stopPropagation()"
                                      (change)="toggleDivisionTwoSelection(item.id, $event)">
                               <span class="division-label">{{ item.divisionTwo }}</span>
@@ -208,7 +208,7 @@
                       <div class="d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center">
                           <input class="form-check-input me-2" type="checkbox"
-                                 [checked]="selectedDivisionThreeIds?.includes(item.id)"
+                                 [checked]="selectedDivisionThreeIds.includes(item.id)"
                                  (click)="$event.stopPropagation()"
                                  (change)="toggleDivisionThreeSelection(item.id, $event)">
                           <span class="division-label">{{ item.divisionThree }}</span>
@@ -247,15 +247,17 @@
 <div class="overlay">
     <div class="modal-content-2">
         <i class="fa-solid fa-xmark text-end w-100" (click)="closeModal()"></i>
-        <h4 class="mb-3">{{ isEditMode ? 'Edit Division One' : 'Add Division One' }}</h4>
+        <h4 class="mb-3">
+            {{ isEditMode ? ('Edit ' + (country?.divisionOneLabel || 'Division One')) : ('Add ' + (country?.divisionOneLabel || 'Division One')) }}
+        </h4>
 
         <form [formGroup]="divisionOneForm" (ngSubmit)="submitDivisionOne()">
             <div class="form-group mb-3">
                 <label for="roleName" class="mb-2">Name</label>
-                <input type="text" class="form-control" id="divisionOne" placeholder="Enter division one name"
+                <input type="text" class="form-control" id="divisionOne" placeholder="Enter {{country?.divisionOneLabel}}"
                     formControlName="divisionOne">
                 @if(divisionOneForm.get('divisionOne')?.invalid && divisionOneForm.get('divisionOne')?.touched){
-                <small class="text-danger">Division one name is required</small>
+                <small class="text-danger">This field is required</small>
                 }
             </div>
             <div class="form-group">
@@ -273,15 +275,17 @@
 <div class="overlay">
     <div class="modal-content-2">
         <i class="fa-solid fa-xmark text-end w-100" (click)="closeModal()"></i>
-        <h4 class="mb-3">{{ isEditMode ? 'Edit Division Two' : 'Add Division Two' }}</h4>
+        <h4 class="mb-3">
+            {{ isEditMode ? ('Edit ' + (country?.divisionTwoLabel || 'Division Two')) : ('Add ' + (country?.divisionTwoLabel || 'Division Two')) }}
+        </h4>
 
         <form [formGroup]="divisionTwoForm" (ngSubmit)="submitDivisionTwo()">
             <div class="form-group mb-3">
                 <label for="roleName" class="mb-2">Name</label>
-                <input type="text" class="form-control" id="divisionTwo" placeholder="Enter division Two name"
+                <input type="text" class="form-control" id="divisionTwo" placeholder="Enter {{country?.divisionTwoLabel}}"
                     formControlName="divisionTwo">
                 @if(divisionTwoForm.get('divisionTwo')?.invalid && divisionTwoForm.get('divisionTwo')?.touched){
-                <small class="text-danger">Division two name is required</small>
+                <small class="text-danger">This field is required</small>
                 }
             </div>
             <div class="form-group">
@@ -300,15 +304,15 @@
     <div class="overlay">
         <div class="modal-content-2">
             <i class="fa-solid fa-xmark text-end w-100" (click)="closeModal()"></i>
-            <h4 class="mb-3">{{ isEditMode ? 'Edit Division Three' : 'Add Division Three' }}</h4>
+            <h4 class="mb-3">{{ isEditMode ? ('Edit ' + (country?.divisionThreeLabel || 'Division Three')) : ('Add ' + (country?.divisionThreeLabel || 'Division Three')) }}</h4>
     
             <form [formGroup]="divisionThreeForm" (ngSubmit)="submitDivisionThree()">
                 <div class="form-group mb-3">
                     <label for="roleName" class="mb-2">Name</label>
-                    <input type="text" class="form-control" id="divisionThree" placeholder="Enter division Three name"
+                    <input type="text" class="form-control" id="divisionThree" placeholder="Enter {{country?.divisionThreeLabel}}"
                         formControlName="divisionThree">
                     @if(divisionThreeForm.get('divisionThree')?.invalid && divisionThreeForm.get('divisionThree')?.touched){
-                    <small class="text-danger">Division three name is required</small>
+                    <small class="text-danger">This field is required</small>
                     }
                 </div>
                 <div class="form-group">

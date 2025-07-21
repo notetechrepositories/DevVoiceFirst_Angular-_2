@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { CountryService } from '../../Service/CountryService/country-service';
 import { ProgramService } from '../../Service/ProgramService/program';
@@ -25,6 +25,7 @@ export class Country {
   isEditMode: boolean = false;
   selectedCountryIds: string[] = [];
   isAllSelected = false;
+  showWarnings: { [key: string]: boolean } = {};
 
   constructor(
     private fb: FormBuilder,
@@ -54,11 +55,24 @@ export class Country {
     this.getCountry();
     this.countryForm=this.fb.group({
       id:[''],
-      country:[''],
+      country:['',Validators.required],
       divisionOneLabel:[''],
       divisionTwoLabel:[''],
       divisionThreeLabel:[''],
-    })
+    });
+
+    ['country', 'divisionOneLabel', 'divisionTwoLabel'].forEach(field => {
+      this.countryForm.get(field)?.valueChanges.subscribe(() => {
+        Object.keys(this.showWarnings).forEach(key => {
+          this.showWarnings[key] = false;
+        });
+      });
+    });
+  }
+
+  checkDependency(dependentField: string, currentField: string): void {
+    const dependsOn = this.countryForm.get(dependentField)?.value;
+    this.showWarnings[currentField] = !dependsOn || dependsOn.trim() === '';
   }
 
   onSearch() {
