@@ -74,7 +74,7 @@
             </td>
             <!-- <td>{{ (currentPage - 1) * itemsPerPage + pagedData.indexOf(item) + 1 }}</td> -->
             
-            <td>{{ item.sysIssueAnswerTypeName }}</td>
+            <td>{{ item.answerTypeName }}</td>
             
             <td>
               <span
@@ -135,9 +135,9 @@
 
         <div class="form-group">
           <label for="name" class="mb-2">Answer Type</label>
-          <input type="text" class="form-control" id="sysIssueAnswerTypeName"  placeholder="Enter Answer Type Name"  formControlName="sysIssueAnswerTypeName"
-           [ngClass]="{'is-invalid': answerTypeForm.get('sysIssueAnswerTypeName')?.invalid && answerTypeForm.get('sysIssueAnswerTypeName')?.touched}" />
-           <div class="invalid-feedback" *ngIf="answerTypeForm.get('sysIssueAnswerTypeName')?.touched && answerTypeForm.get('sysIssueAnswerTypeName')?.hasError('required')">
+          <input type="text" class="form-control" id="answerTypeName"  placeholder="Enter Answer Type Name"  formControlName="answerTypeName"
+           [ngClass]="{'is-invalid': answerTypeForm.get('answerTypeName')?.invalid && answerTypeForm.get('answerTypeName')?.touched}" />
+           <div class="invalid-feedback" *ngIf="answerTypeForm.get('answerTypeName')?.touched && answerTypeForm.get('answerTypeName')?.hasError('required')">
               Answer Type Name is required.
            </div>
         </div>

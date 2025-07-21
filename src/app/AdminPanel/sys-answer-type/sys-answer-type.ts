@@ -42,7 +42,7 @@ export class SysAnswerType {
     this.getAnswerType();
     this.answerTypeForm = this.fb.group({
       id: [''],
-      sysIssueAnswerTypeName: ['', Validators.required],
+      answerTypeName: ['', Validators.required],
     });
   }
 
@@ -64,7 +64,7 @@ export class SysAnswerType {
   onSearch() {
     const term = this.searchTerm.toLowerCase();
     this.filteredData = this.data.filter(item =>
-      item.sysIssueAnswerTypeName.toLowerCase().includes(term)
+      item.answerTypeName.toLowerCase().includes(term)
     );
     this.currentPage = 1;
   }
@@ -103,7 +103,7 @@ export class SysAnswerType {
       this.originalItem = { ...editItem };
       this.answerTypeForm.patchValue({
         id: editItem.id,
-        sysIssueAnswerTypeName: editItem.sysIssueAnswerTypeName,
+        answerTypeName: editItem.answerTypeName,
 
       });
     }
@@ -131,7 +131,7 @@ export class SysAnswerType {
     const form = this.answerTypeForm;
     const formValue = form.value;
     const payload = {
-      sysIssueAnswerTypeName: formValue.sysIssueAnswerTypeName,
+      answerTypeName: formValue.answerTypeName,
 
     };
     if (this.answerTypeForm.invalid) {
@@ -141,7 +141,7 @@ export class SysAnswerType {
     if (this.isEditMode) {
       const updatedFields: any = { id: this.selectedAnswerTypeId };
 
-      this.utilityService.setIfDirty(form, 'sysIssueAnswerTypeName', updatedFields);
+      this.utilityService.setIfDirty(form, 'answerTypeName', updatedFields);
       // Only send update if any field has changed
       if (Object.keys(updatedFields).length === 1) {
         this.utilityService.warning('No changes detected.');
