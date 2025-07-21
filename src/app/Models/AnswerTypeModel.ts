@@ -1,6 +1,7 @@
 export interface AnswerTypeModel {
     id: string;
-    name: string;
+    answerTypeName: string;
     status:string,
-    selected?: boolean; 
+    selected?: boolean;
+     
   }

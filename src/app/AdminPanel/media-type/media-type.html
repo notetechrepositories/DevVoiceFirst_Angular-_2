@@ -1,9 +1,9 @@
 <div>
-    <h3>Manage Answer Type</h3>
+    <h3>Manage Media Type</h3>
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Dashboard</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Answer Type</li>
+            <li class="breadcrumb-item active" aria-current="page">Media Type</li>
         </ol>
     </nav>
 
@@ -32,7 +32,7 @@
         <div class="tooltip-container">
             <button class="btn btn-primary tooltip-button" (click)="openModal()">
               <i class="pi pi-plus"></i>
-              <span class="tooltipText">Add Answer Type</span>
+              <span class="tooltipText">Add Media Type</span>
             </button>
           </div>
       </div>
@@ -55,8 +55,8 @@
               <th class="text-end">
               <button
                 class="delete-btn btn-danger"
-                (click)="deleteAnswerType()"
-                [disabled]="selectedAnswerTypeIds.length === 0">
+                (click)="deleteMediaType()"
+                [disabled]="selectedMediaTypeIds.length === 0">
                 <i class="pi pi-trash text-white"></i>
               </button>
           </th>
@@ -68,13 +68,13 @@
              <td>
               <input
               type="checkbox" class="form-check-input"
-                [checked]="selectedAnswerTypeIds.includes(item.id)"
+                [checked]="selectedMediaTypeIds.includes(item.id)"
                 (change)="toggleSelection(item.id, $event)"
               />
             </td>
             <!-- <td>{{ (currentPage - 1) * itemsPerPage + pagedData.indexOf(item) + 1 }}</td> -->
             
-            <td>{{ item.answerTypeName }}</td>
+            <td>{{ item.description }}</td>
             
             <td>
               <span
@@ -129,16 +129,16 @@
 <div class="overlay">
   <div class="modal-content-2">
     <i class="fa-solid fa-xmark text-end w-100" (click)="closeModal()"></i>
-     <h4 class="mb-3">{{ isEditMode ? 'Edit Answer Type' : 'Add Answer Type' }}</h4>
+     <h4 class="mb-3">{{ isEditMode ? 'Edit Media Type' : 'Add Media Type' }}</h4>
 
-    <form class="mt-3" [formGroup]="answerTypeForm" (ngSubmit)="submitAnswerType()">
+    <form class="mt-3" [formGroup]="mediaTypeForm" (ngSubmit)="submitMediaType()">
 
         <div class="form-group">
-          <label for="name" class="mb-2">Answer Type</label>
-          <input type="text" class="form-control" id="answerTypeName"  placeholder="Enter Answer Type Name"  formControlName="answerTypeName"
-           [ngClass]="{'is-invalid': answerTypeForm.get('answerTypeName')?.invalid && answerTypeForm.get('answerTypeName')?.touched}" />
-           <div class="invalid-feedback" *ngIf="answerTypeForm.get('answerTypeName')?.touched && answerTypeForm.get('answerTypeName')?.hasError('required')">
-              Answer Type Name is required.
+          <label for="name" class="mb-2">Media Type</label>
+          <input type="text" class="form-control" id="description"  placeholder="Enter Media Type Name"  formControlName="description"
+           [ngClass]="{'is-invalid': mediaTypeForm.get('description')?.invalid && mediaTypeForm.get('description')?.touched}" />
+           <div class="invalid-feedback" *ngIf="mediaTypeForm.get('description')?.touched && mediaTypeForm.get('description')?.hasError('required')">
+              Media Type Name is required.
            </div>
         </div>
   
