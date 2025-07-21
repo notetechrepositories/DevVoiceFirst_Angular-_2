@@ -17,7 +17,7 @@
             <a href="#" class="text-secondary me-2">
                 <i class="bi bi-arrow-left fs-4"></i>
             </a>
-            <h1 class="h4 mb-0">United States</h1>
+            <h1 class="h4 mb-0">{{country?.country}}</h1>
         </div>
 
     </div>
@@ -25,21 +25,22 @@
     <!-- Cards Row -->
     <div class="row g-4">
         <!-- Division One  -->
-        <div class="col-12 col-md-4">
+         @if(country?.divisionOneLabel!==''){
+        <div class="col-12 col-md">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h2 class="h6 mb-0">States</h2>
+                    <h2 class="h6 mb-0">{{country?.divisionOneLabel}}</h2>
                     <div class="d-flex gap-2">
                         <div class="tooltip-container">
                             <button class="btn btn-primary btn-sm tooltip-button" (click)="openDivisionModal('one')">
                                 <i class="pi pi-plus"></i>
-                                <span class="tooltipText">Add State</span>
+                                <span class="tooltipText">Add {{country?.divisionOneLabel}}</span>
                             </button>
                         </div>
                         <div class="tooltip-container">
                             <button class="btn btn-danger btn-sm tooltip-button"
-                                [disabled]="selectedDivisionOneIds.length === 0">
-                                <i class="pi pi-trash text-white" (click)="deleteDivisionOne()"></i>
+                                [disabled]="selectedDivisionOneIds.length === 0" (click)="deleteDivisionOne()">
+                                <i class="pi pi-trash text-white"></i>
                             </button>
                         </div>
                     </div>
@@ -48,7 +49,7 @@
                     <!-- Search -->
                     <div class="input-group mb-3">
                         <span class="input-group-text"><i class="pi pi-search"></i></span>
-                        <input type="text" class="form-control" placeholder="Search State"
+                        <input type="text" class="form-control" placeholder="Search {{country?.divisionOneLabel}}"
                             [(ngModel)]="searchTermDivisionOne" (input)="onSearchDivisionOne()">
                     </div>
                     <!-- List -->
@@ -57,13 +58,13 @@
 
                         @for (item of divisionOneList; track item) {
                         <li class="list-group-item division-item"
-                            [class.active-custom]="item.id === selectedDivisionOneId"
+                            [class.active-custom]="item.id === selectedDivisionOneId && country?.divisionTwoLabel!==''"
                             (click)="getDivisionTwo(item.id)">
                           
                           <div class="d-flex justify-content-between align-items-center">
                             <div class="d-flex align-items-center">
                               <input class="form-check-input me-2" type="checkbox"
-                                     [checked]="selectedDivisionOneIds?.includes(item.id)"
+                                     [checked]="selectedDivisionOneIds.includes(item.id)"
                                      (click)="$event.stopPropagation()"
                                      (change)="toggleDivisionOneSelection(item.id, $event)">
                               <span class="division-label">{{ item.divisionOne }}</span>
@@ -93,23 +94,24 @@
                 </div>
             </div>
         </div>
-
+        }
         <!-- Division Two  -->
-        <div class="col-12 col-md-4">
+         @if(country?.divisionTwoLabel!==''){
+        <div class="col-12 col-md">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h2 class="h6 mb-0">Districts (California)</h2>
+                    <h2 class="h6 mb-0">{{country?.divisionTwoLabel}}</h2>
                     <div class="d-flex gap-2">
                         <div class="tooltip-container">
                             <button class="btn btn-primary btn-sm tooltip-button" (click)="openDivisionModal('two')">
                                 <i class="pi pi-plus"></i>
-                                <span class="tooltipText">Add District</span>
+                                <span class="tooltipText">Add {{country?.divisionTwoLabel}}</span>
                             </button>
                         </div>
                         <div class="tooltip-container">
                             <button class="btn btn-danger btn-sm tooltip-button"
-                                [disabled]="selectedDivisionTwoIds.length === 0">
-                                <i class="pi pi-trash text-white" (click)="deleteDivisionTwo()"></i>
+                                [disabled]="selectedDivisionTwoIds.length === 0" (click)="deleteDivisionTwo()">
+                                <i class="pi pi-trash text-white"></i>
                             </button>
                         </div>
                     </div>
@@ -119,7 +121,7 @@
                     <!-- Search -->
                     <div class="input-group mb-3">
                         <span class="input-group-text"><i class="pi pi-search"></i></span>
-                        <input type="text" class="form-control" placeholder="Search District"
+                        <input type="text" class="form-control" placeholder="Search {{country?.divisionTwoLabel}}"
                             [(ngModel)]="searchTermDivisionTwo" (input)="onSearchDivisionTwo()">
                     </div>
                     <!-- LIST -->
@@ -129,8 +131,8 @@
                         @for (item of divisionTwoList; track item) {
 
                         <li class="list-group-item division-item"
-                            [class.active-custom]="item.id === selectedDivisionTwoId"
-                            (click)="getDivisionThree(item.id)">
+                            [class.active-custom]="item.id === selectedDivisionTwoId && country?.divisionThreeLabel!==''"
+                            (click)="country?.divisionThreeLabel === '' && getDivisionThree(item.id)">
                           
                           <div class="d-flex justify-content-between align-items-center">
                             <div class="d-flex align-items-center">
@@ -164,23 +166,25 @@
                 </div>
             </div>
         </div>
+        }
 
         <!-- Division Three -->
-        <div class="col-12 col-md-4">
+         @if(country?.divisionThreeLabel!==''){
+        <div class="col-12 col-md">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h2 class="h6 mb-0">Cities (Los Angeles County)</h2>
+                    <h2 class="h6 mb-0">{{country?.divisionThreeLabel}}</h2>
                     <div class="d-flex gap-2">
                         <div class="tooltip-container">
                             <button class="btn btn-primary btn-sm tooltip-button" (click)="openDivisionModal('three')">
                                 <i class="pi pi-plus"></i>
-                                <span class="tooltipText">Add City</span>
+                                <span class="tooltipText">Add {{country?.divisionThreeLabel}}</span>
                             </button>
                         </div>
                         <div class="tooltip-container">
                             <button class="btn btn-danger btn-sm tooltip-button"
-                                [disabled]="selectedDivisionThreeIds.length === 0">
-                                <i class="pi pi-trash text-white" (click)="deleteDivisionThree()"></i>
+                                [disabled]="selectedDivisionThreeIds.length === 0"  (click)="deleteDivisionThree()">
+                                <i class="pi pi-trash text-white"></i>
                             </button>
                         </div>
                     </div>
@@ -189,7 +193,7 @@
                     <!-- Search -->
                     <div class="input-group mb-3">
                         <span class="input-group-text"><i class="pi pi-search"></i></span>
-                        <input type="text" class="form-control" placeholder="Search City"
+                        <input type="text" class="form-control" placeholder="Search {{country?.divisionThreeLabel}}"
                             [(ngModel)]="searchTermDivisionThree" (input)="onSearchDivisionThree()">
                     </div>
                     <!-- lIST -->
@@ -234,6 +238,7 @@
                 </div>
             </div>
         </div>
+    }
     </div>
 </div>
 

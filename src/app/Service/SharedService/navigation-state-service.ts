@@ -4,17 +4,24 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class NavigationStateService {
-  private country: any;
+  private readonly countryKey = 'app_selected_country';
 
-  constructor() { }
-
-  setCountry(country: any) {
-    this.country = country;
-    console.log("Set country",this.country);
+  setCountry(country: any): void {
+    localStorage.setItem(this.countryKey, JSON.stringify(country));
+    console.log('Country stored:', country);
   }
 
-  getCountry() {
-    console.log("Get country",this.country);
-    return this.country;
+  getCountry(): any {
+    const data = localStorage.getItem(this.countryKey);
+    try {
+      return data ? JSON.parse(data) : null;
+    } catch (e) {
+      console.error('Failed to parse stored country:', e);
+      return null;
+    }
+  }
+
+  clearCountry(): void {
+    localStorage.removeItem(this.countryKey);
   }
 }

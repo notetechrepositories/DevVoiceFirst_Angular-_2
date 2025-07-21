@@ -141,11 +141,10 @@ export class Divisions {
       next:(res)=>{
         this.divisionOneList=res.body.data;
         this.originalDivisionOneList = [...res.body.data]; 
-        if (this.divisionOneList.length > 0) {
+        if (this.divisionOneList.length > 0 && this.country?.divisionTwoLabel!=='') {
           this.selectedDivisionOneId = this.divisionOneList[0].id;
           this.getDivisionTwo(this.selectedDivisionOneId); // load second-level data
         }// keep a copy of the original list
-        console.log(this.divisionOneList);
       },
       error:(err)=>{
         console.log(err);
@@ -170,7 +169,6 @@ export class Divisions {
     } else {
       this.selectedDivisionOneIds = this.selectedDivisionOneIds.filter(selectedId => selectedId !== id);
     }
-    console.log(this.selectedDivisionOneIds);
   }
 
   submitDivisionOne(){
@@ -189,7 +187,6 @@ export class Divisions {
  
     this.countryService.createDivisionOne(this.divisionOneForm.value).subscribe({
       next:(res)=>{
-        console.log(res);
         if(res.status===201){
           this.utilityService.success(res.body?.message);
           this.divisionOneList.push(res.body?.data);
@@ -229,17 +226,15 @@ export class Divisions {
 
   getDivisionTwo(id:string|null){
     this.originalDivisionThreeList=[];
-            this.divisionThreeList=[];
+    this.divisionThreeList=[];
     this.selectedDivisionOneId=id;
-    console.log(this.selectedDivisionOneId);
-    
+
     this.countryService.getDivisionTwo(id).subscribe({
       next:(res)=>{
-        console.log(res);
         if(res.status===200){
           this.divisionTwoList=res.body?.data;
           this.originalDivisionTwoList = [...res.body?.data];
-          if (this.divisionTwoList.length > 0) {
+          if (this.divisionTwoList.length > 0 && this.country?.divisionThreeLabel!=='') {  // if division three label is not empty, then load division three
             this.selectedDivisionTwoId = this.divisionTwoList[0].id;
             this.getDivisionThree(this.selectedDivisionTwoId); // load second-level data
           }
@@ -282,7 +277,6 @@ export class Divisions {
   else{
     this.countryService.createDivisionTwo(this.divisionTwoForm.value).subscribe({
       next:(res)=>{
-        console.log(res);
         if(res.status===201){
           this.utilityService.success(res.body?.message);
           this.divisionTwoList.push(res.body?.data);
@@ -339,7 +333,6 @@ export class Divisions {
         if(res.status===200){
           this.divisionThreeList=res.body?.data;
           this.originalDivisionThreeList = [...res.body?.data];
-          console.log(this.divisionThreeList);
         }
         else{
           this.originalDivisionThreeList=[];
@@ -378,7 +371,6 @@ export class Divisions {
     else{
       this.countryService.createDivisionThree(this.divisionThreeForm.value).subscribe({
         next:(res)=>{
-          console.log(res);
           if(res.status===201){
             this.utilityService.success(res.body?.message);
             this.divisionThreeList.push(res.body?.data);
@@ -457,7 +449,6 @@ export class Divisions {
   
       updateCall.subscribe({
         next: (res) => {
-          console.log(res);
           if(res.status===200){
             item.status = updatedStatus;
             this.utilityService.success('Status updated successfully');

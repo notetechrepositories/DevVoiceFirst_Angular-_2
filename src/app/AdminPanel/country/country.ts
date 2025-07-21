@@ -273,8 +273,9 @@ export class Country {
     }
   }
 
-  onManageDivisions(item:any){
-    this.navigationStateService.setCountry(item);
+  onManageDivisions(item: any): void {
+    this.navigationStateService.setCountry(item); 
     this.router.navigate(['/admin/divisions', item.id]);
   }
+  
 }
