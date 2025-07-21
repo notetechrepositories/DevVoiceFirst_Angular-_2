@@ -1,0 +1,179 @@
+<div>
+    <h3>Add Issue Type</h3>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Dashboard</a></li>
+            <li class="breadcrumb-item"><a routerLink="/admin/issue-type">Issue Type</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Add Issue Type</li>
+        </ol>
+    </nav>
+    <div class="card p-4 shadow-sm">
+    <form [formGroup]="issueTypeForm" (ngSubmit)="submit()">
+
+      <!-- Issue Type Name -->
+      <div class="mb-4">
+        <label for="issueTypeName" class="form-label">Issue Type Name</label>
+        <input type="text" id="issueTypeName" class="form-control" placeholder="Enter issue type name" formControlName="issue_name" required>
+      </div>
+
+      <!-- Media Type Section -->
+      <div class="mb-4">
+        <h5>Media Type Options</h5>
+        <p class="text-muted">Configure photo/video attachment requirements</p>
+
+        <!-- PHOTO SECTION -->
+        <div class="border p-3 rounded mb-4">
+          <div class="form-check form-switch mb-3">
+            <input type="checkbox" class="form-check-input" id="enablePhoto" formControlName="media_type_photo"
+              [checked]="issueTypeForm.get('media_type_photo')?.value === 'y'" 
+              (change)="onPhotoToggle($event)">
+            <label class="form-check-label" for="enablePhoto">Enable Photo Attachment</label>
+          </div>
+
+          <div class="row">
+            <!-- Photo Requirement -->
+            <div class="col-md-6">
+              <label class="form-label">Photo Requirement</label>
+              <div class="d-flex mb-3">
+                <div class="form-check me-4">
+                  <input type="radio" class="form-check-input" formControlName="photorequirement" id="photoMandatory" value="mandatory" [disabled]="isPhotoDisabled">
+                  <label class="form-check-label" for="photoMandatory">Mandatory</label>
+                </div>
+                <div class="form-check">
+                  <input type="radio" class="form-check-input" formControlName="photorequirement" id="photoOptional" value="optional" [disabled]="isPhotoDisabled">
+                  <label class="form-check-label" for="photoOptional">Optional</label>
+                </div>
+              </div>
+
+              <!-- Size and Number -->
+              <div class="mb-3">
+                <label class="form-label">Max Size (MB)</label>
+                <input type="number" class="form-control mb-2" min="1" formControlName="photo_max_size" [readonly]="isPhotoDisabled">
+
+                <label class="form-label">Max Number</label>
+                <input type="number" class="form-control" min="1" formControlName="photo_max_numbers" [readonly]="isPhotoDisabled">
+
+                <small class="text-danger" *ngIf="issueTypeForm.get('photo_max_numbers')?.errors?.['max']">
+                  Max number cannot exceed 4.
+                </small>
+              </div>
+            </div>
+
+            <!-- Photo Types -->
+            <div class="col-md-6">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="dropdown">
+                  <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" [disabled]="isPhotoDisabled">
+                    Select Photo Types
+                  </button>
+                  <ul class="dropdown-menu p-3" style="width: 300px;">
+                    <li class="mb-2">
+                      <button class="btn btn-sm btn-success me-2" (click)="selectAll()">Select All</button>
+                      <button class="btn btn-sm btn-danger" (click)="clearAll()">Clear All</button>
+                    </li>
+                    <li *ngFor="let type of photoTypeList">
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                          [id]="'photo-' + type.id_12_issue_type_photo_video_of"
+                          [checked]="selectedPhotoTypes.includes(type.t12_description)"
+                          (change)="onPhotoTypeChange($event, type)">
+                        <label class="form-check-label" [for]="'photo-' + type.id_12_issue_type_photo_video_of">
+                          {{ type.t12_description }}
+                        </label>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+                <button class="btn btn-primary" type="button" (click)="addPhotoPopup()">Add Custom Type</button>
+              </div>
+
+              <div class="tags-container">
+                <span class="badge bg-secondary me-2 mb-2" *ngFor="let tag of selectedPhotoTypes">
+                  {{ tag }}
+                  <i class="fas fa-times ms-2 cursor-pointer" (click)="removePhotoType(tag)"></i>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIDEO SECTION -->
+        <div class="border p-3 rounded">
+          <div class="form-check form-switch mb-3">
+            <input type="checkbox" class="form-check-input" id="enableVideo" formControlName="media_type_video"
+              [checked]="issueTypeForm.get('media_type_video')?.value === 'y'" 
+              (change)="onVideoToggle($event)">
+            <label class="form-check-label" for="enableVideo">Enable Video Attachment</label>
+          </div>
+
+          <div class="row">
+            <!-- Video Requirement -->
+            <div class="col-md-6">
+              <label class="form-label">Video Requirement</label>
+              <div class="d-flex mb-3">
+                <div class="form-check me-4">
+                  <input type="radio" class="form-check-input" formControlName="videorequirement" id="videoMandatory" value="mandatory" [disabled]="isVideoDisabled">
+                  <label class="form-check-label" for="videoMandatory">Mandatory</label>
+                </div>
+                <div class="form-check">
+                  <input type="radio" class="form-check-input" formControlName="videorequirement" id="videoOptional" value="optional" [disabled]="isVideoDisabled">
+                  <label class="form-check-label" for="videoOptional">Optional</label>
+                </div>
+              </div>
+
+              <!-- Size and Number -->
+              <div class="mb-3">
+                <label class="form-label">Max Size (MB)</label>
+                <input type="number" class="form-control mb-2" min="1" formControlName="video_max_size" [readonly]="isVideoDisabled">
+
+                <label class="form-label">Max Number</label>
+                <input type="number" class="form-control" min="1" formControlName="video_max_numbers" [readonly]="isVideoDisabled">
+              </div>
+            </div>
+
+            <!-- Video Types -->
+            <div class="col-md-6">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="dropdown">
+                  <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" [disabled]="isVideoDisabled">
+                    Select Video Types
+                  </button>
+                  <ul class="dropdown-menu p-3" style="width: 300px;">
+                    <li class="mb-2">
+                      <button class="btn btn-sm btn-success me-2" (click)="selectAllVideo()">Select All</button>
+                      <button class="btn btn-sm btn-danger" (click)="clearAllVideo()">Clear All</button>
+                    </li>
+                    <li *ngFor="let type of videoTypeList">
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                          [id]="'video-' + type.id_12_issue_type_photo_video_of"
+                          [checked]="selectedVideoTypes.includes(type.t12_description)"
+                          (change)="onVideoTypeChange($event, type)">
+                        <label class="form-check-label" [for]="'video-' + type.id_12_issue_type_photo_video_of">
+                          {{ type.t12_description }}
+                        </label>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+                <button class="btn btn-primary" type="button" (click)="addVideoPopup()">Add Custom Type</button>
+              </div>
+
+              <div class="tags-container">
+                <span class="badge bg-secondary me-2 mb-2" *ngFor="let tag of selectedVideoTypes">
+                  {{ tag }}
+                  <i class="fas fa-times ms-2 cursor-pointer" (click)="removeVideoType(tag)"></i>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="d-grid mt-4">
+        <button class="btn btn-success" type="submit">Submit</button>
+      </div>
+    </form>
+  </div>
+</div>
