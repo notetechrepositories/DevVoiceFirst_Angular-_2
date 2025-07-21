@@ -12,6 +12,7 @@ import { UnderDevelopment } from './under-development/under-development';
 import { SysAnswerType } from './sys-answer-type/sys-answer-type';
 import { Country } from './country/country';
 import { Divisions } from './divisions/divisions';
+import { MediaType } from './media-type/media-type';
 
 
 
@@ -32,7 +33,8 @@ import { Divisions } from './divisions/divisions';
     UnderDevelopment,
     SysAnswerType,
     Country,
-    Divisions
+    Divisions,
+    MediaType,
   ],
   declarations: [
 
