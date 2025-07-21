@@ -7,6 +7,7 @@ import { UnderDevelopment } from './under-development/under-development';
 import { Country } from './country/country';
 import { SysAnswerType } from './sys-answer-type/sys-answer-type';
 import { Divisions } from './divisions/divisions';
+import { MediaType } from './media-type/media-type';
 
 
 export const AdminRoutes: Routes = [
@@ -28,6 +29,10 @@ export const AdminRoutes: Routes = [
   {
     path:'system-answer-type',
     component:SysAnswerType
+  },
+  {
+    path:'media-type',
+    component:MediaType
   },
   {
     path:'test',
