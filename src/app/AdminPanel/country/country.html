@@ -49,10 +49,10 @@
                     <th>Division One</th>
                     <th>Division Two</th>
                     <th>Division Three</th>
-                    <th></th>
-                    <th>Status</th>
+                    <th style="width: 10%;"></th>
+                    <th style="width: 5%;">Status</th>
                   
-                    <th class="text-end">
+                    <th class="text-end" style="width: 5%;">
                         <button class="delete-btn btn-danger" (click)="deleteCountry()"
                             [disabled]="selectedCountryIds.length === 0">
                             <i class="pi pi-trash text-white"></i>
@@ -70,8 +70,13 @@
                     <td>{{ item.country }}</td>
                     <td>{{ item.divisionOneLabel }}</td>
                     <td>{{ item.divisionTwoLabel }}</td>
-                    <td>{{ item.divisionThreeName }}</td>
-                    <td><a (click)="onManageDivisions(item)">Manage</a></td>
+                    <td>{{ item.divisionThreeLabel }}</td>
+                   
+                    <td >
+                        @if(item.divisionOneLabel!=='' || item.divisionTwoLabel!=='' || item.divisionThreeLabel!==''){
+                        <a (click)="onManageDivisions(item)" href="javascript:void(0)">Manage Divisions  <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:.7rem;"></i></a>
+                        }
+                    </td>
                     <td> <span
                             class="badge"
                             [ngClass]="item.status ? 'bg-success' : 'bg-secondary'"
@@ -124,26 +129,51 @@
         <h4 class="mb-3">{{ isEditMode ? 'Edit Country' : 'Add Country' }}</h4>
 
         <form [formGroup]="countryForm" (ngSubmit)="submitForm()">
-            <div class="form-group mb-3">
-                <label for="roleName">Country</label>
-                <input type="text" class="form-control" id="country" placeholder="Enter country"
-                    formControlName="country">
-            </div>
-            <div class="form-group mb-3">
-                <label for="roleName">Division One Label Name</label>
-                <input type="text" class="form-control" id="divisionOneLabel" placeholder="Enter division one "
-                    formControlName="divisionOneLabel">
-            </div>
-            <div class="form-group mb-3">
-                <label for="roleName">Division Two Label Name</label>
-                <input type="text" class="form-control" id="divisionTwoLabel" placeholder="Enter division two"
-                    formControlName="divisionTwoLabel">
-            </div>
-            <div class="form-group mb-3">
-                <label for="roleName">Division Three Label Name</label>
-                <input type="text" class="form-control" id="divisionThreeName" placeholder="Enter division three"
-                    formControlName="divisionThreeName">
-            </div>
+            <!-- Country -->
+        <div class="form-group mb-3">
+            <label for="country">Country</label>
+            <input type="text" class="form-control" id="country" placeholder="Enter country" formControlName="country">
+            @if(countryForm.get('country')?.invalid && countryForm.get('country')?.touched){
+                <small class="text-danger">This field is required</small>
+                }
+        </div>
+        
+        <!-- Division One -->
+        <div class="form-group mb-3">
+            <label for="divisionOneLabel">Division One Label Name</label>
+            <input type="text" class="form-control" id="divisionOneLabel" placeholder="Enter division one"
+                [readonly]="countryForm.get('country')?.value === ''"
+                formControlName="divisionOneLabel"
+                (focus)="checkDependency('country', 'divisionOneLabel')">
+            <small class="info-text text-small" *ngIf="showWarnings['divisionOneLabel']">
+                <i class="pi pi-info-circle"></i> Please fill Country first
+            </small>
+        </div>
+        
+        <!-- Division Two -->
+        <div class="form-group mb-3">
+            <label for="divisionTwoLabel">Division Two Label Name</label>
+            <input type="text" class="form-control" id="divisionTwoLabel" placeholder="Enter division two"
+                [readonly]="countryForm.get('divisionOneLabel')?.value === ''"
+                formControlName="divisionTwoLabel"
+                (focus)="checkDependency('divisionOneLabel', 'divisionTwoLabel')">
+            <small class="info-text text-small" *ngIf="showWarnings['divisionTwoLabel']">
+                <i class="pi pi-info-circle"></i> Please fill Division One Label first
+            </small>
+        </div>
+        
+        <!-- Division Three -->
+        <div class="form-group mb-3">
+            <label for="divisionThreeLabel">Division Three Label Name</label>
+            <input type="text" class="form-control" id="divisionThreeLabel" placeholder="Enter division three"
+                [readonly]="countryForm.get('divisionTwoLabel')?.value === ''"
+                formControlName="divisionThreeLabel"
+                (focus)="checkDependency('divisionTwoLabel', 'divisionThreeLabel')">
+            <small class="info-text text-small" *ngIf="showWarnings['divisionThreeLabel']">
+                <i class="pi pi-info-circle"></i> Please fill Division Two Label first
+            </small>
+        </div>
+  
             <div class="form-group">
                 <button type="submit" class="btn mt-4 w-100" [ngClass]="isEditMode ? 'btn-success' : 'btn-primary'">
                     {{ isEditMode ? 'Save Changes' : 'Add' }}
