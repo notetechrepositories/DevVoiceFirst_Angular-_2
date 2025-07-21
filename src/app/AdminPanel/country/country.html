@@ -70,8 +70,8 @@
                     <td>{{ item.country }}</td>
                     <td>{{ item.divisionOneLabel }}</td>
                     <td>{{ item.divisionTwoLabel }}</td>
-                    <td>{{ item.divisionThreeName }}</td>
-                    <td><a (click)="onManageDivisions(item)">Manage</a></td>
+                    <td>{{ item.divisionThreeLabel }}</td>
+                    <td><a (click)="onManageDivisions(item)" href="javascript:void(0)">Manage Divisions</a></td>
                     <td> <span
                             class="badge"
                             [ngClass]="item.status ? 'bg-success' : 'bg-secondary'"
@@ -141,8 +141,8 @@
             </div>
             <div class="form-group mb-3">
                 <label for="roleName">Division Three Label Name</label>
-                <input type="text" class="form-control" id="divisionThreeName" placeholder="Enter division three"
-                    formControlName="divisionThreeName">
+                <input type="text" class="form-control" id="divisionThreeLabel" placeholder="Enter division three"
+                    formControlName="divisionThreeLabel">
             </div>
             <div class="form-group">
                 <button type="submit" class="btn mt-4 w-100" [ngClass]="isEditMode ? 'btn-success' : 'btn-primary'">

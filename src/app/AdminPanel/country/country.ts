@@ -6,6 +6,7 @@ import { CountryService } from '../../Service/CountryService/country-service';
 import { ProgramService } from '../../Service/ProgramService/program';
 import { UtilityService } from '../../Service/UtilityService/utility-service';
 import { CountryModel } from '../../Models/CountryModel';
+import { NavigationStateService } from '../../Service/SharedService/navigation-state-service';
 
 @Component({
   selector: 'app-country',
@@ -30,7 +31,8 @@ export class Country {
     private programService: ProgramService,
     private countryService: CountryService,
     private utilityService: UtilityService,
-    private router: Router
+    private router: Router,
+    private navigationStateService: NavigationStateService
   ) { }
 
   get totalPages(): number {
@@ -55,7 +57,7 @@ export class Country {
       country:[''],
       divisionOneLabel:[''],
       divisionTwoLabel:[''],
-      divisionThreeName:[''],
+      divisionThreeLabel:[''],
     })
   }
 
@@ -105,7 +107,7 @@ export class Country {
         country:editItem.country,
         divisionOneLabel:editItem.divisionOneLabel,
         divisionTwoLabel:editItem.divisionTwoLabel,
-        divisionThreeName:editItem.divisionThreeName
+        divisionThreeLabel:editItem.divisionThreeLabel
       })
     }
     console.log(this.isModalVisible);
@@ -136,8 +138,7 @@ export class Country {
       country: formValue.country,
       divisionOneLabel: formValue.divisionOneLabel,
       divisionTwoLabel: formValue.divisionTwoLabel,
-      divisionThreeName: formValue.divisionThreeName,
-
+      divisionThreeLabel: formValue.divisionThreeLabel,
     };
     if (this.countryForm.invalid) {
       this.countryForm.markAllAsTouched();
@@ -149,7 +150,7 @@ export class Country {
       this.utilityService.setIfDirty(form, 'country', updatedFields);
       this.utilityService.setIfDirty(form, 'divisionOneLabel', updatedFields);
       this.utilityService.setIfDirty(form, 'divisionTwoLabel', updatedFields);
-      this.utilityService.setIfDirty(form, 'divisionThreeName', updatedFields);
+      this.utilityService.setIfDirty(form, 'divisionThreeLabel', updatedFields);
        if (Object.keys(updatedFields).length === 1) {
         this.utilityService.warning('No changes detected.');
         return;
@@ -196,6 +197,7 @@ export class Country {
  async deleteCountry(): Promise<void> {
     const message = `Delete ${this.selectedCountryIds.length} Country(s)`;
     const result = await this.utilityService.confirmDialog(message, 'delete');
+    if(result.isConfirmed){
     this.countryService.deleteCountry(this.selectedCountryIds).subscribe({
       next:(res)=>{
          const deletedIds: string[] = res.body?.data || [];
@@ -208,8 +210,9 @@ export class Country {
           this.utilityService.showError(err.status, err.error?.message || 'Failed to delete items.');
         }
       });
-      this.selectedCountryIds = [];
-      this.isAllSelected = false;
+        this.selectedCountryIds = [];
+        this.isAllSelected = false;
+      }
   }
 
 
@@ -244,6 +247,8 @@ export class Country {
 
     this.isAllSelected = checked;
   }
+
+
    async toggleStatus(item: any): Promise<void> {
     const updatedStatus = !item.status;
     const payload = {
@@ -269,6 +274,7 @@ export class Country {
   }
 
   onManageDivisions(item:any){
-    this.router.navigate(['/admin/divisions', item.id], { state: { country: item } });
+    this.navigationStateService.setCountry(item);
+    this.router.navigate(['/admin/divisions', item.id]);
   }
 }

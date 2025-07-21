@@ -1,9 +1,11 @@
-import { Component, linkedSignal } from '@angular/core';
+import { Component } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CountryService } from '../../Service/CountryService/country-service';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UtilityService } from '../../Service/UtilityService/utility-service';
+import { NavigationStateService } from '../../Service/SharedService/navigation-state-service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-divisions',
@@ -50,22 +52,14 @@ export class Divisions {
     private router:Router,
     private countryService:CountryService,
     private utilityService:UtilityService,
-    private fb:FormBuilder
+    private fb:FormBuilder,
+    private navigationStateService:NavigationStateService
   ){}
-
-
-  
 
   ngOnInit() {
     this.countryId = this.route.snapshot.paramMap.get('id');
-    const navigation = this.router.getCurrentNavigation();
-    console.log(navigation);
-
-    if (navigation?.extras.state) {
-      this.country = navigation.extras.state['country'];
-      console.log('Country from state:', this.country);
-    }
-
+    this.country = this.navigationStateService.getCountry();
+    console.log(this.country);
     this.getDivisionOne();
     this.formInit();
   }
@@ -77,6 +71,9 @@ export class Divisions {
     this.divisionTwoForm=this.fb.group({
       divisionTwo:['',Validators.required],
     });
+    this.divisionThreeForm=this.fb.group({
+      divisionThree:['',Validators.required],
+    });
   }
 
   closeModal(){
@@ -86,22 +83,58 @@ export class Divisions {
     this.isEditMode=false;
     this.divisionOneForm.reset();
     this.divisionTwoForm.reset();
-    // this.divisionThreeForm.reset();
+    this.divisionThreeForm.reset();
   }
 
-  openDivisionOneModal(editItem?:any) {
-    this.isDivisionOneModalVisible = true;
-    this.isEditMode=!!editItem;
-    this.selectedDivisionOneId=editItem?.id ||null
-    if(editItem){
-      console.log("working");
-      
-      this.divisionOneForm.patchValue({
-        divisionOne:editItem.divisionOne,
-        countryId:this.countryId
-      })
+  openDivisionModal(level: 'one' | 'two' | 'three', editItem?: any): void {
+    this.isEditMode = !!editItem;
+  
+    switch (level) {
+      case 'one':
+        this.isDivisionOneModalVisible = true;
+        this.selectedDivisionOneId = editItem?.id || null;
+  
+        if (editItem) {
+          this.divisionOneForm.patchValue({
+            divisionOne:editItem.divisionOne,
+            countryId:this.countryId
+          });
+        }
+        break;
+  
+      case 'two':
+        this.isDivisionTwoModalVisible = true;
+        this.selectedDivisionTwoId = editItem?.id || null;
+  
+        if (editItem) {
+          this.divisionTwoForm.patchValue({
+            divisionTwo:editItem.divisionTwo,
+            divisionOneId:this.selectedDivisionOneId
+          });
+        }
+        break;
+  
+      case 'three':
+        this.isDivisionThreeModalVisible = true;
+        this.selectedDivisionThreeId = editItem?.id || null;
+  
+        if (editItem) {
+          this.divisionThreeForm.patchValue({
+            divisionThree: editItem.divisionThree,
+            divisionTwoId: this.selectedDivisionTwoId
+          });
+        }
+        break;
+  
+      default:
+        console.error('Invalid division level');
     }
   }
+
+
+
+  // ------------- Division One --------------
+  
 
   getDivisionOne(){
     this.countryService.getDivisionOne(this.countryId).subscribe({
@@ -116,6 +149,7 @@ export class Divisions {
       },
       error:(err)=>{
         console.log(err);
+        this.utilityService.showError(err.status,err.error?.message);
       }
     })
   }
@@ -159,27 +193,43 @@ export class Divisions {
         if(res.status===201){
           this.utilityService.success(res.body?.message);
           this.divisionOneList.push(res.body?.data);
+          this.selectedDivisionOneId=this.divisionOneList[0].id;
           this.closeModal();
         }
       },
       error:(err)=>{
         console.log(err);
-        this.utilityService.error(err.error?.message);
+        this.utilityService.showError(err.status,err.error?.message);
       }
     })
   }
-  deleteDivisionOne(){
-    console.log(this.selectedDivisionOneIds);
+
+  async deleteDivisionOne(): Promise<void> {
+    const message = `Delete ${this.selectedDivisionOneIds.length} Division(s)`;
+    const result = await this.utilityService.confirmDialog(message, 'delete');
+    if(result.isConfirmed){
     this.countryService.deleteDivisionOne(this.selectedDivisionOneIds).subscribe({
       next:(res)=>{
-        console.log(res);
+          const deletedIds: string[] = res.body?.data || [];
+          this.divisionOneList = this.divisionOneList.filter(item => !deletedIds.includes(item.id));
+          this.selectedDivisionOneIds = [];
+          this.utilityService.success(res.body?.message || 'Deleted successfully.');
+        },
+        error: (err) => {
+          this.utilityService.showError(err.status, err.error?.message || 'Failed to delete items.');
+        }
+      });
+        this.selectedDivisionOneIds = [];
       }
-    })
   }
+
+
   // ------------- Division Two --------------
   
 
   getDivisionTwo(id:string|null){
+    this.originalDivisionThreeList=[];
+            this.divisionThreeList=[];
     this.selectedDivisionOneId=id;
     console.log(this.selectedDivisionOneId);
     
@@ -189,28 +239,30 @@ export class Divisions {
         if(res.status===200){
           this.divisionTwoList=res.body?.data;
           this.originalDivisionTwoList = [...res.body?.data];
-          console.log(this.divisionTwoList);
-        }
-        else{
-          this.originalDivisionTwoList=[];
-          this.divisionTwoList=[];
+          if (this.divisionTwoList.length > 0) {
+            this.selectedDivisionTwoId = this.divisionTwoList[0].id;
+            this.getDivisionThree(this.selectedDivisionTwoId); // load second-level data
+          }
 
         }
+        else{
+            this.originalDivisionTwoList=[];
+            this.divisionTwoList=[];
+        }
+      },
+      error:(err)=>{
+        console.log(err);
+        this.utilityService.showError(err.status,err.error?.message);
       }
     })
   }
 
-  openDivisionTwoModal(editItem?:any){
-    this.isDivisionTwoModalVisible = true;
-    this.isEditMode=!!editItem;
-    this.selectedDivisionTwoId=editItem?.id ||null
-    if(editItem){
-      console.log("working");
-      
-      this.divisionTwoForm.patchValue({
-        divisionTwo:editItem.divisionTwo,
-        divisionOneId:this.selectedDivisionOneId
-      })
+  onSearchDivisionTwo(){
+    const term = this.searchTermDivisionTwo.toLowerCase();
+    if (term) {
+      this.divisionTwoList = this.originalDivisionTwoList.filter((item)=>item.divisionTwo.toLowerCase().includes(term));
+    } else {
+      this.divisionTwoList = [...this.originalDivisionTwoList];
     }
   }
 
@@ -234,6 +286,7 @@ export class Divisions {
         if(res.status===201){
           this.utilityService.success(res.body?.message);
           this.divisionTwoList.push(res.body?.data);
+          this.selectedDivisionTwoId=this.divisionTwoList[0].id;
           this.closeModal();
         }
         else{
@@ -242,11 +295,12 @@ export class Divisions {
       },
       error:(err)=>{
         console.log(err);
-        this.utilityService.error(err.error?.message);
+        this.utilityService.showError(err.status,err.error?.message);
         }
       })
     }
   }
+
   toggleDivisionTwoSelection(id:string, event:Event){
     const checkbox = event.target as HTMLInputElement;
     if (checkbox.checked) {
@@ -255,12 +309,167 @@ export class Divisions {
       this.selectedDivisionTwoIds = this.selectedDivisionTwoIds.filter(selectedId => selectedId !== id);
     }
   }
-  deleteDivisionTwo(){
-    console.log(this.selectedDivisionTwoIds);
+
+  async deleteDivisionTwo(): Promise<void> {
+    const message = `Delete ${this.selectedDivisionTwoIds.length} Division(s)`;
+    const result = await this.utilityService.confirmDialog(message, 'delete');
+    if(result.isConfirmed){
     this.countryService.deleteDivisionTwo(this.selectedDivisionTwoIds).subscribe({
       next:(res)=>{
-        console.log(res);
+          const deletedIds: string[] = res.body?.data || [];
+          this.divisionTwoList = this.divisionTwoList.filter(item => !deletedIds.includes(item.id));
+          this.selectedDivisionTwoIds = [];
+          this.utilityService.success(res.body?.message || 'Deleted successfully.');
+        },
+        error: (err) => {
+          this.utilityService.showError(err.status, err.error?.message || 'Failed to delete items.');
+        }
+      });
+        this.selectedDivisionTwoIds = [];
+      }
+  }
+
+
+  // ------------- Division Three --------------
+
+  getDivisionThree(id:string|null){
+    this.selectedDivisionTwoId=id;
+    this.countryService.getDivisionThree(id).subscribe({
+      next:(res)=>{
+        if(res.status===200){
+          this.divisionThreeList=res.body?.data;
+          this.originalDivisionThreeList = [...res.body?.data];
+          console.log(this.divisionThreeList);
+        }
+        else{
+          this.originalDivisionThreeList=[];
+          this.divisionThreeList=[];
+        }
+      },
+      error:(err)=>{
+        console.log(err);
+        this.utilityService.showError(err.status,err.error?.message);
       }
     })
+  }
+
+  onSearchDivisionThree(){
+    const term = this.searchTermDivisionThree.toLowerCase();
+    if (term) {
+      this.divisionThreeList = this.originalDivisionThreeList.filter((item)=>item.divisionThree.toLowerCase().includes(term));
+    } else {
+      this.divisionThreeList = [...this.originalDivisionThreeList];
+    }
+  }
+
+  submitDivisionThree(){
+    this.divisionThreeForm.value.divisionTwoId=this.selectedDivisionTwoId;
+    if(this.divisionThreeForm.invalid){
+      this.divisionThreeForm.markAllAsTouched();
+      return;
+    }
+    if(this.isEditMode){
+      this.countryService.updateDivisionThree(this.divisionThreeForm.value).subscribe({
+        next:(res)=>{
+          console.log(res);
+        }
+      })
+    }
+    else{
+      this.countryService.createDivisionThree(this.divisionThreeForm.value).subscribe({
+        next:(res)=>{
+          console.log(res);
+          if(res.status===201){
+            this.utilityService.success(res.body?.message);
+            this.divisionThreeList.push(res.body?.data);
+            this.closeModal();
+          }
+          else{
+            this.utilityService.error(res.body?.message);
+          }
+        },
+        error:(err)=>{
+          console.log(err);
+          this.utilityService.showError(err.status,err.error?.message);
+          }
+        })
+      }
+  }
+
+  toggleDivisionThreeSelection(id:string, event:Event){
+    const checkbox = event.target as HTMLInputElement;
+    if (checkbox.checked) {
+      this.selectedDivisionThreeIds.push(id);
+    } else {
+      this.selectedDivisionThreeIds = this.selectedDivisionThreeIds.filter(selectedId => selectedId !== id);
+    }
+  }
+
+  async deleteDivisionThree(): Promise<void> {
+    const message = `Delete ${this.selectedDivisionThreeIds.length} Division(s)`;
+    const result = await this.utilityService.confirmDialog(message, 'delete');
+    if(result.isConfirmed){
+    this.countryService.deleteDivisionThree(this.selectedDivisionThreeIds).subscribe({
+      next:(res)=>{
+          const deletedIds: string[] = res.body?.data || [];
+          this.divisionThreeList = this.divisionThreeList.filter(item => !deletedIds.includes(item.id));
+          this.selectedDivisionThreeIds = [];
+          this.utilityService.success(res.body?.message || 'Deleted successfully.');
+        },
+        error: (err) => {
+          this.utilityService.showError(err.status, err.error?.message || 'Failed to delete items.');
+        }
+      });
+        this.selectedDivisionThreeIds = [];
+      }
+  }
+
+
+  // ------------- Status Toggle --------------
+
+  async toggleDivisionStatus(item: any, level: 'one' | 'two' | 'three') {
+    const updatedStatus = !item.status;
+    const payload = {
+      id: item.id,
+      status: updatedStatus,
+    };
+  
+    const message = `Are you sure you want to set this division as ${updatedStatus ? 'Active' : 'Inactive'}?`;
+    const result = await this.utilityService.confirmDialog(message, 'update');
+  
+    if (result.isConfirmed) {
+      let updateCall: Observable<any>;
+  
+      switch (level) {
+        case 'one':
+          updateCall = this.countryService.updateDivisionOneStatus(payload);
+          break;
+        case 'two':
+          updateCall = this.countryService.updateDivisionTwoStatus(payload);
+          break;
+        case 'three':
+          updateCall = this.countryService.updateDivisionThreeStatus(payload);
+          break;
+        default:
+          this.utilityService.showError(400, 'Invalid division level.');
+          return;
+      }
+  
+      updateCall.subscribe({
+        next: (res) => {
+          console.log(res);
+          if(res.status===200){
+            item.status = updatedStatus;
+            this.utilityService.success('Status updated successfully');
+          }
+          else{
+            this.utilityService.warning(res.body?.message);
+          }
+        },
+        error: err => {
+          this.utilityService.showError(err.status, err.error?.message || 'Failed to update status.');
+        }
+      });
+    }
   }
 }

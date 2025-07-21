@@ -3,6 +3,6 @@ export interface CountryModel{
     country:string;
     divisionOneLabel:string;
     divisionTwoLabel:string;
-    divisionThreeName:string;
+    divisionThreeLabel:string;
     status:string;
 }

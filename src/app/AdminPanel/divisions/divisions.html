@@ -31,7 +31,7 @@
                     <h2 class="h6 mb-0">States</h2>
                     <div class="d-flex gap-2">
                         <div class="tooltip-container">
-                            <button class="btn btn-primary btn-sm tooltip-button" (click)="openDivisionOneModal()">
+                            <button class="btn btn-primary btn-sm tooltip-button" (click)="openDivisionModal('one')">
                                 <i class="pi pi-plus"></i>
                                 <span class="tooltipText">Add State</span>
                             </button>
@@ -52,22 +52,41 @@
                             [(ngModel)]="searchTermDivisionOne" (input)="onSearchDivisionOne()">
                     </div>
                     <!-- List -->
-                    <ul class="list-group division-list overflow-auto mb-2"
+                    <ul class="list-group division-list overflow-auto mb-2 p-2"
                         style="max-height: 500px; box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;border: none;">
 
                         @for (item of divisionOneList; track item) {
-                        <li class="list-group-item d-flex justify-content-between align-items-center"
-                            [class.active]="item.id === selectedDivisionOneId" (click)="getDivisionTwo(item.id)"
-                            style="cursor: pointer;">
-                            <div>
-                                <input class="form-check-input me-2" type="checkbox"
-                                    [checked]="selectedDivisionOneIds?.includes(item.id)"
-                                    (click)="$event.stopPropagation()"
-                                    (change)="toggleDivisionOneSelection(item.id, $event)">
-                                {{item.divisionOne}}
+                        <li class="list-group-item division-item"
+                            [class.active-custom]="item.id === selectedDivisionOneId"
+                            (click)="getDivisionTwo(item.id)">
+                          
+                          <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                              <input class="form-check-input me-2" type="checkbox"
+                                     [checked]="selectedDivisionOneIds?.includes(item.id)"
+                                     (click)="$event.stopPropagation()"
+                                     (change)="toggleDivisionOneSelection(item.id, $event)">
+                              <span class="division-label">{{ item.divisionOne }}</span>
                             </div>
-                            <i class="pi pi-pen-to-square"></i>
+                            <div class="d-flex">
+                                <span
+                                  class="badge"
+                                [ngClass]="item.status ? 'status-active' : 'status-inactive'"       
+                                  style="cursor: pointer;"
+                                  (click)="toggleDivisionStatus(item, 'one')">
+                                  {{ item.status ? 'Active' : 'Inactive' }}
+                                </span>
+                                <i class="pi pi-pen-to-square edit-icon" (click)="openDivisionModal('one', item)"></i>
+                              </div>
+                              
+                            
+                          </div>
                         </li>
+                        }
+                        @empty {
+                            <li class="list-group-item division-item d-flex justify-content-center align-items-center">
+                                <p class="mb-0">No data found</p>
+                            </li>
                         }
 
                     </ul>
@@ -82,14 +101,14 @@
                     <h2 class="h6 mb-0">Districts (California)</h2>
                     <div class="d-flex gap-2">
                         <div class="tooltip-container">
-                            <button class="btn btn-primary btn-sm tooltip-button" (click)="openDivisionTwoModal()">
+                            <button class="btn btn-primary btn-sm tooltip-button" (click)="openDivisionModal('two')">
                                 <i class="pi pi-plus"></i>
                                 <span class="tooltipText">Add District</span>
                             </button>
                         </div>
                         <div class="tooltip-container">
                             <button class="btn btn-danger btn-sm tooltip-button"
-                                [disabled]="selectedDivisionOneIds.length === 0">
+                                [disabled]="selectedDivisionTwoIds.length === 0">
                                 <i class="pi pi-trash text-white" (click)="deleteDivisionTwo()"></i>
                             </button>
                         </div>
@@ -100,31 +119,46 @@
                     <!-- Search -->
                     <div class="input-group mb-3">
                         <span class="input-group-text"><i class="pi pi-search"></i></span>
-                        <input type="text" class="form-control" placeholder="Search State"
-                            [(ngModel)]="searchTermDivisionOne" (input)="onSearchDivisionOne()">
+                        <input type="text" class="form-control" placeholder="Search District"
+                            [(ngModel)]="searchTermDivisionTwo" (input)="onSearchDivisionTwo()">
                     </div>
                     <!-- LIST -->
-                    <ul class="list-group division-list overflow-auto mb-2"
+                    <ul class="list-group division-list overflow-auto mb-2 p-2"
                         style="max-height: 500px; box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;border: none;">
 
                         @for (item of divisionTwoList; track item) {
-                        <li class="list-group-item d-flex justify-content-between align-items-center"
-                            [class.active]="item.id === selectedDivisionTwoId" (click)="getDivisionTwo(item.id)"
-                            style="cursor: pointer;">
-                            <div>
-                                <input class="form-check-input me-2" type="checkbox"
-                                    [checked]="selectedDivisionTwoIds?.includes(item.id)"
-                                    (click)="$event.stopPropagation()"
-                                    (change)="toggleDivisionTwoSelection(item.id, $event)">
-                                {{item.divisionTwo}}
+
+                        <li class="list-group-item division-item"
+                            [class.active-custom]="item.id === selectedDivisionTwoId"
+                            (click)="getDivisionThree(item.id)">
+                          
+                          <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                              <input class="form-check-input me-2" type="checkbox"
+                                     [checked]="selectedDivisionTwoIds?.includes(item.id)"
+                                     (click)="$event.stopPropagation()"
+                                     (change)="toggleDivisionTwoSelection(item.id, $event)">
+                              <span class="division-label">{{ item.divisionTwo }}</span>
                             </div>
-                            <i class="pi pi-pen-to-square"></i>
+                            <div class="d-flex">
+                                <span
+                                  class="badge"
+                                [ngClass]="item.status ? 'status-active' : 'status-inactive'"
+                                  style="cursor: pointer;"
+                                  (click)="toggleDivisionStatus(item, 'two')">
+                                  {{ item.status ? 'Active' : 'Inactive' }}
+                                </span>
+                                <i class="pi pi-pen-to-square edit-icon" (click)="openDivisionModal('two', item)"></i>
+                              </div>
+                              
+                            
+                          </div>
                         </li>
                         }
                         @empty {
-                        <li class="list-group-item">
-                            <p>No data found</p>
-                        </li>
+                            <li class="list-group-item division-item d-flex justify-content-center align-items-center">
+                                <p class="mb-0">No data found</p>
+                            </li>
                         }
                     </ul>
                 </div>
@@ -138,15 +172,15 @@
                     <h2 class="h6 mb-0">Cities (Los Angeles County)</h2>
                     <div class="d-flex gap-2">
                         <div class="tooltip-container">
-                            <button class="btn btn-primary btn-sm tooltip-button">
+                            <button class="btn btn-primary btn-sm tooltip-button" (click)="openDivisionModal('three')">
                                 <i class="pi pi-plus"></i>
-                                <span class="tooltipText">Add State</span>
+                                <span class="tooltipText">Add City</span>
                             </button>
                         </div>
                         <div class="tooltip-container">
                             <button class="btn btn-danger btn-sm tooltip-button"
-                                [disabled]="selectedDivisionOneIds.length === 0">
-                                <i class="pi pi-trash text-white"></i>
+                                [disabled]="selectedDivisionThreeIds.length === 0">
+                                <i class="pi pi-trash text-white" (click)="deleteDivisionThree()"></i>
                             </button>
                         </div>
                     </div>
@@ -155,26 +189,46 @@
                     <!-- Search -->
                     <div class="input-group mb-3">
                         <span class="input-group-text"><i class="pi pi-search"></i></span>
-                        <input type="text" class="form-control" placeholder="Search State"
-                            [(ngModel)]="searchTermDivisionOne" (input)="onSearchDivisionOne()">
+                        <input type="text" class="form-control" placeholder="Search City"
+                            [(ngModel)]="searchTermDivisionThree" (input)="onSearchDivisionThree()">
                     </div>
                     <!-- lIST -->
-                    <ul class="list-group division-list overflow-auto mb-2"
+                    <ul class="list-group division-list overflow-auto mb-2 p-2"
                         style="max-height: 500px; box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;border: none;">
 
-                        @for (item of divisionOneList; track item) {
-                        <li class="list-group-item d-flex justify-content-between align-items-center"
-                            [class.active]="item.id === selectedDivisionOneId" (click)="getDivisionTwo(item.id)"
-                            style="cursor: pointer;">
-                            <div>
-                                <input class="form-check-input me-2" type="checkbox"
-                                    [checked]="selectedDivisionOneIds?.includes(item.id)"
-                                    (click)="$event.stopPropagation()"
-                                    (change)="toggleDivisionOneSelection(item.id, $event)">
-                                {{item.divisionOne}}
-                            </div>
-                            <i class="pi pi-pen-to-square"></i>
-                        </li>
+                        @for (item of divisionThreeList; track item) {
+
+                        <li class="list-group-item division-item"
+                        [class.active-custom]="item.id === selectedDivisionThreeId">
+                      
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                          <input class="form-check-input me-2" type="checkbox"
+                                 [checked]="selectedDivisionThreeIds?.includes(item.id)"
+                                 (click)="$event.stopPropagation()"
+                                 (change)="toggleDivisionThreeSelection(item.id, $event)">
+                          <span class="division-label">{{ item.divisionThree }}</span>
+                        </div>
+                    
+                        <div class="d-flex">
+                            <span
+                              class="badge"
+                              [ngClass]="item.status ? 'status-active' : 'status-inactive'"
+                              style="cursor: pointer;"
+                              (click)="toggleDivisionStatus(item, 'three')">
+                              {{ item.status ? 'Active' : 'Inactive' }}
+                            </span>
+                            <i class="pi pi-pen-to-square edit-icon" (click)="openDivisionModal('three', item)"></i>
+                          </div>
+                          
+                      </div>
+                    </li>
+                        }
+
+                        @empty {
+                            <li class="list-group-item division-item d-flex justify-content-center align-items-center">
+                                <p class="mb-0">No data found</p>
+                            </li>
                         }
                     </ul>
                 </div>
@@ -234,4 +288,31 @@
     </div>
 
 </div>
+}
+
+<!-- three modal -->
+@if(isDivisionThreeModalVisible){
+    <div class="overlay">
+        <div class="modal-content-2">
+            <i class="fa-solid fa-xmark text-end w-100" (click)="closeModal()"></i>
+            <h4 class="mb-3">{{ isEditMode ? 'Edit Division Three' : 'Add Division Three' }}</h4>
+    
+            <form [formGroup]="divisionThreeForm" (ngSubmit)="submitDivisionThree()">
+                <div class="form-group mb-3">
+                    <label for="roleName" class="mb-2">Name</label>
+                    <input type="text" class="form-control" id="divisionThree" placeholder="Enter division Three name"
+                        formControlName="divisionThree">
+                    @if(divisionThreeForm.get('divisionThree')?.invalid && divisionThreeForm.get('divisionThree')?.touched){
+                    <small class="text-danger">Division three name is required</small>
+                    }
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn mt-4 w-100" [ngClass]="isEditMode ? 'btn-success' : 'btn-primary'">
+                        {{ isEditMode ? 'Save Changes' : 'Add' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    
+    </div>
 }

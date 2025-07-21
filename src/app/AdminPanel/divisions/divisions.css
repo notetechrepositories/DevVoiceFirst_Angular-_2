@@ -5,6 +5,54 @@
     min-height: 78.4vh;
 }
 
+
+.division-item {
+  border: none;
+  border-radius: 8px;
+  margin-bottom: 5px;
+  padding: 12px;
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+
+}
+
+.division-label {
+  color: #000;
+  font-weight: 500;
+  margin-top: 5px;
+}
+
+.active-custom {
+  background-color: #e8f0fe; /* light blue */
+  border-left: 4px solid #007bff; /* blue border */
+  padding-left: 10px !important;
+
+  .division-label {
+    font-weight: 600;
+    color: #0d6efd; /* Bootstrap blue */
+  }
+
+  .edit-icon {
+    color: #0d6efd; /* make pen icon blue */
+  }
+}
+
+.badge{
+  margin-right: 10px;
+  font-size: .6rem;
+}
+.status-active {
+  background-color: #d1f7e4;
+  color: #1a7f4d;
+}
+
+.status-inactive {
+  background-color: #fce1e1;
+  color: #a94442;
+}
+
+
+
 /* Target scrollable areas */
 .division-list::-webkit-scrollbar {
     width: 3px;              /* Thin scrollbar */
