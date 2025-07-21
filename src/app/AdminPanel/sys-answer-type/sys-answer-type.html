@@ -13,7 +13,7 @@
           <input
             type="text"
             class="form-control"
-            placeholder="Search"
+            placeholder="Search"  
             [(ngModel)]="searchTerm"
             (input)="onSearch()"
           />
@@ -55,7 +55,7 @@
               <th class="text-end">
               <button
                 class="delete-btn btn-danger"
-                (click)="deleteBusinessActivity()"
+                (click)="deleteAnswerType()"
                 [disabled]="selectedAnswerTypeIds.length === 0">
                 <i class="pi pi-trash text-white"></i>
               </button>
@@ -74,7 +74,7 @@
             </td>
             <!-- <td>{{ (currentPage - 1) * itemsPerPage + pagedData.indexOf(item) + 1 }}</td> -->
             
-            <td>{{ item.name }}</td>
+            <td>{{ item.sysIssueAnswerTypeName }}</td>
             
             <td>
               <span
@@ -131,13 +131,13 @@
     <i class="fa-solid fa-xmark text-end w-100" (click)="closeModal()"></i>
      <h4 class="mb-3">{{ isEditMode ? 'Edit Answer Type' : 'Add Answer Type' }}</h4>
 
-    <form class="mt-3" [formGroup]="answerTypeForm" (ngSubmit)="submitActivity()">
+    <form class="mt-3" [formGroup]="answerTypeForm" (ngSubmit)="submitAnswerType()">
 
         <div class="form-group">
           <label for="name" class="mb-2">Answer Type</label>
-          <input type="text" class="form-control" id="name"  placeholder="Enter Answer Type Name"  formControlName="name"
-           [ngClass]="{'is-invalid': answerTypeForm.get('name')?.invalid && answerTypeForm.get('name')?.touched}" />
-           <div class="invalid-feedback" *ngIf="answerTypeForm.get('name')?.touched && answerTypeForm.get('name')?.hasError('required')">
+          <input type="text" class="form-control" id="sysIssueAnswerTypeName"  placeholder="Enter Answer Type Name"  formControlName="sysIssueAnswerTypeName"
+           [ngClass]="{'is-invalid': answerTypeForm.get('sysIssueAnswerTypeName')?.invalid && answerTypeForm.get('sysIssueAnswerTypeName')?.touched}" />
+           <div class="invalid-feedback" *ngIf="answerTypeForm.get('sysIssueAnswerTypeName')?.touched && answerTypeForm.get('sysIssueAnswerTypeName')?.hasError('required')">
               Answer Type Name is required.
            </div>
         </div>

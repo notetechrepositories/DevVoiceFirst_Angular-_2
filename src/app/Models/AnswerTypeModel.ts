@@ -1,6 +1,6 @@
 export interface AnswerTypeModel {
     id: string;
-    name: string;
+    sysIssueAnswerTypeName: string;
     status:string,
     selected?: boolean; 
   }
