@@ -132,7 +132,7 @@
 
                         <li class="list-group-item division-item"
                             [class.active-custom]="item.id === selectedDivisionTwoId && country?.divisionThreeLabel!==''"
-                            (click)="country?.divisionThreeLabel === '' && getDivisionThree(item.id)">
+                            (click)="country?.divisionThreeLabel !== '' && getDivisionThree(item.id)">
                           
                           <div class="d-flex justify-content-between align-items-center">
                             <div class="d-flex align-items-center">

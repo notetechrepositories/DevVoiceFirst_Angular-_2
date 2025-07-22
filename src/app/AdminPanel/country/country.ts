@@ -160,7 +160,7 @@ export class Country {
     }
     if (this.isEditMode) {
      
-      const updatedFields: any = { id: this.selectedCountryIds };
+      const updatedFields: any = { id: this.selectedCountryId };
       this.utilityService.setIfDirty(form, 'country', updatedFields);
       this.utilityService.setIfDirty(form, 'divisionOneLabel', updatedFields);
       this.utilityService.setIfDirty(form, 'divisionTwoLabel', updatedFields);
@@ -183,6 +183,8 @@ export class Country {
           this.utilityService.success(res.body?.message || 'Activity updated.');
         },
         error: err => {
+          console.log("error",err);
+          
           this.utilityService.showError(err.status, err.error?.message || 'Update failed.');
         
         }
