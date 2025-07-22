@@ -1,126 +1,228 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { AnswerTypeService } from '../../../Service/AnswerTypeService/answer-type-service';
+import { UtilityService } from '../../../Service/UtilityService/utility-service';
+import { MediaTypeService } from '../../../Service/MediaTypeService/media-type-service';
 
 @Component({
   selector: 'app-add-issue-type',
-  imports: [FormsModule,ReactiveFormsModule,RouterLink,CommonModule],
+  imports: [FormsModule, ReactiveFormsModule, RouterLink, CommonModule],
   templateUrl: './add-issue-type.html',
   styleUrl: './add-issue-type.css'
 })
 export class AddIssueType {
 
-issueTypeForm!:FormGroup;
-isPhotoDisabled:boolean=false;
-isVideoDisabled:boolean=false;
-selectedPhotoTypes: string[] = [];
-selectedVideoTypes: string[] = [];
-selectedPhotoTypesId: number[] = [];
-selectedVideoTypesId: number[] = [];
-addPopupVisible:boolean=false;
-addPopupphotoVisible:boolean=false;
-photoTypeList:any;
-videoTypeList:any;
-constructor( private fb:FormBuilder){
-    
-}
-ngOnInit(){
-this.initalizeform();
-}
-  initalizeform(){
+  issueTypeForm!: FormGroup;
+  isPhotoDisabled: boolean = false;
+  isVideoDisabled: boolean = false;
+  selectedPhotoTypes: string[] = [];
+  selectedVideoTypes: string[] = [];
+  selectedPhotoTypesId: number[] = [];
+  selectedVideoTypesId: number[] = [];
+  addPopupVisible: boolean = false;
+  addPopupphotoVisible: boolean = false;
+
+  videoTypeList: any;
+  answerTypeList: any[] = [];
+  selectedAnswerTypes: any[] = [];
+  mediaTypeList: any[] = [];
+
+
+  attachmentType = [
+    { id: "1", name: 'Photo' },
+    { id: "2", name: 'Video' },
+    { id: "3", name: 'Pdf' },
+  ];
+
+  selectedAttachments: any[] = [];
+  constructor(private fb: FormBuilder,
+    private answerTypeSevice: AnswerTypeService,
+    private utilityService: UtilityService,
+    private mediaTypeService: MediaTypeService
+  ) {
+
+  }
+  ngOnInit() {
+    this.initalizeform();
+    this.getAnswerType();
+    this.getMediaType();
+
+  }
+  initalizeform() {
     this.issueTypeForm = this.fb.group({
-      t1_company_id: 'COMPANY001',
-      issue_name: ['', [Validators.required]],
-      media_type_photo: [''],
-      media_type_video: [''],
-      photorequirement:[''],
-      photo_max_size:[''],
-      photo_max_numbers:['',[Validators.max(4)]],
-      photoType:[''],
-      video_max_size:[''],
-      video_max_numbers:[''],
-      videoType:[''],
-      videorequirement:[''],
-      t9_3_description:['']
+      issueType: ['', Validators.required],
+      answerTypeIds: [[]],
+      mediaRequireds: this.fb.array([])
     });
-   
-  }
-
-  onPhotoToggle(event: Event): void {
-    const isChecked = (event.target as HTMLInputElement).checked;
-    const value = isChecked ? 'y' : 'n';
-    this.issueTypeForm.get('media_type_photo')?.setValue(value);
-    this.isPhotoDisabled = value === 'n';
-  }
-  onVideoToggle(event: Event): void {
-    const isChecked = (event.target as HTMLInputElement).checked;
-    const value = isChecked ? 'y' : 'n';
-    this.issueTypeForm.get('media_type_video')?.setValue(value);
-    this.isVideoDisabled = value === 'n';
-  }
-  selectAll(){
 
   }
-  clearAll(){
+  addMediaRequirement(mediaType: string) {
+    const control = this.fb.group({
+      mediaType: [mediaType, Validators.required],
+      maximum: ['', [Validators.required]],
+      maximumSize: ['', [Validators.required]],
+      mediaTypeIds: this.fb.array([])
+    });
 
+    (this.issueTypeForm.get('mediaRequireds') as FormArray).push(control);
   }
-  onPhotoTypeChange(event: any, type: any) {
-  const id = Number(type.id_12_issue_type_photo_video_of);
-  const name = type.t12_description;
 
-  if (event.target.checked) {
-    if (!this.selectedPhotoTypesId.includes(id)) {
-      this.selectedPhotoTypesId.push(id);
-      this.selectedPhotoTypes.push(name);
+  addMediaTypeId(index: number, id: string, mandatory: boolean) {
+    const mediaTypeIdsArray = ((this.issueTypeForm.get('mediaRequireds') as FormArray).at(index).get('mediaTypeIds') as FormArray);
+
+    mediaTypeIdsArray.push(this.fb.group({
+      mediaTypeId: [id, Validators.required],
+      mandatory: [mandatory]
+    }));
+  }
+
+  // -------------------------
+  getAnswerType() {
+    this.answerTypeSevice.getAnswerType().subscribe({
+      next: res => {
+        this.answerTypeList = res.body.data;
+      },
+      error: err => { this.utilityService.showError(err.status, err.error?.message || 'Get failed.') }
+    });
+  }
+  selectAllAnswerType() {
+    const allIds = this.answerTypeList.map(type => type.id);
+    this.issueTypeForm.get('answerTypeIds')?.setValue(allIds);
+    this.issueTypeForm.get('answerTypeIds')?.markAsDirty();
+  }
+  clearAllAnswerType() {
+    this.issueTypeForm.get('answerTypeIds')?.setValue([]);
+    this.issueTypeForm.get('answerTypeIds')?.markAsDirty();
+  }
+
+  onAnswerTypeToggle(type: any, event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+    const answerTypeIds = this.issueTypeForm.get('answerTypeIds')?.value || [];
+
+    if (checked) {
+      if (!answerTypeIds.includes(type.id)) {
+        answerTypeIds.push(type.id);
+      }
+    } else {
+      const index = answerTypeIds.indexOf(type.id);
+      if (index > -1) {
+        answerTypeIds.splice(index, 1);
+      }
+    }
+
+    this.issueTypeForm.get('answerTypeIds')?.setValue(answerTypeIds);
+    this.issueTypeForm.get('answerTypeIds')?.markAsDirty();
+  }
+  isAnswerTypeSelected(id: string): boolean {
+    return this.issueTypeForm.get('answerTypeIds')?.value?.includes(id);
+  }
+  // ------------------------
+  getMediaType() {
+    this.mediaTypeService.getMediatype().subscribe({
+      next: res => {
+        this.mediaTypeList = res.body.data;
+      },
+      error: err => { this.utilityService.showError(err.status, err.error?.message || 'Get failed.') }
+    });
+  }
+
+
+  toggleMediaType(type: any, event: any) {
+    const isChecked = event.target.checked;
+    const currentIndex = this.selectedPhotoTypes.indexOf(type.description);
+    if (isChecked && currentIndex === -1) {
+      this.selectedPhotoTypes.push(type.description);
+    } else if (!isChecked && currentIndex !== -1) {
+      this.selectedPhotoTypes.splice(currentIndex, 1);
+    }
+  }
+
+  toggleMandatory(type: any) {
+    console.log('Toggled mandatory for:', type.name);
+    // Implement logic to track mandatory status
+  }
+  isAttachmentSelected(id: string): boolean {
+  return this.selectedAttachments.some(t => t.id === id);
+}
+
+  onMediaTypeChange(formIndex: number, type: any, event: any) {
+    const checked = event.target.checked;
+    const control = this.issueTypeForm.get('mediaRequireds') as FormArray;
+    const group = control.at(formIndex).get('mediaTypeIds') as FormArray;
+
+    if (checked) {
+      group.push(this.fb.group({
+        mediaTypeId: [type.id, Validators.required],
+        mandatory: [false]
+      }));
+    } else {
+      const indexToRemove = group.controls.findIndex(c => c.value.mediaTypeId === type.id);
+      if (indexToRemove !== -1) group.removeAt(indexToRemove);
+    }
+  }
+
+  onMandatoryToggle(formIndex: number, type: any, event: any) {
+    const checked = event.target.checked;
+    const group = this.issueTypeForm.get('mediaRequireds') as FormArray;
+    const mediaTypes = group.at(formIndex).get('mediaTypeIds') as FormArray;
+    const control = mediaTypes.controls.find(c => c.value.mediaTypeId === type.id);
+    if (control) {
+      control.patchValue({ mandatory: checked });
+    }
+  }
+
+
+  toggleAttachment(type: any, event: Event) {
+  const checked = (event.target as HTMLInputElement).checked;
+  const formArray = this.issueTypeForm.get('mediaRequireds') as FormArray;
+
+  if (checked) {
+    if (!this.selectedAttachments.some(t => t.id === type.id)) {
+      this.selectedAttachments.push(type);
+
+      formArray.push(this.fb.group({
+        mediaType: [type.name, Validators.required],
+        maximumSize: ['', Validators.required],
+        maximum: ['', Validators.required],
+        mediaTypeIds: this.fb.array([])
+      }));
     }
   } else {
-    this.selectedPhotoTypesId = this.selectedPhotoTypesId.filter(i => i !== id);
-    this.selectedPhotoTypes = this.selectedPhotoTypes.filter(n => n !== name);
+    const index = this.selectedAttachments.findIndex(t => t.id === type.id);
+    if (index > -1) {
+      this.selectedAttachments.splice(index, 1);
+      formArray.removeAt(index);
+    }
   }
 }
-  addVideoPopup() {
-    console.log("working");
-    
-    this.addPopupVisible = true;
+
+
+
+
+  selectAll() {
+    this.selectedPhotoTypes = this.mediaTypeList.map(m => m.description);
+  }
+
+  clearAll() {
+    this.selectedPhotoTypes = [];
   }
   addPhotoPopup() {
     console.log("working");
-    
+
     this.addPopupphotoVisible = true;
   }
 
   removePhotoType(tag: string) {
- 
-}
-
-removeVideoType(tag: string) {
-
-}
- selectAllVideo() {
-   
-  }
-
-  // Clear All
-  clearAllVideo() {
-    this.selectedVideoTypes = [];
-    this.selectedVideoTypesId = [];
-  }
-  onVideoTypeChange(event: any, type: any) {
-  const id = type.id_12_issue_type_photo_video_of;
-  const name = type.t12_description;
-
-  if (event.target.checked) {
-    if (!this.selectedVideoTypesId.includes(id)) {
-      this.selectedVideoTypes.push(name);
-      this.selectedVideoTypesId.push(id);
+    const index = this.selectedPhotoTypes.indexOf(tag);
+    if (index > -1) {
+      this.selectedPhotoTypes.splice(index, 1);
     }
-  } else {
-    this.selectedVideoTypes = this.selectedVideoTypes.filter(item => item !== name);
-    this.selectedVideoTypesId = this.selectedVideoTypesId.filter(item => item !== id);
   }
-}
-submit(){
 
-}
+  submit() {
+    console.log(this.issueTypeForm.value);
+
+  }
 }

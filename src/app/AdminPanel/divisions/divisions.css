@@ -1,8 +1,8 @@
-.card-container{
-    border:none;
-    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
-    border-radius: 5px;
-    min-height: 78.4vh;
+.card-container {
+  border: none;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+  border-radius: 5px;
+  min-height: 78.4vh;
 }
 
 
@@ -23,24 +23,29 @@
 }
 
 .active-custom {
-  background-color: #e8f0fe; /* light blue */
-  border-left: 4px solid #007bff; /* blue border */
+  background-color: #e8f0fe;
+  /* light blue */
+  border-left: 4px solid #007bff;
+  /* blue border */
   padding-left: 10px !important;
 
   .division-label {
     font-weight: 600;
-    color: #0d6efd; /* Bootstrap blue */
+    color: #0d6efd;
+    /* Bootstrap blue */
   }
 
   .edit-icon {
-    color: #0d6efd; /* make pen icon blue */
+    color: #0d6efd;
+    /* make pen icon blue */
   }
 }
 
-.badge{
+.badge {
   margin-right: 10px;
   font-size: .6rem;
 }
+
 .status-active {
   background-color: #d1f7e4;
   color: #1a7f4d;
@@ -55,20 +60,23 @@
 
 /* Target scrollable areas */
 .division-list::-webkit-scrollbar {
-    width: 3px;              /* Thin scrollbar */
-  }
-  
-  .division-list::-webkit-scrollbar-track {
-    background: transparent; /* Optional: transparent track */
-  }
-  
-  .division-list::-webkit-scrollbar-thumb {
-    background-color: #ccc;  /* Light gray thumb */
-    border-radius: 4px;      /* Rounded edges */
-  }
-  
-  /* Remove scrollbar buttons (up/down arrows) */
-  .division-list::-webkit-scrollbar-button {
-    display: none;
-  }
-  
+  width: 3px;
+  /* Thin scrollbar */
+}
+
+.division-list::-webkit-scrollbar-track {
+  background: transparent;
+  /* Optional: transparent track */
+}
+
+.division-list::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  /* Light gray thumb */
+  border-radius: 4px;
+  /* Rounded edges */
+}
+
+/* Remove scrollbar buttons (up/down arrows) */
+.division-list::-webkit-scrollbar-button {
+  display: none;
+}

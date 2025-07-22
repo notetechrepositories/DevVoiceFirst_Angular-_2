@@ -6,6 +6,7 @@ import { RouterLink } from '@angular/router';
 import { MediaTypeModel } from '../../Models/MediaTypeModel';
 import { MediaTypeService } from '../../Service/MediaTypeService/media-type-service';
 
+
 @Component({
   selector: 'app-media-type',
   imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink],
@@ -34,7 +35,7 @@ export class MediaType {
   constructor(
     private fb: FormBuilder,
     private utilityService: UtilityService,
-    private MediaTypeService:MediaTypeService
+    private mediaTypeService:MediaTypeService
   ) { }
 
   ngOnInit() {
@@ -115,7 +116,7 @@ export class MediaType {
   }
 
   getMediaType() {
-    this.MediaTypeService.getMediatype().subscribe({
+    this.mediaTypeService.getAllMediatype().subscribe({
       next: res => {
         this.data = res.body.data;
         this.filteredData = [...this.data];
@@ -146,7 +147,7 @@ export class MediaType {
         this.utilityService.warning('No changes detected.');
         return;
       }
-      this.MediaTypeService.updateMediaType(updatedFields).subscribe({
+      this.mediaTypeService.updateMediaType(updatedFields).subscribe({
         next: (res) => {
           const updatedItem = res.body?.data;
 
@@ -165,7 +166,7 @@ export class MediaType {
       });
     }
     else {
-      this.MediaTypeService.createMediaType(payload).subscribe({
+      this.mediaTypeService.createMediaType(payload).subscribe({
         next: (res) => {
           const newItem = res.body?.data;
           if (newItem) {
@@ -186,7 +187,7 @@ export class MediaType {
     const message = `Delete ${this.selectedMediaTypeIds.length} Media type(s)`;
     const result = await this.utilityService.confirmDialog(message, 'delete');
     if (result.isConfirmed) {
-      this.MediaTypeService.deleteMediaType(this.selectedMediaTypeIds).subscribe({
+      this.mediaTypeService.deleteMediaType(this.selectedMediaTypeIds).subscribe({
         next: (res) => {
           const deletedIds: string[] = res.body?.data || [];
           this.filteredData = this.filteredData.filter(item => !deletedIds.includes(item.id));
@@ -243,7 +244,7 @@ export class MediaType {
 
     if (result.isConfirmed) {
 
-      this.MediaTypeService.updateMediaTypeStatus(payload).subscribe({
+      this.mediaTypeService.updateMediaTypeStatus(payload).subscribe({
         next: () => {
           item.status = updatedStatus;
           this.utilityService.success('Status updated successfully');

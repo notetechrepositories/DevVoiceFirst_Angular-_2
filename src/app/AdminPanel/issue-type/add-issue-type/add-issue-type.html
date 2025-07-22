@@ -7,51 +7,128 @@
             <li class="breadcrumb-item active" aria-current="page">Add Issue Type</li>
         </ol>
     </nav>
-    <div class="card p-4 shadow-sm">
+    <div class="card-container p-4">
     <form [formGroup]="issueTypeForm" (ngSubmit)="submit()">
 
       <!-- Issue Type Name -->
-      <div class="mb-4">
-        <label for="issueTypeName" class="form-label">Issue Type Name</label>
-        <input type="text" id="issueTypeName" class="form-control" placeholder="Enter issue type name" formControlName="issue_name" required>
-      </div>
+       <div class="row mb-3">
+         <div class="col-md-6">
+            <div class="formGroup">
+              <label for="issueTypeName" class="form-label">Issue Type Name</label>
+              <input type="text" id="issueTypeName" class="form-control" placeholder="Enter issue type name" formControlName="issueType" required>
+            </div>
+         </div>
+         <div class="col-md-6">
+          <div class="formGroup">
+            <label class="form-label">Answer Type</label>
 
-      <!-- Media Type Section -->
-      <div class="mb-4">
-        <h5>Media Type Options</h5>
-        <p class="text-muted">Configure photo/video attachment requirements</p>
+            <!-- Dropdown + Add Button Container -->
+            <div class="d-flex align-items-center gap-2">
+              <!-- Dropdown Button -->
+              <div class="dropdown flex-grow-1">
+                <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button" data-bs-toggle="dropdown"  data-bs-auto-close="outside">
+                  Select Answer Types
+                </button>
 
-        <!-- PHOTO SECTION -->
-        <div class="border p-3 rounded mb-4">
-          <div class="form-check form-switch mb-3">
-            <input type="checkbox" class="form-check-input" id="enablePhoto" formControlName="media_type_photo"
-              [checked]="issueTypeForm.get('media_type_photo')?.value === 'y'" 
-              (change)="onPhotoToggle($event)">
-            <label class="form-check-label" for="enablePhoto">Enable Photo Attachment</label>
-          </div>
+                <!-- Dropdown List -->
+                <ul class="dropdown-menu p-3" style="width:100%">
+                  <li class="mb-2 d-flex justify-content-between">
+                    <div>
+                      <button class="btn btn-sm btn-success me-2" (click)="selectAllAnswerType()">Select All</button>
+                      <button class="btn btn-sm btn-danger" (click)="clearAllAnswerType()">Clear All</button>
+                    </div>
+                  </li>
 
-          <div class="row">
-            <!-- Photo Requirement -->
-            <div class="col-md-6">
-              <label class="form-label">Photo Requirement</label>
-              <div class="d-flex mb-3">
-                <div class="form-check me-4">
-                  <input type="radio" class="form-check-input" formControlName="photorequirement" id="photoMandatory" value="mandatory" [disabled]="isPhotoDisabled">
-                  <label class="form-check-label" for="photoMandatory">Mandatory</label>
-                </div>
-                <div class="form-check">
-                  <input type="radio" class="form-check-input" formControlName="photorequirement" id="photoOptional" value="optional" [disabled]="isPhotoDisabled">
-                  <label class="form-check-label" for="photoOptional">Optional</label>
-                </div>
+                  @for (type of answerTypeList; track type.id) {
+                    <li class="mb-2">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <!-- Checkbox + Label -->
+                        <div class="form-check">
+                          <input class="form-check-input me-2" type="checkbox" [id]="type.id"
+                            [checked]="isAnswerTypeSelected(type.id)"(change)="onAnswerTypeToggle(type, $event)">
+                          <label class="form-check-label" [for]="type.id">
+                            {{ type.answerTypeName }}
+                          </label>
+                        </div>
+                      </div>
+                    </li>
+                  }
+                </ul>
               </div>
 
-              <!-- Size and Number -->
+              <!-- Add Button -->
+              <button type="button" class="btn btn-primary">
+                <i class="fas fa-plus"></i>
+              </button>
+            </div>
+          </div>
+
+         </div>
+       </div>
+
+<!-- Media Type Section -->
+<div class="mb-4">
+  <h5>Media Type Options</h5>
+  <p class="text-muted">Configure photo/video attachment requirements</p>
+
+  <!-- Attachment Type Dropdown -->
+  <div class="dropdown flex-grow-1 mb-3">
+    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" >
+      Select Attachment Types
+    </button>
+
+    <ul class="dropdown-menu p-3">
+      <li class="mb-2 d-flex justify-content-between">
+        <div>
+          <button class="btn btn-sm btn-success me-2" (click)="selectAll()">Select All</button>
+          <button class="btn btn-sm btn-danger" (click)="clearAll()">Clear All</button>
+        </div>
+      </li>
+
+      @for (type of attachmentType; track type.id) {
+        <li class="mb-2">
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              [id]="'attachment-' + type.id"
+              [checked]="selectedAttachments.includes(type)"
+              (change)="toggleAttachment(type, $event)">
+            <label class="form-check-label" [for]="'attachment-' + type.id">
+              {{ type.name }}
+            </label>
+          </div>
+        </li>
+      }
+    </ul>
+  </div>
+
+  <!-- Media Form Array Section -->
+  <div class="row" formArrayName="mediaRequireds">
+    @for (attachment of selectedAttachments; let i = $index; track i) {
+      <div class="col-md-6 mb-2" [formGroupName]="i">
+        <div class="border p-3 rounded">
+          <p class="fw-bold">{{ attachment.name }} Attachment</p>
+
+          <div class="row">
+            <!-- Size and Number -->
+            <div class="col-md-6">
               <div class="mb-3">
                 <label class="form-label">Max Size (MB)</label>
-                <input type="number" class="form-control mb-2" min="1" formControlName="photo_max_size" [readonly]="isPhotoDisabled">
+                <input
+                  type="number"
+                  class="form-control mb-2"
+                  formControlName="maximumSize"
+                  min="1"
+                  [readonly]="isPhotoDisabled" />
 
                 <label class="form-label">Max Number</label>
-                <input type="number" class="form-control" min="1" formControlName="photo_max_numbers" [readonly]="isPhotoDisabled">
+                <input
+                  type="number"
+                  class="form-control"
+                  formControlName="maximum"
+                  min="1"
+                  [readonly]="isPhotoDisabled" />
 
                 <small class="text-danger" *ngIf="issueTypeForm.get('photo_max_numbers')?.errors?.['max']">
                   Max number cannot exceed 4.
@@ -59,33 +136,77 @@
               </div>
             </div>
 
-            <!-- Photo Types -->
-            <div class="col-md-6">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <div class="dropdown">
-                  <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" [disabled]="isPhotoDisabled">
-                    Select media Types
+            <!-- Media Type List -->
+            <div class="col-md-6 d-flex flex-column">
+              <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                <div class="dropdown w-100">
+                  <button
+                    class="btn btn-outline-secondary dropdown-toggle w-100"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    [disabled]="isPhotoDisabled">
+                    Select Media Types
                   </button>
-                  <ul class="dropdown-menu p-3" style="width: 300px;">
-                    <li class="mb-2">
-                      <button class="btn btn-sm btn-success me-2" (click)="selectAll()">Select All</button>
-                      <button class="btn btn-sm btn-danger" (click)="clearAll()">Clear All</button>
-                    </li>
-                    @for(type of photoTypeList;track type){
-                       <li >
-                      <div class="form-check">
-                        
-                      </div>
-                    </li>
+
+                  <ul class="dropdown-menu p-3 dropdown-menu-container">
+                    @if (mediaTypeList.length > 0) {
+                      <li class="mb-2 d-flex justify-content-between">
+                        <div>
+                          <button class="btn btn-sm btn-success me-2" (click)="selectAll()">Select All</button>
+                          <button class="btn btn-sm btn-danger" (click)="clearAll()">Clear All</button>
+                        </div>
+                        <div>
+                          <small>Mandatory</small>
+                        </div>
+                      </li>
+
+                      @for (type of mediaTypeList; track type.id) {
+                        <li class="mb-2">
+                          <div class="d-flex justify-content-between align-items-center">
+                            <!-- Checkbox -->
+                            <div class="form-check">
+                              <input
+                                class="form-check-input me-2"
+                                type="checkbox"
+                                [id]="'media-' + type.id"
+                                (change)="onMediaTypeChange(i, type, $event)">
+                              <label class="form-check-label" [for]="'media-' + type.id">
+                                {{ type.description }}
+                              </label>
+                            </div>
+
+                            <!-- Mandatory Switch -->
+                            <div class="form-check form-switch ms-2">
+                              <input
+                                class="form-check-input"
+                                type="checkbox"
+                                [id]="'mandatory-toggle-' + type.id"
+                                (change)="onMandatoryToggle(i, type, $event)">
+                              <label
+                                class="form-check-label small text-muted"
+                                [for]="'mandatory-toggle-' + type.id">
+                                Mandatory
+                              </label>
+                            </div>
+                          </div>
+                        </li>
+                      }
+                    } @else {
+                      <li class="text-muted">No media types available</li>
                     }
-                   
                   </ul>
                 </div>
-                <button class="btn btn-primary" type="button" (click)="addPhotoPopup()">Add Custom Type</button>
+
+                <button class="btn btn-primary" type="button" (click)="addPhotoPopup()">
+                  <i class="fas fa-plus"></i>
+                </button>
               </div>
 
-              <div class="tags-container">
-                <span class="badge bg-secondary me-2 mb-2" *ngFor="let tag of selectedPhotoTypes">
+              <!-- Selected Tags -->
+              <div class="card h-100">
+                <span
+                  class="badge bg-secondary me-2 mb-2"
+                  *ngFor="let tag of selectedPhotoTypes">
                   {{ tag }}
                   <i class="fas fa-times ms-2 cursor-pointer" (click)="removePhotoType(tag)"></i>
                 </span>
@@ -93,79 +214,12 @@
             </div>
           </div>
         </div>
-
-        <!-- VIDEO SECTION -->
-        <div class="border p-3 rounded">
-          <div class="form-check form-switch mb-3">
-            <input type="checkbox" class="form-check-input" id="enableVideo" formControlName="media_type_video"
-              [checked]="issueTypeForm.get('media_type_video')?.value === 'y'" 
-              (change)="onVideoToggle($event)">
-            <label class="form-check-label" for="enableVideo">Enable Video Attachment</label>
-          </div>
-
-          <div class="row">
-            <!-- Video Requirement -->
-            <div class="col-md-6">
-              <label class="form-label">Video Requirement</label>
-              <div class="d-flex mb-3">
-                <div class="form-check me-4">
-                  <input type="radio" class="form-check-input" formControlName="videorequirement" id="videoMandatory" value="mandatory" [disabled]="isVideoDisabled">
-                  <label class="form-check-label" for="videoMandatory">Mandatory</label>
-                </div>
-                <div class="form-check">
-                  <input type="radio" class="form-check-input" formControlName="videorequirement" id="videoOptional" value="optional" [disabled]="isVideoDisabled">
-                  <label class="form-check-label" for="videoOptional">Optional</label>
-                </div>
-              </div>
-
-              <!-- Size and Number -->
-              <div class="mb-3">
-                <label class="form-label">Max Size (MB)</label>
-                <input type="number" class="form-control mb-2" min="1" formControlName="video_max_size" [readonly]="isVideoDisabled">
-
-                <label class="form-label">Max Number</label>
-                <input type="number" class="form-control" min="1" formControlName="video_max_numbers" [readonly]="isVideoDisabled">
-              </div>
-            </div>
-
-            <!-- Video Types -->
-            <div class="col-md-6">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <div class="dropdown">
-                  <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" [disabled]="isVideoDisabled">
-                    Select Video Types
-                  </button>
-                  <ul class="dropdown-menu p-3" style="width: 300px;">
-                    <li class="mb-2">
-                      <button class="btn btn-sm btn-success me-2" (click)="selectAllVideo()">Select All</button>
-                      <button class="btn btn-sm btn-danger" (click)="clearAllVideo()">Clear All</button>
-                    </li>
-                    <li *ngFor="let type of videoTypeList">
-                      <div class="form-check">
-                        <input class="form-check-input" type="checkbox" 
-                          [id]="'video-' + type.id_12_issue_type_photo_video_of"
-                          [checked]="selectedVideoTypes.includes(type.t12_description)"
-                          (change)="onVideoTypeChange($event, type)">
-                        <label class="form-check-label" [for]="'video-' + type.id_12_issue_type_photo_video_of">
-                          {{ type.t12_description }}
-                        </label>
-                      </div>
-                    </li>
-                  </ul>
-                </div>
-                <button class="btn btn-primary" type="button" (click)="addVideoPopup()">Add Custom Type</button>
-              </div>
-
-              <div class="tags-container">
-                <span class="badge bg-secondary me-2 mb-2" *ngFor="let tag of selectedVideoTypes">
-                  {{ tag }}
-                  <i class="fas fa-times ms-2 cursor-pointer" (click)="removeVideoType(tag)"></i>
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
+    }
+  </div>
+</div>
+
+
 
       <!-- Submit Button -->
       <div class="d-grid mt-4">
