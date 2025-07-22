@@ -199,7 +199,11 @@ export class AddIssueType {
 }
 
 
-
+isMediaTypeChecked(index: number, mediaTypeId: string): boolean {
+  const mediaTypeIds = this.issueTypeForm.get('mediaRequireds') as FormArray;
+  const mediaTypes = mediaTypeIds.at(index).get('mediaTypeIds') as FormArray;
+  return mediaTypes.controls.some(c => c.value.mediaTypeId === mediaTypeId);
+}
 
   selectAll() {
     this.selectedPhotoTypes = this.mediaTypeList.map(m => m.description);
@@ -208,6 +212,29 @@ export class AddIssueType {
   clearAll() {
     this.selectedPhotoTypes = [];
   }
+  selectAllMediaType(index: number) {
+  const mediaTypeIdsArray = this.issueTypeForm.get('mediaRequireds') as FormArray;
+  const mediaTypeIds = mediaTypeIdsArray.at(index).get('mediaTypeIds') as FormArray;
+
+  this.mediaTypeList.forEach(type => {
+    const alreadyExists = mediaTypeIds.controls.some(c => c.value.mediaTypeId === type.id);
+    if (!alreadyExists) {
+      mediaTypeIds.push(this.fb.group({
+        mediaTypeId: [type.id, Validators.required],
+        mandatory: [false]
+      }));
+    }
+  });
+}
+
+  clearAllMediaType(index: number) {
+  const mediaTypeIdsArray = this.issueTypeForm.get('mediaRequireds') as FormArray;
+  const mediaTypeIds = mediaTypeIdsArray.at(index).get('mediaTypeIds') as FormArray;
+
+  while (mediaTypeIds.length !== 0) {
+    mediaTypeIds.removeAt(0);
+  }
+}
   addPhotoPopup() {
     console.log("working");
 

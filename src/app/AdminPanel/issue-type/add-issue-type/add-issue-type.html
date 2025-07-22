@@ -144,6 +144,7 @@
                     class="btn btn-outline-secondary dropdown-toggle w-100"
                     type="button"
                     data-bs-toggle="dropdown"
+                    data-bs-auto-close="outside"
                     [disabled]="isPhotoDisabled">
                     Select Media Types
                   </button>
@@ -152,8 +153,8 @@
                     @if (mediaTypeList.length > 0) {
                       <li class="mb-2 d-flex justify-content-between">
                         <div>
-                          <button class="btn btn-sm btn-success me-2" (click)="selectAll()">Select All</button>
-                          <button class="btn btn-sm btn-danger" (click)="clearAll()">Clear All</button>
+                          <button class="btn btn-sm btn-success me-2" (click)="selectAllMediaType(i)">Select All</button>
+                          <button class="btn btn-sm btn-danger" (click)="clearAllMediaType(i)">Clear All</button>
                         </div>
                         <div>
                           <small>Mandatory</small>
@@ -169,6 +170,7 @@
                                 class="form-check-input me-2"
                                 type="checkbox"
                                 [id]="'media-' + type.id"
+                                 [checked]="isMediaTypeChecked(i, type.id)"
                                 (change)="onMediaTypeChange(i, type, $event)">
                               <label class="form-check-label" [for]="'media-' + type.id">
                                 {{ type.description }}
