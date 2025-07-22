@@ -1,10 +1,11 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-add-issue-type',
-  imports: [FormsModule,ReactiveFormsModule,RouterLink],
+  imports: [FormsModule,ReactiveFormsModule,RouterLink,CommonModule],
   templateUrl: './add-issue-type.html',
   styleUrl: './add-issue-type.css'
 })
@@ -19,7 +20,32 @@ selectedPhotoTypesId: number[] = [];
 selectedVideoTypesId: number[] = [];
 addPopupVisible:boolean=false;
 addPopupphotoVisible:boolean=false;
-
+photoTypeList:any;
+videoTypeList:any;
+constructor( private fb:FormBuilder){
+    
+}
+ngOnInit(){
+this.initalizeform();
+}
+  initalizeform(){
+    this.issueTypeForm = this.fb.group({
+      t1_company_id: 'COMPANY001',
+      issue_name: ['', [Validators.required]],
+      media_type_photo: [''],
+      media_type_video: [''],
+      photorequirement:[''],
+      photo_max_size:[''],
+      photo_max_numbers:['',[Validators.max(4)]],
+      photoType:[''],
+      video_max_size:[''],
+      video_max_numbers:[''],
+      videoType:[''],
+      videorequirement:[''],
+      t9_3_description:['']
+    });
+   
+  }
 
   onPhotoToggle(event: Event): void {
     const isChecked = (event.target as HTMLInputElement).checked;
