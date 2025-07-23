@@ -43,10 +43,12 @@
     <table class="table">
         <thead class="table-light">
           <tr>
-              <th>
+          <th>
             <input
-              type="checkbox" class="form-check-input"
-              [checked]="isAllSelected"
+              type="checkbox"
+              class="form-check-input"
+              [checked]="pagedData.length > 0 && isAllSelected"
+              [disabled]="pagedData.length === 0"
               (change)="toggleSelectAll($event)"
             />
           </th>

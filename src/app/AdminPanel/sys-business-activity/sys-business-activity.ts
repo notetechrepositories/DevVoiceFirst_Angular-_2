@@ -19,7 +19,7 @@ export class SysBusinessActivity {
   data: BusinessActivityModel[] = [];
   filteredData: BusinessActivityModel[] = [];
 
-  itemsPerPage = 10;
+  itemsPerPage = 1;
   currentPage = 1;
   searchTerm: string = '';
   statusFilter: string = '';
@@ -53,6 +53,8 @@ export class SysBusinessActivity {
     });
   }
 
+  //---------------- pagination ----------------
+
   get totalPages(): number {
     return Math.ceil(this.filteredData.length / this.itemsPerPage);
   }
@@ -67,6 +69,21 @@ export class SysBusinessActivity {
     const start = (this.currentPage - 1) * this.itemsPerPage;
     return this.filteredData.slice(start, start + this.itemsPerPage);
   }
+
+  goToPage(page: number) {
+    this.currentPage = page;
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) this.currentPage--;
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) this.currentPage++;
+  }
+
+
+  //---------------- Filter ----------------
 
   onSearch() {
     const term = this.searchTerm.toLowerCase();
@@ -86,21 +103,7 @@ export class SysBusinessActivity {
     this.updateSelectAllStatus();
   }
   
-
-  goToPage(page: number) {
-    this.currentPage = page;
-  }
-
-  previousPage() {
-    if (this.currentPage > 1) this.currentPage--;
-  }
-
-  nextPage() {
-    if (this.currentPage < this.totalPages) this.currentPage++;
-  }
-
-  // ----------------
-
+  // ---------------- Modal ----------------
 
   openModal(editItem?: BusinessActivityModel) {
     this.isModalVisible = true;
