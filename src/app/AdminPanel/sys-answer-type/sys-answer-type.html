@@ -46,7 +46,8 @@
               <th>
             <input
               type="checkbox" class="form-check-input"
-              [checked]="isAllSelected"
+              [checked]="pagedData.length > 0 && isAllSelected"
+              [disabled]="pagedData.length === 0"
               (change)="toggleSelectAll($event)"
             />
           </th>

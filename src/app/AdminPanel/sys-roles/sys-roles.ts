@@ -180,16 +180,19 @@ export class SysRoles {
       const permissionsForm = this.roleForm.get('permissions') as FormGroup;
       item.rolePrograms.forEach(rp => {
         const group = permissionsForm.get(rp.programId) as FormGroup;
-        if (group) {
+        const mod = modules.find(m => m.id === rp.programId);
+        if (group && mod) {
           this.permissionKeys.forEach(key => {
-            if (group.get(key)) {
-              group.get(key)?.enable();
-              group.get(key)?.setValue(rp[key as keyof RoleProgram]);
+            const ctrl = group.get(key);
+            if (ctrl && mod[key]) {
+              ctrl.enable();
+              ctrl.setValue(rp[key as keyof RoleProgram]);
             }
           });
         }
       });
     }
+    
   
     this.modules = modules;
   }

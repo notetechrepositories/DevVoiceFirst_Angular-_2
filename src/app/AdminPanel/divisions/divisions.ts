@@ -178,11 +178,32 @@ export class Divisions {
       return;
     }
     if(this.isEditMode){
-      this.countryService.updateDivisionOne(this.divisionOneForm.value).subscribe({
+      const updatedFields: any = { id: this.selectedDivisionOneId };
+      this.utilityService.setIfDirty(this.divisionOneForm, 'divisionOne', updatedFields);
+      if (Object.keys(updatedFields).length === 1) {
+        this.utilityService.warning('No changes detected.');
+        return;
+      }
+      
+      this.countryService.updateDivisionOne(updatedFields).subscribe({
         next:(res)=>{
-          console.log(res);
+          if(res.status===200){
+            const updatedItem = res.body?.data;
+            const index = this.divisionOneList.findIndex(item => item.id === updatedItem.id);
+            if (index !== -1) {
+              this.divisionOneList[index] = updatedItem;
+            }
+            this.utilityService.success(res.body?.message || 'Activity updated.');
+            this.closeModal();
+          }
+          else{
+              this.utilityService.warning(res.body?.message);
+            }
+        },
+        error:(err)=>{
+          this.utilityService.showError(err.status,err.error?.message);
         }
-      })
+      });
     }
  
     this.countryService.createDivisionOne(this.divisionOneForm.value).subscribe({
@@ -268,11 +289,32 @@ export class Divisions {
       return;
     }
   if(this.isEditMode){
-    this.countryService.updateDivisionTwo(this.divisionTwoForm.value).subscribe({
-      next:(res)=>{
-        console.log(res);
+    const updatedFields: any = { id: this.selectedDivisionTwoId };
+      this.utilityService.setIfDirty(this.divisionTwoForm, 'divisionTwo', updatedFields);
+      if (Object.keys(updatedFields).length === 1) {
+        this.utilityService.warning('No changes detected.');
+        return;
       }
-    })
+      
+      this.countryService.updateDivisionTwo(updatedFields).subscribe({
+        next:(res)=>{
+          if(res.status===200){
+          const updatedItem = res.body?.data;
+          const index = this.divisionTwoList.findIndex(item => item.id === updatedItem.id);
+            if (index !== -1) {
+              this.divisionTwoList[index] = updatedItem;
+            }
+            this.utilityService.success(res.body?.message || 'Activity updated.');
+            this.closeModal();
+            }
+          else{
+            this.utilityService.warning(res.body?.message);
+          }
+        },
+        error:(err)=>{
+          this.utilityService.showError(err.status,err.error?.message);
+        }
+      });
   }
   else{
     this.countryService.createDivisionTwo(this.divisionTwoForm.value).subscribe({
@@ -362,11 +404,31 @@ export class Divisions {
       return;
     }
     if(this.isEditMode){
-      this.countryService.updateDivisionThree(this.divisionThreeForm.value).subscribe({
+      const updatedFields: any = { id: this.selectedDivisionThreeId };
+      this.utilityService.setIfDirty(this.divisionThreeForm, 'divisionThree', updatedFields);
+      if (Object.keys(updatedFields).length === 1) {
+        this.utilityService.warning('No changes detected.');
+        return;
+      }
+      this.countryService.updateDivisionThree(updatedFields).subscribe({
         next:(res)=>{
-          console.log(res);
+          if(res.status===200){
+            const updatedItem = res.body?.data;
+            const index = this.divisionThreeList.findIndex(item => item.id === updatedItem.id);
+            if (index !== -1) {
+              this.divisionThreeList[index] = updatedItem;
+            }
+            this.utilityService.success(res.body?.message || 'Activity updated.');
+            this.closeModal();
+          }
+          else{
+            this.utilityService.warning(res.body?.message);
+          }
+        },
+        error:(err)=>{
+          this.utilityService.showError(err.status,err.error?.message);
         }
-      })
+      });
     }
     else{
       this.countryService.createDivisionThree(this.divisionThreeForm.value).subscribe({

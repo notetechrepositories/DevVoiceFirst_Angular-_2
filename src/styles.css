@@ -37,7 +37,7 @@ i{
 
 /* pagination */
 
-.pagination {
+/* .pagination {
   display: flex;
   list-style: none;
   gap: 5px;
@@ -51,7 +51,40 @@ i{
 .page-item.disabled .page-link {
   pointer-events: none;
   color: #aaa;
+} */
+
+.custom-pagination {
+  .page-item {
+    margin: 0 4px;
+
+    .page-link {
+      color: #007bff;
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    &.active .page-link {
+      background-color: #007bff;
+      color: white;
+      border-color: #007bff;
+    }
+
+    .page-link:hover {
+      background-color: #e9ecef;
+      text-decoration: none;
+    }
+
+    &.disabled .page-link,
+    .disabled-link {
+      pointer-events: none;
+      opacity: 0.5;
+    }
+  }
 }
+
 
 
 /* delete btn */
