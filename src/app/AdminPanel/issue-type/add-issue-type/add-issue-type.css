@@ -1,0 +1,28 @@
+.card-container {
+  border: none;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+  border-radius: 5px;
+}
+
+.tags-container{
+    border: 1px solid;
+    height:100%
+}
+
+.dropdown-menu-container{
+    width: 355px;
+    position: absolute;
+    inset: 0px auto auto 0px;
+    margin: 10px -1px 0px 0px;
+    transform: translate(0px, 40px);
+    max-height: 200px;
+    overflow: auto;
+}
+
+.btn-outline-secondary{
+    border-color: #dee2e6;
+}
+
+.btn-outline-secondary:hover{
+    background-color: none;
+}

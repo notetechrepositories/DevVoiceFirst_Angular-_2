@@ -8,6 +8,8 @@ import { Country } from './country/country';
 import { SysAnswerType } from './sys-answer-type/sys-answer-type';
 import { Divisions } from './divisions/divisions';
 import { MediaType } from './media-type/media-type';
+import { IssueType } from './issue-type/issue-type';
+import { AddIssueType } from './issue-type/add-issue-type/add-issue-type';
 
 
 export const AdminRoutes: Routes = [
@@ -33,6 +35,14 @@ export const AdminRoutes: Routes = [
   {
     path:'media-type',
     component:MediaType
+  },
+  {
+    path:'add-issue-type',
+    component:AddIssueType
+  },
+   {
+    path:'issue-type',
+    component:IssueType
   },
   {
     path:'test',

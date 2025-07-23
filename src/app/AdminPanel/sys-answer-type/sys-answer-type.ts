@@ -116,7 +116,7 @@ export class SysAnswerType {
   }
 
   getAnswerType() {
-    this.answerTypeSevice.getAnswerType().subscribe({
+    this.answerTypeSevice.getAllAnswerType().subscribe({
       next: res => {
         this.data = res.body.data;
         this.filteredData = [...this.data];

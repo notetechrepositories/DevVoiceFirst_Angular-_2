@@ -1,0 +1,25 @@
+<div class="overlay">
+  <div class="modal-content-2">
+    <i class="fa-solid fa-xmark text-end w-100" (click)="closeModal()"></i>
+     <h4 class="mb-3">Add Media Type</h4>
+      <form class="mt-3" [formGroup]="mediaTypeForm" (ngSubmit)="submitMediaType()">
+
+        <div class="form-group">
+          <label for="name" class="mb-2">Media Type</label>
+          <input type="text" class="form-control" id="description"  placeholder="Enter Media Type Name"  formControlName="description"
+           [ngClass]="{'is-invalid': mediaTypeForm.get('description')?.invalid && mediaTypeForm.get('description')?.touched}" />
+           <div class="invalid-feedback" *ngIf="mediaTypeForm.get('description')?.touched && mediaTypeForm.get('description')?.hasError('required')">
+              Media Type Name is required.
+           </div>
+        </div>
+  
+
+      <div class="col-md d-flex align-items-end">
+        <button type="submit" class="btn mt-4 w-100 btn-primary" >
+           Add
+        </button>
+      </div>
+
+    </form>
+    </div>
+    </div>

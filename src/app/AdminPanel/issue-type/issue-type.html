@@ -1,0 +1,138 @@
+<div>
+    <h3>Manage Issue Type</h3>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Issue Type</li>
+        </ol>
+    </nav>
+
+    <div class="page-header d-flex justify-content-between align-items-center mb-3 mt-4">
+      <div class="d-flex flex-wrap gap-2 align-items-center col-md">
+        <div class="input-group w-auto" style="min-width: 300px;">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Search"  
+            [(ngModel)]="searchTerm"
+            (input)="onSearch()"
+          />
+        </div>
+        <select
+          class="form-select w-auto"
+          [(ngModel)]="statusFilter"
+          (change)="onStatusFilterChange()"
+        >
+          <option value="">All Status</option>
+          <option value="true">Active</option>
+          <option value="false">Inactive</option>
+        </select>
+      </div>
+      <div class="d-flex gap-2">
+        <div class="tooltip-container">
+            <button class="btn btn-primary tooltip-button" (click)="openModal()">
+              <i class="pi pi-plus"></i>
+              <span class="tooltipText">Add Issue Type</span>
+            </button>
+          </div>
+      </div>
+
+      
+    </div>
+<div class="table-responsive">
+    <table class="table">
+        <thead class="table-light">
+          <tr>
+              <th>
+            <input
+              type="checkbox" class="form-check-input"
+              [checked]="isAllSelected"
+              (change)="toggleSelectAll($event)"
+            />
+          </th>
+              <th>Name</th>
+              <th>Media Type</th>
+              <th>Attachment Requirement</th>
+              <th>Max Size & Number</th>
+              <th>Status</th>
+              <th class="text-end">
+              <button
+                class="delete-btn btn-danger"
+                (click)="deleteAnswerType()"
+                [disabled]="selectedAnswerTypeIds.length === 0">
+                <i class="pi pi-trash text-white"></i>
+              </button>
+          </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of pagedData; track item) {
+          <tr>
+             <td>
+              <input
+              type="checkbox" class="form-check-input"
+                [checked]="selectedAnswerTypeIds.includes(item.id)"
+                (change)="toggleSelection(item.id, $event)"
+              />
+            </td>
+            <!-- <td>{{ (currentPage - 1) * itemsPerPage + pagedData.indexOf(item) + 1 }}</td> -->
+            
+            <td>{{ item.answerTypeName }}</td>
+              <td>{{ item.answerTypeName }}</td>
+                <td>{{ item.answerTypeName }}</td>
+                  <td>{{ item.answerTypeName }}</td>
+            
+            
+            <td>
+              <span
+                class="badge"
+                [ngClass]="item.status ? 'bg-success' : 'bg-secondary'"
+                style="cursor: pointer;"
+                (click)="toggleStatus(item)"
+              >
+                {{ item.status ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+            <td class="text-end">
+              <i class="pi pi-pen-to-square fw-bold" (click)="openModal()"></i>&nbsp;
+             
+            </td>
+          </tr>
+          }
+      
+          @empty {
+            <tr>
+              <td colspan="8" class="text-center">No data found</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+</div>
+
+
+<!-- Pagination Controls -->
+<nav class="d-flex justify-content-end">
+  <ul class="pagination">
+    <li class="page-item" [class.disabled]="currentPage === 1">
+      <a class="page-link" (click)="previousPage()"><i class="fa-solid fa-angle-left"></i></a>
+    </li>
+    @for (page of totalPagesArray; track page) {
+      <li class="page-item" [class.active]="page === currentPage">
+        <a class="page-link" (click)="goToPage(page)">{{ page }}</a>
+      </li>
+    }
+    <li class="page-item" [class.disabled]="currentPage === totalPages">
+      <a class="page-link" (click)="nextPage()"><i class="fa-solid fa-angle-right"></i></a>
+    </li>
+  </ul>
+</nav>
+
+</div>
+
+
+
+
+
+
+
+

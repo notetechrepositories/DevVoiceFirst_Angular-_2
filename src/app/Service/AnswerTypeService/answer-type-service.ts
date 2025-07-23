@@ -13,7 +13,7 @@ export class AnswerTypeService {
 
   //------------- System Answer Type -------------
 
-  getAnswerType(){
+  getAllAnswerType(){
     return this.http.get<any>(`${this.apiUrl}/answer-type/all`,{observe: 'response'});
   }
 
@@ -31,5 +31,10 @@ export class AnswerTypeService {
   updateAnswerTypeStatus(data:any){
     return this.http.patch<any>(`${this.apiUrl}/answer-type`, data,{observe: 'response'});
   }
+
+   getAnswerType(){
+    return this.http.get<any>(`${this.apiUrl}/answer-type`,{observe: 'response'});
+  }
+
 
 }
