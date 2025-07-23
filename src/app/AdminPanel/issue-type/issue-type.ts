@@ -95,18 +95,7 @@ export class IssueType {
   // ----------------
 
 
-  openModal(editItem?: AnswerTypeModel) {
-   
-    this.isEditMode = !!editItem;
-    this.selectedAnswerTypeId = editItem?.id || null;
-    if (editItem) {
-      this.originalItem = { ...editItem };
-      this.answerTypeForm.patchValue({
-        id: editItem.id,
-        answerTypeName: editItem.answerTypeName,
-
-      });
-    }
+  openModal() {
      this.router.navigate(['admin/add-issue-type']);
   }
 

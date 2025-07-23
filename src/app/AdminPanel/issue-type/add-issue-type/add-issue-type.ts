@@ -1,14 +1,17 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AnswerTypeService } from '../../../Service/AnswerTypeService/answer-type-service';
 import { UtilityService } from '../../../Service/UtilityService/utility-service';
 import { MediaTypeService } from '../../../Service/MediaTypeService/media-type-service';
+import { IssueType } from '../issue-type';
+import { IssueTypeService } from '../../../Service/IssueTypeService/issue-type-service';
+import { AddAnswerType } from '../../sys-answer-type/add-answer-type/add-answer-type';
 
 @Component({
   selector: 'app-add-issue-type',
-  imports: [FormsModule, ReactiveFormsModule, RouterLink, CommonModule],
+  imports: [FormsModule, ReactiveFormsModule, RouterLink, CommonModule, AddAnswerType],
   templateUrl: './add-issue-type.html',
   styleUrl: './add-issue-type.css'
 })
@@ -23,13 +26,13 @@ export class AddIssueType {
   selectedVideoTypesId: number[] = [];
   addPopupVisible: boolean = false;
   addPopupphotoVisible: boolean = false;
-
+selectedMediaTypeList:any[]=[];
   videoTypeList: any;
   answerTypeList: any[] = [];
   selectedAnswerTypes: any[] = [];
   mediaTypeList: any[] = [];
 
-
+isAnswerModalVisible:boolean=false;
   attachmentType = [
     { id: "1", name: 'Photo' },
     { id: "2", name: 'Video' },
@@ -40,7 +43,9 @@ export class AddIssueType {
   constructor(private fb: FormBuilder,
     private answerTypeSevice: AnswerTypeService,
     private utilityService: UtilityService,
-    private mediaTypeService: MediaTypeService
+    private mediaTypeService: MediaTypeService,
+    private issueTypeService:IssueTypeService,
+    private router:Router
   ) {
 
   }
@@ -79,6 +84,19 @@ export class AddIssueType {
   }
 
   // -------------------------
+
+  openAnswerModal(){
+    this.isAnswerModalVisible=true;
+  }
+
+
+
+  closeModal(){
+    this.isAnswerModalVisible=false;
+  }
+
+
+
   getAnswerType() {
     this.answerTypeSevice.getAnswerType().subscribe({
       next: res => {
@@ -87,10 +105,11 @@ export class AddIssueType {
       error: err => { this.utilityService.showError(err.status, err.error?.message || 'Get failed.') }
     });
   }
+
   selectAllAnswerType() {
     const allIds = this.answerTypeList.map(type => type.id);
     this.issueTypeForm.get('answerTypeIds')?.setValue(allIds);
-    this.issueTypeForm.get('answerTypeIds')?.markAsDirty();
+    
   }
   clearAllAnswerType() {
     this.issueTypeForm.get('answerTypeIds')?.setValue([]);
@@ -115,10 +134,48 @@ export class AddIssueType {
     this.issueTypeForm.get('answerTypeIds')?.setValue(answerTypeIds);
     this.issueTypeForm.get('answerTypeIds')?.markAsDirty();
   }
+
   isAnswerTypeSelected(id: string): boolean {
     return this.issueTypeForm.get('answerTypeIds')?.value?.includes(id);
   }
+
+  getSelectedAnswerTypeNames(): string {
+    const selectedIds: string[] = this.issueTypeForm.get('answerTypeIds')?.value || [];
+
+    if (selectedIds.length === 0) {
+      return 'Select Answer Types';
+    }
+
+    const selectedNames = this.answerTypeList
+      .filter(type => selectedIds.includes(type.id))
+      .map(type => type.answerTypeName);
+
+    const maxDisplay = 3;
+
+    if (selectedNames.length > maxDisplay) {
+      const visible = selectedNames.slice(0, maxDisplay).join(', ');
+      return `${visible},... +${selectedNames.length - maxDisplay} more`;
+    }
+
+    return selectedNames.join(', ');
+}
+
+
+//----------------------------
+
+  selectAll() {
+    this.selectedPhotoTypes = this.attachmentType.map(m => m.name);
+  }
+
+  clearAll() {
+    this.selectedPhotoTypes = [];
+  }
+
+
+
+
   // ------------------------
+
   getMediaType() {
     this.mediaTypeService.getMediatype().subscribe({
       next: res => {
@@ -128,40 +185,38 @@ export class AddIssueType {
     });
   }
 
+onMediaTypeChange(formIndex: number, type: any, event: any) {
+  const checked = event.target.checked;
+  const control = this.issueTypeForm.get('mediaRequireds') as FormArray;
+  const group = control.at(formIndex).get('mediaTypeIds') as FormArray;
 
-  toggleMediaType(type: any, event: any) {
-    const isChecked = event.target.checked;
-    const currentIndex = this.selectedPhotoTypes.indexOf(type.description);
-    if (isChecked && currentIndex === -1) {
-      this.selectedPhotoTypes.push(type.description);
-    } else if (!isChecked && currentIndex !== -1) {
-      this.selectedPhotoTypes.splice(currentIndex, 1);
-    }
-  }
+  const existingIndex = group.controls.findIndex(c => c.value.mediaTypeId === type.id);
 
-  toggleMandatory(type: any) {
-    console.log('Toggled mandatory for:', type.name);
-    // Implement logic to track mandatory status
-  }
-  isAttachmentSelected(id: string): boolean {
-  return this.selectedAttachments.some(t => t.id === id);
-}
-
-  onMediaTypeChange(formIndex: number, type: any, event: any) {
-    const checked = event.target.checked;
-    const control = this.issueTypeForm.get('mediaRequireds') as FormArray;
-    const group = control.at(formIndex).get('mediaTypeIds') as FormArray;
-
-    if (checked) {
+  if (checked) {
+    // Add only if not already present
+    if (existingIndex === -1) {
       group.push(this.fb.group({
         mediaTypeId: [type.id, Validators.required],
         mandatory: [false]
       }));
-    } else {
-      const indexToRemove = group.controls.findIndex(c => c.value.mediaTypeId === type.id);
-      if (indexToRemove !== -1) group.removeAt(indexToRemove);
     }
+     const alreadySelected = this.selectedMediaTypeList.some(t => t.id === type.id);
+    if (!alreadySelected) {
+      this.selectedMediaTypeList.push(type);
+    }
+  } else {
+    // Remove from FormArray if unchecked
+    if (existingIndex !== -1) {
+      group.removeAt(existingIndex);
+    }
+     this.selectedMediaTypeList = this.selectedMediaTypeList.filter(t => t.id !== type.id);
   }
+}
+isMediaTypeChecked(index: number, mediaTypeId: string): boolean {
+  const mediaTypeIds = this.issueTypeForm.get('mediaRequireds') as FormArray;
+  const mediaTypes = mediaTypeIds.at(index).get('mediaTypeIds') as FormArray;
+  return mediaTypes.controls.some(c => c.value.mediaTypeId === mediaTypeId);
+}
 
   onMandatoryToggle(formIndex: number, type: any, event: any) {
     const checked = event.target.checked;
@@ -199,19 +254,17 @@ export class AddIssueType {
 }
 
 
-isMediaTypeChecked(index: number, mediaTypeId: string): boolean {
-  const mediaTypeIds = this.issueTypeForm.get('mediaRequireds') as FormArray;
-  const mediaTypes = mediaTypeIds.at(index).get('mediaTypeIds') as FormArray;
-  return mediaTypes.controls.some(c => c.value.mediaTypeId === mediaTypeId);
+
+
+isMandatoryChecked(formIndex: number, mediaTypeId: string): boolean {
+  const group = this.issueTypeForm.get('mediaRequireds') as FormArray;
+  const mediaTypes = group.at(formIndex).get('mediaTypeIds') as FormArray;
+  const control = mediaTypes.controls.find(c => c.value.mediaTypeId === mediaTypeId);
+  return control?.value.mandatory || false;
 }
 
-  selectAll() {
-    this.selectedPhotoTypes = this.mediaTypeList.map(m => m.description);
-  }
 
-  clearAll() {
-    this.selectedPhotoTypes = [];
-  }
+
   selectAllMediaType(index: number) {
   const mediaTypeIdsArray = this.issueTypeForm.get('mediaRequireds') as FormArray;
   const mediaTypeIds = mediaTypeIdsArray.at(index).get('mediaTypeIds') as FormArray;
@@ -224,6 +277,9 @@ isMediaTypeChecked(index: number, mediaTypeId: string): boolean {
         mandatory: [false]
       }));
     }
+    this.selectedMediaTypeList = this.mediaTypeList;
+ 
+    
   });
 }
 
@@ -234,6 +290,7 @@ isMediaTypeChecked(index: number, mediaTypeId: string): boolean {
   while (mediaTypeIds.length !== 0) {
     mediaTypeIds.removeAt(0);
   }
+   this.selectedMediaTypeList = [];
 }
   addPhotoPopup() {
     console.log("working");
@@ -241,15 +298,39 @@ isMediaTypeChecked(index: number, mediaTypeId: string): boolean {
     this.addPopupphotoVisible = true;
   }
 
-  removePhotoType(tag: string) {
-    const index = this.selectedPhotoTypes.indexOf(tag);
-    if (index > -1) {
-      this.selectedPhotoTypes.splice(index, 1);
-    }
+removePhotoType(tag: any, formIndex: number) {
+  // Remove from selectedMediaTypeList
+  this.selectedMediaTypeList = this.selectedMediaTypeList.filter(t => t.id !== tag.id);
+
+  // Remove from form array
+  const mediaTypeIdsArray = (this.issueTypeForm.get('mediaRequireds') as FormArray)
+    .at(formIndex)
+    .get('mediaTypeIds') as FormArray;
+
+  const indexToRemove = mediaTypeIdsArray.controls.findIndex(
+    c => c.value.mediaTypeId === tag.id
+  );
+
+  if (indexToRemove !== -1) {
+    mediaTypeIdsArray.removeAt(indexToRemove);
   }
+}
 
   submit() {
-    console.log(this.issueTypeForm.value);
-
+    const form=this.issueTypeForm.value;
+    console.log(form);
+    
+    this.issueTypeService.createIssueTypeService(form).subscribe({
+    next:(res)=>{
+      console.log(res);
+      this.utilityService.success(res.body.message);
+      this.router.navigate(['admin/issue-type'])
+      },
+     error: err => {
+      console.log(err);
+      
+          this.utilityService.showError(err.status, err.error.message);
+        }
+   });
   }
 }
