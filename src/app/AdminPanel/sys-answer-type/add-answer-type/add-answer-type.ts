@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AnswerTypeService } from '../../../Service/AnswerTypeService/answer-type-service';
 import { UtilityService } from '../../../Service/UtilityService/utility-service';
@@ -14,7 +14,7 @@ import { UtilityService } from '../../../Service/UtilityService/utility-service'
 export class AddAnswerType {
 
   answerTypeForm!: FormGroup;
-
+@Output() close = new EventEmitter<void>();
   constructor(
     private fb: FormBuilder,
     private utilityService: UtilityService,
@@ -44,11 +44,16 @@ export class AddAnswerType {
       this.answerTypeSevice.createAnswertype(payload).subscribe({
         next: (res) => {
           this.utilityService.success(res.body.message);
+           this.close.emit();
         },
         error: err => {
           this.utilityService.showError(err.status, err.error.message);
         }
       });
+    }
+
+    closeModal(){
+      this.close.emit();
     }
 
 

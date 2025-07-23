@@ -8,10 +8,11 @@ import { MediaTypeService } from '../../../Service/MediaTypeService/media-type-s
 import { IssueType } from '../issue-type';
 import { IssueTypeService } from '../../../Service/IssueTypeService/issue-type-service';
 import { AddAnswerType } from '../../sys-answer-type/add-answer-type/add-answer-type';
+import { AddMediaType } from "../../media-type/add-media-type/add-media-type";
 
 @Component({
   selector: 'app-add-issue-type',
-  imports: [FormsModule, ReactiveFormsModule, RouterLink, CommonModule, AddAnswerType],
+  imports: [FormsModule, ReactiveFormsModule, RouterLink, CommonModule, AddAnswerType, AddMediaType],
   templateUrl: './add-issue-type.html',
   styleUrl: './add-issue-type.css'
 })
@@ -26,6 +27,7 @@ export class AddIssueType {
   selectedVideoTypesId: number[] = [];
   addPopupVisible: boolean = false;
   addPopupphotoVisible: boolean = false;
+  isMediaModalVisible:boolean=false;
 selectedMediaTypeList:any[]=[];
   videoTypeList: any;
   answerTypeList: any[] = [];
@@ -292,10 +294,11 @@ isMandatoryChecked(formIndex: number, mediaTypeId: string): boolean {
   }
    this.selectedMediaTypeList = [];
 }
-  addPhotoPopup() {
-    console.log("working");
-
-    this.addPopupphotoVisible = true;
+  openMediaModal() {
+   this.isMediaModalVisible=true;
+  }
+  closeMediaModal(){
+   this.isMediaModalVisible=false;
   }
 
 removePhotoType(tag: any, formIndex: number) {

@@ -201,7 +201,7 @@
                   </ul>
                 </div>
 
-                <button class="btn btn-primary" type="button" (click)="addPhotoPopup()">
+                <button class="btn btn-primary" type="button" (click)="openMediaModal()">
                   <i class="fas fa-plus"></i>
                 </button>
               </div>
@@ -234,14 +234,18 @@
 </div>
 
 
-<!-- Modal -->
+<!-- Modal  Answer type---->
 
 @if(isAnswerModalVisible){
-<div class="overlay">
-  <div class="modal-content-2">
-    <i class="fa-solid fa-xmark text-end w-100" (click)="closeModal()"></i>
-     <h4 class="mb-3">Add Answer Type</h4>
-      <app-add-answer-type></app-add-answer-type>
-  </div>
-</div>
+
+  <app-add-answer-type (close)="closeModal()"></app-add-answer-type>
+
+}
+
+<!---------- Modal Media Type------ -->
+
+@if(isMediaModalVisible){
+
+  <app-add-media-type (close)="closeModal()"></app-add-media-type>
+
 }
