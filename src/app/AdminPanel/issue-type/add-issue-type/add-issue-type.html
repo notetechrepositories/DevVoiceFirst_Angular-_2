@@ -1,0 +1,251 @@
+<div>
+    <h3>Add Issue Type</h3>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Dashboard</a></li>
+            <li class="breadcrumb-item"><a routerLink="/admin/issue-type">Issue Type</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Add Issue Type</li>
+        </ol>
+    </nav>
+    <div class="card-container p-4">
+    <form [formGroup]="issueTypeForm" >
+
+      <!-- Issue Type Name -->
+       <div class="row mb-3">
+         <div class="col-md-6">
+            <div class="formGroup">
+              <label for="issueTypeName" class="form-label">Issue Type Name</label>
+              <input type="text" id="issueTypeName" class="form-control" placeholder="Enter issue type name" formControlName="issueType" required>
+            </div>
+         </div>
+         <div class="col-md-6">
+          <div class="formGroup">
+            <label class="form-label">Answer Type</label>
+
+            <!-- Dropdown + Add Button Container -->
+            <div class="d-flex align-items-center gap-2">
+              <!-- Dropdown Button -->
+              <div class="dropdown flex-grow-1">
+                <button class="btn btn-outline-secondary dropdown-toggle w-100 text-start"  data-bs-toggle="dropdown"  data-bs-auto-close="outside">
+                   {{ getSelectedAnswerTypeNames() }}
+                </button>
+
+                <!-- Dropdown List -->
+                <ul class="dropdown-menu p-3" style="width:100%">
+                  <li class="mb-2 d-flex justify-content-between">
+                    <div>
+                      <button class="btn btn-sm btn-success me-2" (click)="selectAllAnswerType()">Select All</button>
+                      <button class="btn btn-sm btn-danger" (click)="clearAllAnswerType()">Clear All</button>
+                    </div>
+                  </li>
+
+                  @for (type of answerTypeList; track type.id) {
+                    <li class="mb-2">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <!-- Checkbox + Label -->
+                        <div class="form-check">
+                          <input class="form-check-input me-2" type="checkbox" [id]="type.id"
+                            [checked]="isAnswerTypeSelected(type.id)"(change)="onAnswerTypeToggle(type, $event)">
+                          <label class="form-check-label" [for]="type.id">
+                            {{ type.answerTypeName }}
+                          </label>
+                        </div>
+                      </div>
+                    </li>
+                  }
+                </ul>
+              </div>
+
+              <!-- Add Button -->
+              <button type="button" class="btn btn-primary" (click)="openAnswerModal()">
+                <i class="fas fa-plus"></i>
+              </button>
+            </div>
+          </div>
+
+         </div>
+       </div>
+
+<!-- Media Type Section -->
+<div class="mb-4">
+  <h5>Media Type Options</h5>
+  <p class="text-muted">Configure photo/video attachment requirements</p>
+
+  <!-- Attachment Type Dropdown -->
+  <div class="dropdown flex-grow-1 mb-3">
+    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" >
+      Select Attachment Types
+    </button>
+
+    <ul class="dropdown-menu p-3">
+      <li class="mb-2 d-flex justify-content-between">
+        <div>
+          <button class="btn btn-sm btn-success me-2" (click)="selectAll()">Select All</button>
+          <button class="btn btn-sm btn-danger" (click)="clearAll()">Clear All</button>
+        </div>
+      </li>
+
+      @for (type of attachmentType; track type.id) {
+        <li class="mb-2">
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              [id]="'attachment-' + type.id"
+              [checked]="selectedAttachments.includes(type)"
+              (change)="toggleAttachment(type, $event)">
+            <label class="form-check-label" [for]="'attachment-' + type.id">
+              {{ type.name }}
+            </label>
+          </div>
+        </li>
+      }
+    </ul>
+  </div>
+
+  <!-- Media Form Array Section -->
+  <div class="row" formArrayName="mediaRequireds">
+    @for (attachment of selectedAttachments; let i = $index; track i) {
+      <div class="col-md-6 mb-2" [formGroupName]="i">
+        <div class="border p-3 rounded">
+          <p class="fw-bold">{{ attachment.name }} Attachment</p>
+
+          <div class="row">
+            <!-- Size and Number -->
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Max Size (MB)</label>
+                <input
+                  type="number"
+                  class="form-control mb-2"
+                  formControlName="maximumSize"
+                  min="1"
+                  [readonly]="isPhotoDisabled" />
+
+                <label class="form-label">Max Number</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  formControlName="maximum"
+                  min="1"
+                  [readonly]="isPhotoDisabled" />
+
+                <small class="text-danger" *ngIf="issueTypeForm.get('photo_max_numbers')?.errors?.['max']">
+                  Max number cannot exceed 4.
+                </small>
+              </div>
+            </div>
+
+            <!-- Media Type List -->
+            <div class="col-md-6 d-flex flex-column">
+              <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                <div class="dropdown w-100">
+                  <button
+                    class="btn btn-outline-secondary dropdown-toggle w-100"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    data-bs-auto-close="outside"
+                    [disabled]="isPhotoDisabled">
+                    Select Media Types
+                  </button>
+
+                  <ul class="dropdown-menu p-3 dropdown-menu-container">
+                    @if (mediaTypeList.length > 0) {
+                      <li class="mb-2 d-flex justify-content-between">
+                        <div>
+                          <button class="btn btn-sm btn-success me-2" (click)="selectAllMediaType(i)">Select All</button>
+                          <button class="btn btn-sm btn-danger" (click)="clearAllMediaType(i)">Clear All</button>
+                        </div>
+                        <div>
+                          <small>Mandatory</small>
+                        </div>
+                      </li>
+
+                      @for (type of mediaTypeList; track type.id) {
+                        <li class="mb-2">
+                          <div class="d-flex justify-content-between align-items-center">
+                            <!-- Checkbox -->
+                            <div class="form-check">
+                              <input
+                                class="form-check-input me-2"
+                                type="checkbox"
+                                [id]="'media-' + type.id"
+                                 [checked]="isMediaTypeChecked(i, type.id)"
+                                (change)="onMediaTypeChange(i, type, $event)">
+                              <label class="form-check-label" [for]="'media-' + type.id">
+                                {{ type.description }}
+                              </label>
+                            </div>
+
+                            <!-- Mandatory Switch -->
+                            <div class="form-check form-switch ms-2">
+                              <input
+                                class="form-check-input"
+                                type="checkbox"
+                                [id]="'mandatory-toggle-' + type.id"
+                                 [disabled]="!isMediaTypeChecked(i, type.id)" 
+                                 [checked]="isMandatoryChecked(i, type.id)"
+                                (change)="onMandatoryToggle(i, type, $event)">
+                              <label
+                                class="form-check-label small text-muted"
+                                [for]="'mandatory-toggle-' + type.id">
+                               
+                              </label>
+                            </div>
+                          </div>
+                        </li>
+                      }
+                    } @else {
+                      <li class="text-muted">No media types available</li>
+                    }
+                  </ul>
+                </div>
+
+                <button class="btn btn-primary" type="button" (click)="openMediaModal()">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+
+              <!-- Selected Tags -->
+              <div class="card h-100 p-2 d-flex flex-row flex-wrap align-items-start gap-1">
+                <span
+                  class="badge bg-info d-inline-block"
+                  *ngFor="let tag of selectedMediaTypeList">
+                  {{ tag.description }}
+                  <i class="fas fa-times ms-2 cursor-pointer" (click)="removePhotoType(tag, i)"></i>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+
+
+      <!-- Submit Button -->
+      <div class="d-grid mt-4">
+        <button class="btn btn-success" type="submit" (click)="submit()">Submit</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- Modal  Answer type---->
+
+@if(isAnswerModalVisible){
+
+  <app-add-answer-type (close)="closeModal()" (created)="addNewAnswerTypeToList($event)" ></app-add-answer-type>
+
+}
+
+<!---------- Modal Media Type------ -->
+
+@if(isMediaModalVisible){
+
+  <app-add-media-type (close)="closeMediaModal()" (created)="addNewMediaTypeToList($event)"></app-add-media-type>
+
+}

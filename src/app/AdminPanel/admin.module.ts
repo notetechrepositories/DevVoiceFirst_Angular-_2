@@ -13,6 +13,9 @@ import { SysAnswerType } from './sys-answer-type/sys-answer-type';
 import { Country } from './country/country';
 import { Divisions } from './divisions/divisions';
 import { MediaType } from './media-type/media-type';
+import { IssueType } from './issue-type/issue-type';
+import { AddIssueType } from './issue-type/add-issue-type/add-issue-type';
+import { AddAnswerType } from './sys-answer-type/add-answer-type/add-answer-type';
 
 
 
@@ -32,9 +35,13 @@ import { MediaType } from './media-type/media-type';
     TestModule,
     UnderDevelopment,
     SysAnswerType,
+    AddAnswerType,
     Country,
     Divisions,
     MediaType,
+    IssueType,
+    AddIssueType,
+
   ],
   declarations: [
 

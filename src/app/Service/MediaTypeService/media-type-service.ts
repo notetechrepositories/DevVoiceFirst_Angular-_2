@@ -11,7 +11,7 @@ export class MediaTypeService {
 
   constructor(private http:HttpClient) { }
   // -------------------Sys MediaType-------------------------------------
-  getMediatype(){
+  getAllMediatype(){
 
    return this.http.get<any>(`${this.apiUrl}/media-type/all`,{observe:'response'});
   }
@@ -27,4 +27,11 @@ export class MediaTypeService {
   updateMediaTypeStatus(data:any){
     return this.http.patch<any>(`${this.apiUrl}/media-type`,data,{observe:'response'})
   }
+  getMediatype(){
+
+   return this.http.get<any>(`${this.apiUrl}/media-type`,{observe:'response'});
+  }
+
+
+  
 }

@@ -1,48 +1,48 @@
 import { Component } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { AnswerTypeModel } from '../../Models/AnswerTypeModel';
+import { AnswerTypeService } from '../../Service/AnswerTypeService/answer-type-service';
 import { UtilityService } from '../../Service/UtilityService/utility-service';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
-import { MediaTypeModel } from '../../Models/MediaTypeModel';
-import { MediaTypeService } from '../../Service/MediaTypeService/media-type-service';
-
+import { Router, RouterLink } from '@angular/router';
 
 @Component({
-  selector: 'app-media-type',
+  selector: 'app-issue-type',
   imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink],
-  templateUrl: './media-type.html',
-  styleUrl: './media-type.css'
+  templateUrl: './issue-type.html',
+  styleUrl: './issue-type.css'
 })
-export class MediaType {
-  data: MediaTypeModel[] = [];
-  filteredData: MediaTypeModel[] = [];
+export class IssueType {
+ data: AnswerTypeModel[] = [];
+  filteredData: AnswerTypeModel[] = [];
 
   itemsPerPage = 10;
   currentPage = 1;
   searchTerm: string = '';
   statusFilter: string = '';
-  selectedMediaTypeIds: string[] = [];
+  selectedAnswerTypeIds: string[] = [];
   isAllSelected = false;
   isModalVisible: boolean = false;
   isEditModalVisible: boolean = false;
-  mediaTypeForm!: FormGroup;
+  answerTypeForm!: FormGroup;
   isEditMode: boolean = false;
   originalItem: any;
 
-  mediaTypes: any[] = [];
-  selectedMediaTypeId: string | null = null;
+  answerTypes: any[] = [];
+  selectedAnswerTypeId: string | null = null;
 
   constructor(
     private fb: FormBuilder,
     private utilityService: UtilityService,
-    private mediaTypeService:MediaTypeService
+    private answerTypeSevice: AnswerTypeService,
+    private router: Router
   ) { }
 
   ngOnInit() {
-    this.getMediaType();
-    this.mediaTypeForm = this.fb.group({
+    this.getAnswerType();
+    this.answerTypeForm = this.fb.group({
       id: [''],
-      description: ['', Validators.required],
+      answerTypeName: ['', Validators.required],
     });
   }
 
@@ -64,7 +64,7 @@ export class MediaType {
   onSearch() {
     const term = this.searchTerm.toLowerCase();
     this.filteredData = this.data.filter(item =>
-      item.description.toLowerCase().includes(term)
+      item.answerTypeName.toLowerCase().includes(term)
     );
     this.currentPage = 1;
   }
@@ -95,28 +95,18 @@ export class MediaType {
   // ----------------
 
 
-  openModal(editItem?: MediaTypeModel) {
-    this.isModalVisible = true;
-    this.isEditMode = !!editItem;
-    this.selectedMediaTypeId = editItem?.id || null;
-    if (editItem) {
-      this.originalItem = { ...editItem };
-      this.mediaTypeForm.patchValue({
-        id: editItem.id,
-        description: editItem.description,
-
-      });
-    }
+  openModal() {
+     this.router.navigate(['admin/add-issue-type']);
   }
 
   closeModal() {
     this.isModalVisible = false;
-    this.mediaTypes = [];
-    this.mediaTypeForm.reset();
+    this.answerTypes = [];
+    this.answerTypeForm.reset();
   }
 
-  getMediaType() {
-    this.mediaTypeService.getAllMediatype().subscribe({
+  getAnswerType() {
+    this.answerTypeSevice.getAnswerType().subscribe({
       next: res => {
         this.data = res.body.data;
         this.filteredData = [...this.data];
@@ -125,29 +115,29 @@ export class MediaType {
     });
   }
   removeActivity(index: number): void {
-    this.mediaTypes.splice(index, 1);
+    this.answerTypes.splice(index, 1);
   }
-  submitMediaType() {
-    const form = this.mediaTypeForm;
+  submitAnswerType() {
+    const form = this.answerTypeForm;
     const formValue = form.value;
     const payload = {
-      description: formValue.description,
+      answerTypeName: formValue.answerTypeName,
 
     };
-    if (this.mediaTypeForm.invalid) {
-      this.mediaTypeForm.markAllAsTouched();
+    if (this.answerTypeForm.invalid) {
+      this.answerTypeForm.markAllAsTouched();
       return;
     }
     if (this.isEditMode) {
-      const updatedFields: any = { id: this.selectedMediaTypeId };
+      const updatedFields: any = { id: this.selectedAnswerTypeId };
 
-      this.utilityService.setIfDirty(form, 'description', updatedFields);
+      this.utilityService.setIfDirty(form, 'answerTypeName', updatedFields);
       // Only send update if any field has changed
       if (Object.keys(updatedFields).length === 1) {
         this.utilityService.warning('No changes detected.');
         return;
       }
-      this.mediaTypeService.updateMediaType(updatedFields).subscribe({
+      this.answerTypeSevice.updateAnswerType(updatedFields).subscribe({
         next: (res) => {
           const updatedItem = res.body?.data;
 
@@ -158,7 +148,7 @@ export class MediaType {
             }
           }
           this.closeModal();
-          this.utilityService.success(res.body?.message || 'Media Type updated.');
+          this.utilityService.success(res.body?.message || 'Activity updated.');
         },
         error: err => {
           this.utilityService.showError(err.status, err.error?.message || 'Update failed.');
@@ -166,7 +156,7 @@ export class MediaType {
       });
     }
     else {
-      this.mediaTypeService.createMediaType(payload).subscribe({
+      this.answerTypeSevice.createAnswertype(payload).subscribe({
         next: (res) => {
           const newItem = res.body?.data;
           if (newItem) {
@@ -183,15 +173,15 @@ export class MediaType {
 
 
   }
-  async deleteMediaType(): Promise<void> {
-    const message = `Delete ${this.selectedMediaTypeIds.length} Media type(s)`;
+  async deleteAnswerType(): Promise<void> {
+    const message = `Delete ${this.selectedAnswerTypeIds.length} Answer type(s)`;
     const result = await this.utilityService.confirmDialog(message, 'delete');
     if (result.isConfirmed) {
-      this.mediaTypeService.deleteMediaType(this.selectedMediaTypeIds).subscribe({
+      this.answerTypeSevice.deleteAnswerType(this.selectedAnswerTypeIds).subscribe({
         next: (res) => {
           const deletedIds: string[] = res.body?.data || [];
           this.filteredData = this.filteredData.filter(item => !deletedIds.includes(item.id));
-          this.selectedMediaTypeIds = [];
+          this.selectedAnswerTypeIds = [];
           this.isAllSelected = false;
           this.utilityService.success(res.body?.message || 'Deleted successfully.');
         },
@@ -200,24 +190,24 @@ export class MediaType {
         }
 
       });
-      this.selectedMediaTypeIds = [];
+      this.selectedAnswerTypeIds = [];
       this.isAllSelected = false;
 
     }
   }
   updateSelectAllStatus() {
-    this.isAllSelected = this.selectedMediaTypeIds.length === this.pagedData.length;
+    this.isAllSelected = this.selectedAnswerTypeIds.length === this.pagedData.length;
   }
 
   toggleSelection(id: string, event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
 
     if (checked) {
-      if (!this.selectedMediaTypeIds.includes(id)) {
-        this.selectedMediaTypeIds.push(id);
+      if (!this.selectedAnswerTypeIds.includes(id)) {
+        this.selectedAnswerTypeIds.push(id);
       }
     } else {
-      this.selectedMediaTypeIds = this.selectedMediaTypeIds.filter(x => x !== id);
+      this.selectedAnswerTypeIds = this.selectedAnswerTypeIds.filter(x => x !== id);
     }
   }
 
@@ -225,9 +215,9 @@ export class MediaType {
     const checked = (event.target as HTMLInputElement).checked;
 
     if (checked) {
-      this.selectedMediaTypeIds = this.pagedData.map(x => x.id);
+      this.selectedAnswerTypeIds = this.pagedData.map(x => x.id);
     } else {
-      this.selectedMediaTypeIds = [];
+      this.selectedAnswerTypeIds = [];
     }
 
     this.isAllSelected = checked;
@@ -239,12 +229,12 @@ export class MediaType {
       id: item.id,
       status: updatedStatus
     };
-    const message = `Are you sure you want to set this media type as ${updatedStatus ? 'Active' : 'Inactive'}?`;
+    const message = `Are you sure you want to set this answer type as ${updatedStatus ? 'Active' : 'Inactive'}?`;
     const result = await this.utilityService.confirmDialog(message, 'update');
 
     if (result.isConfirmed) {
 
-      this.mediaTypeService.updateMediaTypeStatus(payload).subscribe({
+      this.answerTypeSevice.updateAnswerTypeStatus(payload).subscribe({
         next: () => {
           item.status = updatedStatus;
           this.utilityService.success('Status updated successfully');
