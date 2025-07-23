@@ -238,7 +238,7 @@
 
 @if(isAnswerModalVisible){
 
-  <app-add-answer-type (close)="closeModal()"></app-add-answer-type>
+  <app-add-answer-type (close)="closeModal()" (created)="addNewAnswerTypeToList($event)" ></app-add-answer-type>
 
 }
 
@@ -246,6 +246,6 @@
 
 @if(isMediaModalVisible){
 
-  <app-add-media-type (close)="closeModal()"></app-add-media-type>
+  <app-add-media-type (close)="closeMediaModal()" (created)="addNewMediaTypeToList($event)"></app-add-media-type>
 
 }

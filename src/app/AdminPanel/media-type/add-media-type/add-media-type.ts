@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Output } from '@angular/core';
-import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MediaTypeService } from '../../../Service/MediaTypeService/media-type-service';
 import { UtilityService } from '../../../Service/UtilityService/utility-service';
 
@@ -13,12 +13,21 @@ import { UtilityService } from '../../../Service/UtilityService/utility-service'
 export class AddMediaType {
 
 mediaTypeForm!:FormGroup;
+newMediaType:any;
 @Output() close = new EventEmitter<void>();
+@Output() created = new EventEmitter<any>();
 
 constructor(private mediatypeService:MediaTypeService,
- private utilityService:UtilityService
+ private utilityService:UtilityService,
+ private fb:FormBuilder
 ){}
 
+ ngOnInit() {
+    this.mediaTypeForm = this.fb.group({
+      id: [''],
+      description: ['', Validators.required],
+    });
+  }
 submitMediaType(){
      const form = this.mediaTypeForm;
     const formValue = form.value;
@@ -31,7 +40,9 @@ submitMediaType(){
     }
       this.mediatypeService.createMediaType(payload).subscribe({
         next: (res) => {
+          this.newMediaType=res.body.data;
           this.utilityService.success(res.body.message);
+            this.created.emit(this.newMediaType);
            this.close.emit();
         },
         error: err => {

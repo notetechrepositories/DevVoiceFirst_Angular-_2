@@ -162,7 +162,9 @@ isAnswerModalVisible:boolean=false;
     return selectedNames.join(', ');
 }
 
-
+  addNewAnswerTypeToList(newType: any) {
+  this.answerTypeList.push(newType);
+}
 //----------------------------
 
   selectAll() {
@@ -256,16 +258,12 @@ isMediaTypeChecked(index: number, mediaTypeId: string): boolean {
 }
 
 
-
-
 isMandatoryChecked(formIndex: number, mediaTypeId: string): boolean {
   const group = this.issueTypeForm.get('mediaRequireds') as FormArray;
   const mediaTypes = group.at(formIndex).get('mediaTypeIds') as FormArray;
   const control = mediaTypes.controls.find(c => c.value.mediaTypeId === mediaTypeId);
   return control?.value.mandatory || false;
 }
-
-
 
   selectAllMediaType(index: number) {
   const mediaTypeIdsArray = this.issueTypeForm.get('mediaRequireds') as FormArray;
@@ -298,7 +296,10 @@ isMandatoryChecked(formIndex: number, mediaTypeId: string): boolean {
    this.isMediaModalVisible=true;
   }
   closeMediaModal(){
-   this.isMediaModalVisible=false;
+   this.isMediaModalVisible=false;  
+  }
+  addNewMediaTypeToList(newType:any){
+     this.mediaTypeList.push(newType);
   }
 
 removePhotoType(tag: any, formIndex: number) {
@@ -336,4 +337,8 @@ removePhotoType(tag: any, formIndex: number) {
         }
    });
   }
+
+
+
+
 }

@@ -14,7 +14,9 @@ import { UtilityService } from '../../../Service/UtilityService/utility-service'
 export class AddAnswerType {
 
   answerTypeForm!: FormGroup;
+  newAnswerType:any;
 @Output() close = new EventEmitter<void>();
+@Output() created = new EventEmitter<any>();
   constructor(
     private fb: FormBuilder,
     private utilityService: UtilityService,
@@ -43,7 +45,9 @@ export class AddAnswerType {
 
       this.answerTypeSevice.createAnswertype(payload).subscribe({
         next: (res) => {
+          this.newAnswerType=res.body.data;
           this.utilityService.success(res.body.message);
+           this.created.emit(this.newAnswerType);
            this.close.emit();
         },
         error: err => {
