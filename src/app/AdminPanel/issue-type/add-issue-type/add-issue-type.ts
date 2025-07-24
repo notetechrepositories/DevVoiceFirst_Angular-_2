@@ -34,7 +34,7 @@ export class AddIssueType {
   selectedAnswerTypes: any[] = [];
   mediaTypeList: any[] = [];
 
-  
+
 
   isAnswerModalVisible: boolean = false;
   attachmentType = [
@@ -89,7 +89,7 @@ export class AddIssueType {
 
   // ------------------------
 
-    get mediaRequired(): FormArray {
+  get mediaRequired(): FormArray {
     return this.issueTypeForm.get('mediaRequired') as FormArray;
   }
 
@@ -179,61 +179,7 @@ export class AddIssueType {
   clearAll() {
     this.selectedPhotoTypes = [];
   }
-
-
-
-
-  // ------------------------
-
-  getMediaType() {
-    this.mediaTypeService.getMediatype().subscribe({
-      next: res => this.mediaTypeList = res.body.data,
-      error: err => this.utilityService.showError(err.status, err.error?.message || 'Get failed.')
-    });
-  }
-
-  onMediaTypeChange(index: number, type: any, event: any) {
-    const checked = event.target.checked;
-    const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaTypeLinks') as FormArray;
-    const exists = mediaTypeIds.controls.find(c => c.value.mediaTypeId === type.id);
-
-    if (checked && !exists) {
-      mediaTypeIds.push(this.fb.group({
-        mediaTypeId: [type.id, Validators.required],
-        mandatory: [false]
-      }));
-      this.selectedMediaTypeList[index].push(type);
-    } else if (!checked && exists) {
-      const idx = mediaTypeIds.controls.findIndex(c => c.value.mediaTypeId === type.id);
-      mediaTypeIds.removeAt(idx);
-      this.selectedMediaTypeList[index] = this.selectedMediaTypeList[index].filter(t => t.id !== type.id);
-    }
-  }
-
-
-
-  isMediaTypeChecked(index: number, id: string): boolean {
-    const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaTypeLinks') as FormArray;
-    return mediaTypeIds.controls.some(c => c.value.mediaTypeId === id);
-  }
-
-  onMandatoryToggle(index: number, type: any, event: any) {
-    const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaTypeLinks') as FormArray;
-    const control = mediaTypeIds.controls.find(c => c.value.mediaTypeId === type.id);
-    if (control) {
-      control.patchValue({ mandatory: event.target.checked });
-    }
-  }
-
-   removeMediaType(index: number, tag: any) {
-    const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaTypeLinks') as FormArray;
-    const idx = mediaTypeIds.controls.findIndex(c => c.value.mediaTypeId === tag.id);
-    if (idx > -1) mediaTypeIds.removeAt(idx);
-    this.selectedMediaTypeList[index] = this.selectedMediaTypeList[index].filter(t => t.id !== tag.id);
-  }
-
-
- toggleAttachment(type: any, event: Event) {
+  toggleAttachment(type: any, event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
 
     if (checked) {
@@ -258,10 +204,14 @@ export class AddIssueType {
   }
 
 
-  isMandatoryChecked(index: number, mediaTypeId: string): boolean {
-    const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaTypeLinks') as FormArray;
-    const control = mediaTypeIds.controls.find(c => c.value.mediaTypeId === mediaTypeId);
-    return control?.value.mandatory || false;
+
+  // ------------------------MediaType--------------------------------------
+
+  getMediaType() {
+    this.mediaTypeService.getMediatype().subscribe({
+      next: res => this.mediaTypeList = res.body.data,
+      error: err => this.utilityService.showError(err.status, err.error?.message || 'Get failed.')
+    });
   }
 
   selectAllMediaType(index: number) {
@@ -286,6 +236,43 @@ export class AddIssueType {
     this.selectedMediaTypeList[index] = [];
   }
 
+  isMediaTypeChecked(index: number, id: string): boolean {
+    const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaTypeLinks') as FormArray;
+    return mediaTypeIds.controls.some(c => c.value.mediaTypeId === id);
+  }
+
+  onMediaTypeChange(index: number, type: any, event: any) {
+    const checked = event.target.checked;
+    const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaTypeLinks') as FormArray;
+    const exists = mediaTypeIds.controls.find(c => c.value.mediaTypeId === type.id);
+
+    if (checked && !exists) {
+      mediaTypeIds.push(this.fb.group({
+        mediaTypeId: [type.id, Validators.required],
+        mandatory: [false]
+      }));
+      this.selectedMediaTypeList[index].push(type);
+    } else if (!checked && exists) {
+      const idx = mediaTypeIds.controls.findIndex(c => c.value.mediaTypeId === type.id);
+      mediaTypeIds.removeAt(idx);
+      this.selectedMediaTypeList[index] = this.selectedMediaTypeList[index].filter(t => t.id !== type.id);
+    }
+  }
+
+  isMandatoryChecked(index: number, mediaTypeId: string): boolean {
+    const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaTypeLinks') as FormArray;
+    const control = mediaTypeIds.controls.find(c => c.value.mediaTypeId === mediaTypeId);
+    return control?.value.mandatory || false;
+  }
+
+  onMandatoryToggle(index: number, type: any, event: any) {
+    const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaTypeLinks') as FormArray;
+    const control = mediaTypeIds.controls.find(c => c.value.mediaTypeId === type.id);
+    if (control) {
+      control.patchValue({ mandatory: event.target.checked });
+    }
+  }
+
   openMediaModal() {
     this.isMediaModalVisible = true;
   }
@@ -293,29 +280,30 @@ export class AddIssueType {
   closeMediaModal() {
     this.isMediaModalVisible = false;
   }
-
   addNewMediaTypeToList(newType: any) {
     this.mediaTypeList.push(newType);
   }
 
-  removePhotoType(tag: any, formIndex: number) {
-    // Remove from selectedMediaTypeList
-    this.selectedMediaTypeList = this.selectedMediaTypeList.filter((t:any) => t.id !== tag.id);
+  removeMediaType(tag: any, formIndex: number) {
+    const formArray = this.issueTypeForm.get('mediaRequired') as FormArray;
+    const mediaTypeIdsArray = formArray.at(formIndex).get('issueMediaTypeLinks') as FormArray;
 
-    // Remove from form array
-    const mediaTypeIdsArray = (this.issueTypeForm.get('mediaRequired') as FormArray)
-      .at(formIndex)
-      .get('issueMediaTypeLinks') as FormArray;
-
+    this.selectedMediaTypeList[formIndex] = this.selectedMediaTypeList[formIndex].filter(
+      (t: any) => t.id !== tag.id
+    );
     const indexToRemove = mediaTypeIdsArray.controls.findIndex(
       c => c.value.mediaTypeId === tag.id
     );
 
     if (indexToRemove !== -1) {
       mediaTypeIdsArray.removeAt(indexToRemove);
+      mediaTypeIdsArray.markAsDirty();
+      mediaTypeIdsArray.markAsTouched();
     }
   }
+// -------------------------------------------------------------------------------
 
+// ------------SUBMIT------------------------------------------------------------
   submit() {
     const form = this.issueTypeForm.value;
     console.log(form);

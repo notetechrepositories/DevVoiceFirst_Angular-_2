@@ -19,5 +19,8 @@ export class IssueTypeService {
   deleteIssueType(data:any){
     return this.http.delete<any>(`${this.apiUrl}/issue-type`,{body:data,observe:'response'});
   }
+  updateIssueTypeStatus(data:any){
+    return this.http.patch<any>(`${this.apiUrl}/issue-type`,data,{observe:'response'});
+  }
 
 }

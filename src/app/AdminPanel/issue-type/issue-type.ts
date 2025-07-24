@@ -34,7 +34,6 @@ export class IssueType {
   constructor(
     private fb: FormBuilder,
     private utilityService: UtilityService,
-    private answerTypeSevice: AnswerTypeService,
     private router: Router,
     private issueTypeService:IssueTypeService
   ) { }
@@ -107,8 +106,6 @@ export class IssueType {
   }
   async deleteIssueType(): Promise<void> {
     const message = `Delete ${this.selectedIssueTypeIds.length} Issue type(s)`;
-    console.log(this.selectedIssueTypeIds);
-    
     const result = await this.utilityService.confirmDialog(message, 'delete');
     if (result.isConfirmed) {
       this.issueTypeService.deleteIssueType(this.selectedIssueTypeIds).subscribe({
@@ -168,7 +165,7 @@ export class IssueType {
 
     if (result.isConfirmed) {
 
-      this.answerTypeSevice.updateAnswerTypeStatus(payload).subscribe({
+      this.issueTypeService.updateIssueTypeStatus(payload).subscribe({
         next: () => {
           item.status = updatedStatus;
           this.utilityService.success('Status updated successfully');
@@ -179,5 +176,9 @@ export class IssueType {
         }
       });
     }
+  }
+
+  viewIssueType(){
+
   }
 }
