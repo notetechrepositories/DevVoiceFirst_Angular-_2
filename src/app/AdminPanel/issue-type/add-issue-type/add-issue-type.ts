@@ -324,7 +324,7 @@ removePhotoType(tag: any, formIndex: number) {
     const form=this.issueTypeForm.value;
     console.log(form);
     
-    this.issueTypeService.createIssueTypeService(form).subscribe({
+    this.issueTypeService.createIssueType(form).subscribe({
     next:(res)=>{
       console.log(res);
       this.utilityService.success(res.body.message);

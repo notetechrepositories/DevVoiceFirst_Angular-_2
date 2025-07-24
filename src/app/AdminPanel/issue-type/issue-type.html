@@ -46,20 +46,18 @@
               <th>
             <input
               type="checkbox" class="form-check-input"
-              [checked]="isAllSelected"
+              [checked]="pagedData.length > 0 && isAllSelected"
+              [disabled]="pagedData.length === 0"
               (change)="toggleSelectAll($event)"
             />
           </th>
               <th>Name</th>
-              <th>Media Type</th>
-              <th>Attachment Requirement</th>
-              <th>Max Size & Number</th>
               <th>Status</th>
               <th class="text-end">
               <button
                 class="delete-btn btn-danger"
-                (click)="deleteAnswerType()"
-                [disabled]="selectedAnswerTypeIds.length === 0">
+                (click)="deleteIssueType()"
+                [disabled]="selectedIssueTypeIds.length === 0">
                 <i class="pi pi-trash text-white"></i>
               </button>
           </th>
@@ -71,17 +69,13 @@
              <td>
               <input
               type="checkbox" class="form-check-input"
-                [checked]="selectedAnswerTypeIds.includes(item.id)"
+                [checked]="selectedIssueTypeIds.includes(item.id)"
                 (change)="toggleSelection(item.id, $event)"
               />
             </td>
             <!-- <td>{{ (currentPage - 1) * itemsPerPage + pagedData.indexOf(item) + 1 }}</td> -->
             
-            <td>{{ item.answerTypeName }}</td>
-              <td>{{ item.answerTypeName }}</td>
-                <td>{{ item.answerTypeName }}</td>
-                  <td>{{ item.answerTypeName }}</td>
-            
+            <td>{{ item.issueType }}</td>
             
             <td>
               <span

@@ -10,11 +10,14 @@ export class IssueTypeService {
   private apiUrl=environment.apiUrl
   constructor(private http:HttpClient) { }
 
-  getIssueTypeService(){
+  getAllIssueType(){
     return this.http.get<any>(`${this.apiUrl}/issue-type/all`,{observe:'response'});
   }
-  createIssueTypeService(data:any){
+  createIssueType(data:any){
     return this.http.post<any>(`${this.apiUrl}/issue-type`,data,{observe:'response'})
+  }
+  deleteIssueType(data:any){
+    return this.http.delete<any>(`${this.apiUrl}/issue-type`,{body:data,observe:'response'});
   }
 
 }
