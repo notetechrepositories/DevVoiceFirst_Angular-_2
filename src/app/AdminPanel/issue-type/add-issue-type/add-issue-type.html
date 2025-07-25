@@ -15,7 +15,10 @@
          <div class="col-md-6">
             <div class="formGroup">
               <label for="issueTypeName" class="form-label">Issue Type Name</label>
-              <input type="text" id="issueTypeName" class="form-control" placeholder="Enter issue type name" formControlName="issueType" required>
+              <input type="text" id="issueTypeName" class="form-control" placeholder="Enter issue type name" formControlName="issueType" required [ngClass]="{'is-invalid': issueTypeForm.get('issueType')?.invalid && issueTypeForm.get('issueType')?.touched}">
+                <div class="invalid-feedback" *ngIf="issueTypeForm.get('issueType')?.touched && issueTypeForm.get('issueType')?.hasError('required')">
+                 Issue Type Name is required.
+               </div>
             </div>
          </div>
          <div class="col-md-6">
@@ -95,7 +98,7 @@
               [checked]="selectedAttachments.includes(type)"
               (change)="toggleAttachment(type, $event)">
             <label class="form-check-label" [for]="'attachment-' + type.id">
-              {{ type.name }}
+              {{ type.attachmentType }}
             </label>
           </div>
         </li>
@@ -108,7 +111,7 @@
     @for (attachment of selectedAttachments; let i = $index; track i) {
       <div class="col-md-6 mb-2" [formGroupName]="i">
         <div class="border p-3 rounded">
-          <p class="fw-bold">{{ attachment.name }} Attachment</p>
+          <p class="fw-bold">{{ attachment.attachmentType }} Attachment</p>
 
           <div class="row">
             <!-- Size and Number -->

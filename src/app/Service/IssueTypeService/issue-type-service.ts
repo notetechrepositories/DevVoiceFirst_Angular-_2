@@ -22,5 +22,7 @@ export class IssueTypeService {
   updateIssueTypeStatus(data:any){
     return this.http.patch<any>(`${this.apiUrl}/issue-type`,data,{observe:'response'});
   }
-
+  getIssueTypeBYId(id:any){
+    return this.http.get<any>(`${this.apiUrl}/issue-type/id?Id=${id}`,{observe:'response'});
+  }
 }

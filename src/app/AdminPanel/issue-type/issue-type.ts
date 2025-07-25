@@ -181,4 +181,7 @@ export class IssueType {
   viewIssueType(){
 
   }
+  openEditModal(id:any){
+    this.router.navigate(['admin/edit-issue-type',id]);
+  }
 }

@@ -9,6 +9,7 @@ import { IssueType } from '../issue-type';
 import { IssueTypeService } from '../../../Service/IssueTypeService/issue-type-service';
 import { AddAnswerType } from '../../sys-answer-type/add-answer-type/add-answer-type';
 import { AddMediaType } from "../../media-type/add-media-type/add-media-type";
+import { AttachmentSevice } from '../../../Service/AttachmentService/attachment-sevice';
 
 @Component({
   selector: 'app-add-issue-type',
@@ -37,11 +38,7 @@ export class AddIssueType {
 
 
   isAnswerModalVisible: boolean = false;
-  attachmentType = [
-    { id: "1", name: 'Photo' },
-    { id: "2", name: 'Video' },
-    { id: "3", name: 'Pdf' },
-  ];
+  attachmentType :any[ ]=[];
 
   selectedAttachments: any[] = [];
   constructor(private fb: FormBuilder,
@@ -49,7 +46,8 @@ export class AddIssueType {
     private utilityService: UtilityService,
     private mediaTypeService: MediaTypeService,
     private issueTypeService: IssueTypeService,
-    private router: Router
+    private router: Router,
+    private attachmentService:AttachmentSevice
   ) {
 
   }
@@ -57,6 +55,7 @@ export class AddIssueType {
     this.initalizeform();
     this.getAnswerType();
     this.getMediaType();
+    this.getAttachment();
 
   }
   initalizeform() {
@@ -67,22 +66,22 @@ export class AddIssueType {
     });
 
   }
-  addMediaRequirement(mediaType: string) {
+  addMediaRequirement(attachmentTypeId: string) {
     const control = this.fb.group({
-      mediaType: [mediaType, Validators.required],
-      maximum: ['', [Validators.required]],
-      maximumSize: ['', [Validators.required]],
-      issueMediaTypeLinks: this.fb.array([])
+      attachmentTypeId: [attachmentTypeId],
+      maximum: [''],
+      maximumSize: [''],
+      issueMediaType: this.fb.array([])
     });
 
     (this.issueTypeForm.get('mediaRequired') as FormArray).push(control);
   }
 
   addMediaTypeId(index: number, id: string, mandatory: boolean) {
-    const mediaTypeIdsArray = ((this.issueTypeForm.get('mediaRequired') as FormArray).at(index).get('issueMediaTypeLinks') as FormArray);
+    const mediaTypeIdsArray = ((this.issueTypeForm.get('mediaRequired') as FormArray).at(index).get('issueMediaType') as FormArray);
 
     mediaTypeIdsArray.push(this.fb.group({
-      mediaTypeId: [id, Validators.required],
+      mediaTypeId: [id],
       mandatory: [mandatory]
     }));
   }
@@ -171,6 +170,12 @@ export class AddIssueType {
     this.answerTypeList.push(newType);
   }
   //----------------------------
+  getAttachment(){
+     this.attachmentService.getAttachment().subscribe({
+      next: res => this.attachmentType = res.body.data,
+      error: err => this.utilityService.showError(err.status, err.error?.message || 'Get failed.')
+    });
+  }
 
   selectAll() {
     this.selectedPhotoTypes = this.attachmentType.map(m => m.name);
@@ -186,10 +191,10 @@ export class AddIssueType {
       if (!this.selectedAttachments.some(t => t.id === type.id)) {
         this.selectedAttachments.push(type);
         this.mediaRequired.push(this.fb.group({
-          mediaType: [type.name, Validators.required],
-          maximum: ['', Validators.required],
-          maximumSize: ['', Validators.required],
-          issueMediaTypeLinks: this.fb.array([])
+          attachmentTypeId: [type.id],
+          maximum: [''],
+          maximumSize: [''],
+          issueMediaType: this.fb.array([])
         }));
         this.selectedMediaTypeList.push([]);
       }
@@ -215,13 +220,13 @@ export class AddIssueType {
   }
 
   selectAllMediaType(index: number) {
-    const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaTypeLinks') as FormArray;
+    const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaType') as FormArray;
 
     this.mediaTypeList.forEach(type => {
       const exists = mediaTypeIds.controls.some(c => c.value.mediaTypeId === type.id);
       if (!exists) {
         mediaTypeIds.push(this.fb.group({
-          mediaTypeId: [type.id, Validators.required],
+          mediaTypeId: [type.id],
           mandatory: [false]
         }));
       }
@@ -231,19 +236,19 @@ export class AddIssueType {
   }
 
   clearAllMediaType(index: number) {
-    const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaTypeLinks') as FormArray;
+    const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaType') as FormArray;
     while (mediaTypeIds.length !== 0) mediaTypeIds.removeAt(0);
     this.selectedMediaTypeList[index] = [];
   }
 
   isMediaTypeChecked(index: number, id: string): boolean {
-    const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaTypeLinks') as FormArray;
+    const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaType') as FormArray;
     return mediaTypeIds.controls.some(c => c.value.mediaTypeId === id);
   }
 
   onMediaTypeChange(index: number, type: any, event: any) {
     const checked = event.target.checked;
-    const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaTypeLinks') as FormArray;
+    const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaType') as FormArray;
     const exists = mediaTypeIds.controls.find(c => c.value.mediaTypeId === type.id);
 
     if (checked && !exists) {
@@ -260,13 +265,13 @@ export class AddIssueType {
   }
 
   isMandatoryChecked(index: number, mediaTypeId: string): boolean {
-    const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaTypeLinks') as FormArray;
+    const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaType') as FormArray;
     const control = mediaTypeIds.controls.find(c => c.value.mediaTypeId === mediaTypeId);
     return control?.value.mandatory || false;
   }
 
   onMandatoryToggle(index: number, type: any, event: any) {
-    const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaTypeLinks') as FormArray;
+    const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaType') as FormArray;
     const control = mediaTypeIds.controls.find(c => c.value.mediaTypeId === type.id);
     if (control) {
       control.patchValue({ mandatory: event.target.checked });
@@ -286,7 +291,7 @@ export class AddIssueType {
 
   removeMediaType(tag: any, formIndex: number) {
     const formArray = this.issueTypeForm.get('mediaRequired') as FormArray;
-    const mediaTypeIdsArray = formArray.at(formIndex).get('issueMediaTypeLinks') as FormArray;
+    const mediaTypeIdsArray = formArray.at(formIndex).get('issueMediaType') as FormArray;
 
     this.selectedMediaTypeList[formIndex] = this.selectedMediaTypeList[formIndex].filter(
       (t: any) => t.id !== tag.id
