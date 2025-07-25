@@ -8,6 +8,7 @@ import { IssueTypeService } from '../../../Service/IssueTypeService/issue-type-s
 import { MediaTypeService } from '../../../Service/MediaTypeService/media-type-service';
 import { AddAnswerType } from '../../sys-answer-type/add-answer-type/add-answer-type';
 import { AddMediaType } from '../../media-type/add-media-type/add-media-type';
+import { AttachmentSevice } from '../../../Service/AttachmentService/attachment-sevice';
 
 @Component({
   selector: 'app-edit-issue-type',
@@ -31,16 +32,13 @@ issueTypeForm!: FormGroup;
   answerTypeList: any[] = [];
   selectedAnswerTypes: any[] = [];
   mediaTypeList: any[] = [];
+   answerTypeIds: any[] = [];
 // -------------
 issueTypeId:any='';
 
 
   isAnswerModalVisible: boolean = false;
-  attachmentType = [
-    { id: "1", name: 'Photo' },
-    { id: "2", name: 'Video' },
-    { id: "3", name: 'Pdf' },
-  ];
+  attachmentType :any[]=[];
 
   selectedAttachments: any[] = [];
   constructor(private fb: FormBuilder,
@@ -49,7 +47,8 @@ issueTypeId:any='';
     private mediaTypeService: MediaTypeService,
     private issueTypeService: IssueTypeService,
     private router: Router,
-    private route:ActivatedRoute
+    private route:ActivatedRoute,
+    private attachmentService:AttachmentSevice
   ) {
 
   }
@@ -61,6 +60,7 @@ issueTypeId:any='';
     this.getAnswerType();
     this.getMediaType();
     this.getIssueTypeById();
+    this.getAttachment();
 
   }
   initalizeform() {
@@ -175,6 +175,13 @@ issueTypeId:any='';
     this.answerTypeList.push(newType);
   }
   //----------------------------
+  getAttachment(){
+     this.attachmentService.getAttachment().subscribe({
+      next: res => this.attachmentType = res.body.data,
+      error: err => this.utilityService.showError(err.status, err.error?.message || 'Get failed.')
+    });
+  }
+
 
   selectAll() {
     this.selectedPhotoTypes = this.attachmentType.map(m => m.name);
@@ -326,12 +333,46 @@ issueTypeId:any='';
     });
   }
 // -----------------------------
+issueTypeData :any;
+issueAttachment:any;
 getIssueTypeById(){
 this.issueTypeService.getIssueTypeBYId(this.issueTypeId).subscribe({
   next:(res)=>{
     console.log(res);
     
+  this.issueTypeData =res.body.data;
+     this.issueTypeForm.patchValue({
+        issueType: this.issueTypeData .issueType,  
+      });
+        this.answerTypeIds = this.issueTypeData.answerTypeIds
+        this.issueAttachment= this.issueTypeData.mediaRequired
+console.log(this.issueAttachment);
+
+    
   }
 })
 }
+isAttachmentSelected(id: string): boolean {
+  return this.issueAttachment?.some((item:any) => item.attachmentTypeId === id);
+}
+onAttachmentToggle(attachment: any, event: Event) {
+  const checked = (event.target as HTMLInputElement).checked;
+
+  if (checked) {
+    // Add to list if not already present
+    if (!this.issueAttachment.some((a:any) => a.attachmentTypeId === attachment.attachmentTypeId)) {
+      this.issueAttachment.push({
+        ...attachment,
+        maximum: 1,
+        maximumSize: 1,
+        issueMediaType: [],
+      });
+    }
+  } else {
+    // Remove from the list
+    this.issueAttachment = this.issueAttachment.filter((a:any) => a.attachmentTypeId !== attachment.attachmentTypeId
+    );
+  }
+}
+
 }

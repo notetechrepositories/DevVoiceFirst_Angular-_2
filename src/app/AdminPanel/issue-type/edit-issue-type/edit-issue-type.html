@@ -40,10 +40,10 @@
                           class="form-check-input"
                           type="checkbox"
                           [id]="'attachment-' + type.id"
-                          [checked]="selectedAttachments.includes(type)"
-                          (change)="toggleAttachment(type, $event)">
+                          [checked]="isAttachmentSelected(type.id)"
+                          (change)="onAttachmentToggle(type, $event)">
                         <label class="form-check-label" [for]="'attachment-' + type.id">
-                          {{ type.name }}
+                          {{ type.attachmentType }}
                         </label>
                       </div>
                     </li>
@@ -102,30 +102,12 @@
             <div class="table-responsive" style="max-height: 150px; overflow-y: auto;">
               <table class="table mb-0">
                 <tbody>
+                     @for (type of answerTypeIds; track type.id){
                   <tr>
-                    <td>DEASDASD</td>
-                    <td>ASDASDASD</td>
+                      <td>{{type.answerTypeName}}</td>
+                      <td>{{ type.status ? 'Active' : 'Inactive' }}</td>
                   </tr>
-                  <tr>
-                    <td>DEASDASD</td>
-                    <td>ASDASDASD</td>
-                  </tr>
-                  <tr>
-                    <td>DEASDASD</td>
-                    <td>ASDASDASD</td>
-                  </tr>
-                  <tr>
-                    <td>DEASDASD</td>
-                    <td>ASDASDASD</td>
-                  </tr>
-                  <tr>
-                    <td>DEASDASD</td>
-                    <td>ASDASDASD</td>
-                  </tr>
-                  <tr>
-                    <td>DEASDASD</td>
-                    <td>ASDASDASD</td>
-                  </tr>
+                }
                 </tbody>
               </table>
             </div>
@@ -140,13 +122,13 @@
 
   <!-- Media Form Array Section -->
   <div class="row" formArrayName="mediaRequired">
-    @for (attachment of selectedAttachments; let i = $index; track i) {
+    @for (attachment of issueAttachment; let i = $index; track i) {
       <div class="col-md-6 mb-2" [formGroupName]="i">
         <div class="border p-3 rounded">
           <div class="row">
             <!-- Size and Number -->
             <div class="col-md-4">
-              <p class="fw-bold">{{ attachment.name }} Attachment</p>
+              <p class="fw-bold">{{ attachment.attachmentType }} Attachment</p>
               <div class="mb-3">
                 <label class="form-label">Max Size (MB)</label>
                 <input
