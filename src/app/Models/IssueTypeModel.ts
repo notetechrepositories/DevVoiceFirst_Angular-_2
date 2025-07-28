@@ -5,5 +5,6 @@ export interface IssueTypeModel{
     maximum:number;
     maximumSize:number;
     mediaTypeId:string;
+    status:string;
 
 }
