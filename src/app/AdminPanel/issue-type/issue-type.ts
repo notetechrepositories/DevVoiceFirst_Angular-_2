@@ -5,6 +5,8 @@ import { AnswerTypeService } from '../../Service/AnswerTypeService/answer-type-s
 import { UtilityService } from '../../Service/UtilityService/utility-service';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
+import { IssueTypeService } from '../../Service/IssueTypeService/issue-type-service';
+import { IssueTypeModel } from '../../Models/IssueTypeModel';
 
 @Component({
   selector: 'app-issue-type',
@@ -13,37 +15,31 @@ import { Router, RouterLink } from '@angular/router';
   styleUrl: './issue-type.css'
 })
 export class IssueType {
- data: AnswerTypeModel[] = [];
-  filteredData: AnswerTypeModel[] = [];
+ data: IssueTypeModel[] = [];
+  filteredData: IssueTypeModel[] = [];
 
   itemsPerPage = 10;
   currentPage = 1;
   searchTerm: string = '';
   statusFilter: string = '';
-  selectedAnswerTypeIds: string[] = [];
+  selectedIssueTypeIds: string[] = [];
   isAllSelected = false;
   isModalVisible: boolean = false;
   isEditModalVisible: boolean = false;
-  answerTypeForm!: FormGroup;
   isEditMode: boolean = false;
   originalItem: any;
-
   answerTypes: any[] = [];
   selectedAnswerTypeId: string | null = null;
 
   constructor(
     private fb: FormBuilder,
     private utilityService: UtilityService,
-    private answerTypeSevice: AnswerTypeService,
-    private router: Router
+    private router: Router,
+    private issueTypeService:IssueTypeService
   ) { }
 
   ngOnInit() {
-    this.getAnswerType();
-    this.answerTypeForm = this.fb.group({
-      id: [''],
-      answerTypeName: ['', Validators.required],
-    });
+    this.getAllIssueType();
   }
 
   get totalPages(): number {
@@ -64,7 +60,7 @@ export class IssueType {
   onSearch() {
     const term = this.searchTerm.toLowerCase();
     this.filteredData = this.data.filter(item =>
-      item.answerTypeName.toLowerCase().includes(term)
+      item.issueType.toLowerCase().includes(term)
     );
     this.currentPage = 1;
   }
@@ -99,14 +95,8 @@ export class IssueType {
      this.router.navigate(['admin/add-issue-type']);
   }
 
-  closeModal() {
-    this.isModalVisible = false;
-    this.answerTypes = [];
-    this.answerTypeForm.reset();
-  }
-
-  getAnswerType() {
-    this.answerTypeSevice.getAnswerType().subscribe({
+  getAllIssueType() {
+    this.issueTypeService.getAllIssueType().subscribe({
       next: res => {
         this.data = res.body.data;
         this.filteredData = [...this.data];
@@ -114,74 +104,15 @@ export class IssueType {
       error: err => { this.utilityService.showError(err.status, err.error?.message || 'Get failed.') }
     });
   }
-  removeActivity(index: number): void {
-    this.answerTypes.splice(index, 1);
-  }
-  submitAnswerType() {
-    const form = this.answerTypeForm;
-    const formValue = form.value;
-    const payload = {
-      answerTypeName: formValue.answerTypeName,
-
-    };
-    if (this.answerTypeForm.invalid) {
-      this.answerTypeForm.markAllAsTouched();
-      return;
-    }
-    if (this.isEditMode) {
-      const updatedFields: any = { id: this.selectedAnswerTypeId };
-
-      this.utilityService.setIfDirty(form, 'answerTypeName', updatedFields);
-      // Only send update if any field has changed
-      if (Object.keys(updatedFields).length === 1) {
-        this.utilityService.warning('No changes detected.');
-        return;
-      }
-      this.answerTypeSevice.updateAnswerType(updatedFields).subscribe({
-        next: (res) => {
-          const updatedItem = res.body?.data;
-
-          if (updatedItem) {
-            const filteredIndex = this.filteredData.findIndex(item => item.id === updatedItem.id);
-            if (filteredIndex !== -1) {
-              this.filteredData[filteredIndex] = updatedItem;
-            }
-          }
-          this.closeModal();
-          this.utilityService.success(res.body?.message || 'Activity updated.');
-        },
-        error: err => {
-          this.utilityService.showError(err.status, err.error?.message || 'Update failed.');
-        }
-      });
-    }
-    else {
-      this.answerTypeSevice.createAnswertype(payload).subscribe({
-        next: (res) => {
-          const newItem = res.body?.data;
-          if (newItem) {
-            this.filteredData.push(newItem);
-          }
-          this.closeModal();
-          this.utilityService.success(res.body.message);
-        },
-        error: err => {
-          this.utilityService.showError(err.status, err.error.message);
-        }
-      });
-    }
-
-
-  }
-  async deleteAnswerType(): Promise<void> {
-    const message = `Delete ${this.selectedAnswerTypeIds.length} Answer type(s)`;
+  async deleteIssueType(): Promise<void> {
+    const message = `Delete ${this.selectedIssueTypeIds.length} Issue type(s)`;
     const result = await this.utilityService.confirmDialog(message, 'delete');
     if (result.isConfirmed) {
-      this.answerTypeSevice.deleteAnswerType(this.selectedAnswerTypeIds).subscribe({
+      this.issueTypeService.deleteIssueType(this.selectedIssueTypeIds).subscribe({
         next: (res) => {
           const deletedIds: string[] = res.body?.data || [];
           this.filteredData = this.filteredData.filter(item => !deletedIds.includes(item.id));
-          this.selectedAnswerTypeIds = [];
+          this.selectedIssueTypeIds = [];
           this.isAllSelected = false;
           this.utilityService.success(res.body?.message || 'Deleted successfully.');
         },
@@ -190,24 +121,24 @@ export class IssueType {
         }
 
       });
-      this.selectedAnswerTypeIds = [];
+      this.selectedIssueTypeIds = [];
       this.isAllSelected = false;
 
     }
   }
   updateSelectAllStatus() {
-    this.isAllSelected = this.selectedAnswerTypeIds.length === this.pagedData.length;
+    this.isAllSelected = this.selectedIssueTypeIds.length === this.pagedData.length;
   }
 
   toggleSelection(id: string, event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
 
     if (checked) {
-      if (!this.selectedAnswerTypeIds.includes(id)) {
-        this.selectedAnswerTypeIds.push(id);
+      if (!this.selectedIssueTypeIds.includes(id)) {
+        this.selectedIssueTypeIds.push(id);
       }
     } else {
-      this.selectedAnswerTypeIds = this.selectedAnswerTypeIds.filter(x => x !== id);
+      this.selectedIssueTypeIds = this.selectedIssueTypeIds.filter(x => x !== id);
     }
   }
 
@@ -215,9 +146,9 @@ export class IssueType {
     const checked = (event.target as HTMLInputElement).checked;
 
     if (checked) {
-      this.selectedAnswerTypeIds = this.pagedData.map(x => x.id);
+      this.selectedIssueTypeIds = this.pagedData.map(x => x.id);
     } else {
-      this.selectedAnswerTypeIds = [];
+      this.selectedIssueTypeIds = [];
     }
 
     this.isAllSelected = checked;
@@ -229,12 +160,12 @@ export class IssueType {
       id: item.id,
       status: updatedStatus
     };
-    const message = `Are you sure you want to set this answer type as ${updatedStatus ? 'Active' : 'Inactive'}?`;
+    const message = `Are you sure you want to set this issue type as ${updatedStatus ? 'Active' : 'Inactive'}?`;
     const result = await this.utilityService.confirmDialog(message, 'update');
 
     if (result.isConfirmed) {
 
-      this.answerTypeSevice.updateAnswerTypeStatus(payload).subscribe({
+      this.issueTypeService.updateIssueTypeStatus(payload).subscribe({
         next: () => {
           item.status = updatedStatus;
           this.utilityService.success('Status updated successfully');
@@ -245,5 +176,12 @@ export class IssueType {
         }
       });
     }
+  }
+
+  viewIssueType(){
+
+  }
+  openEditModal(id:any){
+    this.router.navigate(['admin/edit-issue-type',id]);
   }
 }

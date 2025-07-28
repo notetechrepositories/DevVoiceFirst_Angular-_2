@@ -10,6 +10,7 @@ import { Divisions } from './divisions/divisions';
 import { MediaType } from './media-type/media-type';
 import { IssueType } from './issue-type/issue-type';
 import { AddIssueType } from './issue-type/add-issue-type/add-issue-type';
+import { EditIssueType } from './issue-type/edit-issue-type/edit-issue-type';
 
 
 export const AdminRoutes: Routes = [
@@ -39,6 +40,10 @@ export const AdminRoutes: Routes = [
   {
     path:'add-issue-type',
     component:AddIssueType
+  },
+    {
+    path:'edit-issue-type/:id',
+    component:EditIssueType
   },
    {
     path:'issue-type',
