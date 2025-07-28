@@ -46,7 +46,7 @@ issueTypeId:any='';
   issueAnswerType:any;
 
   deletedAnswerTypeIds: string[] = [];
-  removedAttachmentIds: string[] = [];
+  removedAttachments: any[] = [];
   
 
 
@@ -347,7 +347,7 @@ issueTypeId:any='';
         // Track deletion if it previously existed in the DB
         const original = this.selectedAttachments.find((a: any) => a.attachmentTypeId === type.id);
         if (original?.mediaRequiredId) {
-          this.removedAttachmentIds.push(original.mediaRequiredId);
+          this.removedAttachments.push(original.mediaRequiredId);
         }
   
         this.selectedAttachments.splice(index, 1);
@@ -485,15 +485,16 @@ onAttachmentToggle(type: any, event: Event) {
   if (checked) {
     // Prevent duplicates
     if (!this.selectedAttachments.some((a: any) => a.attachmentTypeId === type.id)) {
-      this.selectedAttachments.push({
+      const newAttachment = {
         attachmentTypeId: type.id,
         attachmentType: type.attachmentType,
         maximum: 1,
         maximumSize: 1,
         issueMediaType: []
-      });
+      };
 
-      // Push to FormArray as well
+      this.selectedAttachments.push(newAttachment);
+
       formArray.push(this.fb.group({
         attachmentTypeId: [type.id, Validators.required],
         maximum: [1, Validators.required],
@@ -501,15 +502,29 @@ onAttachmentToggle(type: any, event: Event) {
         issueMediaType: this.fb.array([])
       }));
 
-      // Optional: push to selectedMediaTypeList for visual media tag rendering
       this.selectedMediaTypeList.push([]);
     }
   } else {
+    // Find the attachment to be removed
     const index = this.selectedAttachments.findIndex((a: any) => a.attachmentTypeId === type.id);
+    const removedAttachment = this.selectedAttachments[index];
+
     if (index > -1) {
+      // Track the removed item so mediaRequiredId is not lost
+      if (removedAttachment?.mediaRequiredId) {
+        this.removedAttachments.push(removedAttachment);
+      }
+
       this.selectedAttachments.splice(index, 1);
-      formArray.removeAt(index);
-      this.selectedMediaTypeList.splice(index, 1); // sync visual list
+    }
+
+    // Remove form control by matching attachmentTypeId, not index
+    const formIndex = formArray.controls.findIndex(
+      ctrl => ctrl.get('attachmentTypeId')?.value === type.id
+    );
+    if (formIndex > -1) {
+      formArray.removeAt(formIndex);
+      this.selectedMediaTypeList.splice(formIndex, 1);
     }
   }
 }
@@ -566,9 +581,7 @@ generateUpdatePayload(): any {
   // ---------- Handle Media Required ----------
   const formArray = form.get('mediaRequired') as FormArray;
   const formAttachmentIds = formArray.controls.map(ctrl => ctrl.get('attachmentTypeId')?.value);
-  const removedMediaRequired = (this.selectedAttachments || []).filter((orig: any) =>
-    !formAttachmentIds.includes(orig.attachmentTypeId)
-  );
+  const removedMediaRequired = this.removedAttachments || [];
 
   const mediaRequiredChanges: any[] = [];
 
@@ -657,6 +670,8 @@ generateUpdatePayload(): any {
   if (mediaRequiredChanges.length > 0) {
     payload.mediaRequired = mediaRequiredChanges;
   }
+
+  this.removedAttachments = [];
 
   return payload;
 }
