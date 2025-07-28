@@ -45,6 +45,7 @@
                         <label class="form-check-label" [for]="'attachment-' + type.id">
                           {{ type.attachmentType }}
                         </label>
+
                       </div>
                     </li>
                   }
@@ -54,64 +55,78 @@
 
          </div>
          <div class="col-md-6">
+          <!-- Inside your form -->
           <div class="formGroup d-flex justify-content-between">
             <label class="form-label">Answer Type</label>
-                                        <!-- Dropdown + Add Button Container -->
-              <div class="d-flex align-items-center gap-2">
-                <!-- Dropdown Button -->
-                <div class="dropdown flex-grow-1">
-                  <button class="btn btn-outline-secondary dropdown-toggle text-start btn-xs"  data-bs-toggle="dropdown"  data-bs-auto-close="outside">
-                    <i class="pi pi-list-check"></i>
-                  </button>
-
-                  <!-- Dropdown List -->
-                  <ul class="dropdown-menu p-3" style="width:100%">
-                    <li class="mb-2 d-flex justify-content-between">
-                      <div>
-                        <button class="btn btn-sm btn-success me-2" (click)="selectAllAnswerType()">Select All</button>
-                        <button class="btn btn-sm btn-danger" (click)="clearAllAnswerType()">Clear All</button>
+            <div class="d-flex align-items-center gap-2">
+              <div class="dropdown flex-grow-1">
+                <button class="btn btn-outline-secondary dropdown-toggle text-start btn-xs" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                  <i class="pi pi-list-check"></i> Select Answer Types
+                </button>
+          
+                <ul class="dropdown-menu p-3" style="width:100%">
+                  <li class="mb-2 d-flex justify-content-between">
+                    <div>
+                      <button class="btn btn-sm btn-success me-2" (click)="selectAllAnswerType()">Select All</button>
+                      <button class="btn btn-sm btn-danger" (click)="clearAllAnswerType()">Clear All</button>
+                    </div>
+                  </li>
+          
+                  @for (type of answerTypeList; track type.id) {
+                    <li class="mb-2">
+                      <div class="form-check">
+                        <input
+                          class="form-check-input"
+                          type="checkbox"
+                          [id]="type.id"
+                          [checked]="isAnswerTypeSelected(type.id)"
+                          (change)="onAnswerTypeToggle(type, $event)">
+                        <label class="form-check-label" [for]="type.id">
+                          {{ type.answerTypeName }}
+                        </label>
                       </div>
                     </li>
-
-                    @for (type of answerTypeList; track type.id) {
-                      <li class="mb-2">
-                        <div class="d-flex justify-content-between align-items-center">
-                          <!-- Checkbox + Label -->
-                          <div class="form-check">
-                            <input class="form-check-input me-2" type="checkbox" [id]="type.id"
-                              [checked]="isAnswerTypeSelected(type.id)"(change)="onAnswerTypeToggle(type, $event)">
-                            <label class="form-check-label" [for]="type.id">
-                              {{ type.answerTypeName }}
-                            </label>
-                          </div>
-                        </div>
-                      </li>
-                    }
-                  </ul>
-                </div>
-
-                <!-- Add Button -->
-                <button type="button" class="btn btn-primary btn-xs" (click)="openAnswerModal()">
-                  <i class="fas fa-plus"></i>
-                </button>
+                  }
+                </ul>
               </div>
-
+          
+              <button type="button" class="btn btn-primary btn-xs" (click)="openAnswerModal()">
+                <i class="fas fa-plus"></i>
+              </button>
+            </div>
           </div>
+          
 
-          <div class="card p-2">
+          <div class="card p-2" style="height:134px">
             <div class="table-responsive" style="max-height: 150px; overflow-y: auto;">
               <table class="table mb-0">
                 <tbody>
-                     @for (type of answerTypeIds; track type.id){
-                  <tr>
-                      <td>{{type.answerTypeName}}</td>
-                      <td>{{ type.status ? 'Active' : 'Inactive' }}</td>
-                  </tr>
-                }
+                  @for (type of issueAnswerType; track type.answerTypeId) {
+                    <tr>
+                      <td>{{ type.answerTypeName }}</td>
+                      <td>
+                        <span
+                          class="badge"
+                          [ngClass]="type.status ? 'bg-success' : 'bg-secondary'"
+                          style="cursor: pointer;"
+                        >
+                          {{ type.status ? 'Active' : 'Inactive' }}
+                        </span>
+                      </td>
+                    </tr>
+                  }
+                  @empty {
+                    <div class="h-100">
+                      <p class="text-center text-muted">No answer type selected</p>
+                    </div>
+                      
+                    
+                  }
                 </tbody>
               </table>
             </div>
           </div>
+          
 
          </div>
        </div>
@@ -122,7 +137,7 @@
 
   <!-- Media Form Array Section -->
   <div class="row" formArrayName="mediaRequired">
-    @for (attachment of issueAttachment; let i = $index; track i) {
+    @for (attachment of selectedAttachments; let i = $index; track i) {
       <div class="col-md-6 mb-2" [formGroupName]="i">
         <div class="border p-3 rounded">
           <div class="row">
@@ -162,7 +177,7 @@
                     data-bs-toggle="dropdown"
                     data-bs-auto-close="outside"
                     [disabled]="isPhotoDisabled">
-                    <i class="pi pi-list-check"></i>
+                    <i class="pi pi-list-check"></i> Select Media Types
                   </button>
 
                   <ul class="dropdown-menu p-3 dropdown-menu-container">
@@ -223,34 +238,31 @@
               </div>
 
               <!-- Selected Tags -->
-            <div class="card p-2">
+            <div class="card p-2" style="height: 172px;">
               <div class="table-responsive" style="max-height: 150px; overflow-y: auto;">
                 <table class="table mb-0">
                   <tbody>
-                    <tr>
-                      <td>DEASDASD</td>
-                      <td>ASDASDASD</td>
-                    </tr>
-                    <tr>
-                      <td>DEASDASD</td>
-                      <td>ASDASDASD</td>
-                    </tr>
-                    <tr>
-                      <td>DEASDASD</td>
-                      <td>ASDASDASD</td>
-                    </tr>
-                    <tr>
-                      <td>DEASDASD</td>
-                      <td>ASDASDASD</td>
-                    </tr>
-                    <tr>
-                      <td>DEASDASD</td>
-                      <td>ASDASDASD</td>
-                    </tr>
-                    <tr>
-                      <td>DEASDASD</td>
-                      <td>ASDASDASD</td>
-                    </tr>
+                    @for(type of selectedMediaTypeList[i]; let j = $index; track j){
+                      <tr>
+                        <td>{{type.description}}</td>
+                        <td>
+                          <span
+                            class="badge"
+                            [ngClass]="type.status ? 'bg-success' : 'bg-secondary'"
+                            style="cursor: pointer;"
+                          >
+                            {{ type.status ? 'Active' : 'Inactive' }}
+                          </span>
+                        </td>
+                      </tr>
+                    }
+                    @empty {
+                      <div class="h-100">
+                        <p class="text-center text-muted">No media type selected</p>
+                      </div>
+                        
+                      
+                    }
                   </tbody>
                 </table>
               </div>

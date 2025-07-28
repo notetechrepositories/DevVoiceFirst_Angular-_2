@@ -41,6 +41,16 @@ issueTypeId:any='';
   attachmentType :any[]=[];
 
   selectedAttachments: any[] = [];
+
+  issueTypeData :any;
+  issueAnswerType:any;
+
+  deletedAnswerTypeIds: string[] = [];
+  removedAttachmentIds: string[] = [];
+  
+
+
+
   constructor(private fb: FormBuilder,
     private answerTypeSevice: AnswerTypeService,
     private utilityService: UtilityService,
@@ -61,16 +71,18 @@ issueTypeId:any='';
     this.getMediaType();
     this.getIssueTypeById();
     this.getAttachment();
-
   }
+
   initalizeform() {
     this.issueTypeForm = this.fb.group({
+      id: [''],
       issueType: ['', Validators.required],
-      answerTypeIds: [[]],
+      status: [true],
+      answerTypeIds: this.fb.array([]),
       mediaRequired: this.fb.array([])
     });
-
   }
+
   addMediaRequirement(mediaType: string) {
     const control = this.fb.group({
       mediaType: [mediaType, Validators.required],
@@ -84,18 +96,96 @@ issueTypeId:any='';
 
   addMediaTypeId(index: number, id: string, mandatory: boolean) {
     const mediaTypeIdsArray = ((this.issueTypeForm.get('mediaRequired') as FormArray).at(index).get('issueMediaTypeLinks') as FormArray);
-
     mediaTypeIdsArray.push(this.fb.group({
       mediaTypeId: [id, Validators.required],
       mandatory: [mandatory]
     }));
   }
 
-  // ------------------------
-
   get mediaRequired(): FormArray {
     return this.issueTypeForm.get('mediaRequired') as FormArray;
   }
+
+
+  getIssueTypeById() {
+    this.issueTypeService.getIssueTypeBYId(this.issueTypeId).subscribe({
+      next: res => {
+        const data = res.body.data;
+        console.log(data);
+        
+        this.issueAnswerType = data.answerTypeIds || [];
+        this.selectedAttachments = data.mediaRequired || [];
+  
+        this.issueTypeForm.patchValue({
+          id: data.id,
+          issueType: data.issueType,
+          status: data.status ?? true,
+          answerTypeIds: this.issueAnswerType.map((a: any) => a.answerTypeId)
+        });
+
+        const answerTypeArray = this.issueTypeForm.get('answerTypeIds') as FormArray;
+        data.answerTypeIds.forEach((item: any) => {
+          answerTypeArray.push(this.fb.group({
+            issueAnswerTypeId: [item.issueAnswerTypeId],
+            answerTypeId: [item.answerTypeId],
+            answerTypeName: [item.answerTypeName],
+            issueTypeId: [item.issueTypeId],
+            status: [item.status ?? true]
+          }));
+        });
+
+        console.log(answerTypeArray.value);
+        
+  
+        // Clear existing mediaRequired array
+        const mediaRequiredArray = this.issueTypeForm.get('mediaRequired') as FormArray;
+        mediaRequiredArray.clear();
+        this.selectedMediaTypeList = []; // Clear before pushing new data
+        
+        this.selectedAttachments.forEach((item: any) => {
+          const mediaGroup = this.fb.group({
+            mediaRequiredId: [item.mediaRequiredId],
+            attachmentTypeId: [item.attachmentTypeId, Validators.required],
+            maximum: [item.maximum, Validators.required],
+            maximumSize: [item.maximumSize, Validators.required],
+            status: [item.status ?? true], // Add this
+            issueMediaType: this.fb.array([])
+          });
+        
+          const mediaTypeArray = mediaGroup.get('issueMediaType') as FormArray;
+        
+          const selectedMediaTypes: any[] = []; // Will collect this row's types
+        
+          (item.issueMediaType || []).forEach((mt: any) => {
+            mediaTypeArray.push(this.fb.group({
+              issueMediaTypeId: [mt.issueMediaTypeId],
+              mediaTypeId: [mt.mediaTypeId, Validators.required],
+              description: [mt.description],
+              mandatory: [mt.mandatory],
+              status: [mt.status ?? true]
+            }));
+        
+            // Push to tracking array for UI
+            selectedMediaTypes.push({
+              mediaTypeId: mt.mediaTypeId,
+              description: mt.description,
+              mandatory: mt.mandatory,
+              status:mt.status
+            });
+          });
+        
+          mediaRequiredArray.push(mediaGroup);
+          this.selectedMediaTypeList.push(selectedMediaTypes); // Push to visual array
+          console.log(this.selectedMediaTypeList);
+          
+        });
+        
+  
+      },
+      error: err => this.utilityService.showError(err.status, err.error?.message || 'Fetch failed.')
+    });
+  }
+  
 
   // -------------------------
 
@@ -118,36 +208,81 @@ issueTypeId:any='';
   }
 
   selectAllAnswerType() {
-    const allIds = this.answerTypeList.map(type => type.id);
-    this.issueTypeForm.get('answerTypeIds')?.setValue(allIds);
-
+    const answerArray = this.issueTypeForm.get('answerTypeIds') as FormArray;
+    answerArray.clear();
+  
+    this.issueAnswerType = []; // Clear old list
+  
+    this.answerTypeList.forEach(type => {
+      const group = this.fb.group({
+        issueAnswerTypeId: [null],
+        answerTypeId: [type.id],
+        answerTypeName: [type.answerTypeName],
+        issueTypeId: [this.issueTypeForm.value.id],
+        status: [true]
+      });
+  
+      answerArray.push(group);
+  
+      // Also update the visual preview array
+      this.issueAnswerType.push(group.value);
+    });
+  
+    answerArray.markAsDirty();
   }
+  
   clearAllAnswerType() {
-    this.issueTypeForm.get('answerTypeIds')?.setValue([]);
-    this.issueTypeForm.get('answerTypeIds')?.markAsDirty();
+    const answerArray = this.issueTypeForm.get('answerTypeIds') as FormArray;
+    answerArray.clear();
+    answerArray.markAsDirty();
+    this.issueAnswerType=[];
   }
-
+  
   onAnswerTypeToggle(type: any, event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
-    const answerTypeIds = this.issueTypeForm.get('answerTypeIds')?.value || [];
-
+    const answerArray = this.issueTypeForm.get('answerTypeIds') as FormArray;
+  
     if (checked) {
-      if (!answerTypeIds.includes(type.id)) {
-        answerTypeIds.push(type.id);
+      const exists = answerArray.controls.some(ctrl => ctrl.value.answerTypeId === type.id);
+      if (!exists) {
+        const group = this.fb.group({
+          issueAnswerTypeId: [null],
+          answerTypeId: [type.id],
+          answerTypeName: [type.answerTypeName],
+          issueTypeId: [this.issueTypeForm.value.id],
+          status: [true]
+        });
+  
+        answerArray.push(group);
+        this.issueAnswerType.push(group.value); // ✅ add to visual list
       }
-    } else {
-      const index = answerTypeIds.indexOf(type.id);
+    }else {
+      const index = answerArray.controls.findIndex(ctrl => ctrl.value.answerTypeId === type.id);
       if (index > -1) {
-        answerTypeIds.splice(index, 1);
+        const removedItem = answerArray.at(index).value;
+        answerArray.removeAt(index);
+    
+        // ✅ Track for deletion if it has issueAnswerTypeId
+        if (removedItem.issueAnswerTypeId) {
+          this.deletedAnswerTypeIds.push(removedItem.issueAnswerTypeId);
+        }
+      }
+    
+      // Remove from display list
+      const visualIndex = this.issueAnswerType.findIndex((item:any) => item.answerTypeId === type.id);
+      if (visualIndex > -1) {
+        this.issueAnswerType.splice(visualIndex, 1);
       }
     }
-
-    this.issueTypeForm.get('answerTypeIds')?.setValue(answerTypeIds);
-    this.issueTypeForm.get('answerTypeIds')?.markAsDirty();
+  
+    answerArray.markAsDirty();
   }
+  
+  
 
   isAnswerTypeSelected(id: string): boolean {
-    return this.issueTypeForm.get('answerTypeIds')?.value?.includes(id);
+    const answerArray = this.issueTypeForm.get('answerTypeIds') as FormArray;
+    return answerArray.controls.some(ctrl => ctrl.value.answerTypeId === id);
   }
 
   getSelectedAnswerTypeNames(): string {
@@ -175,13 +310,14 @@ issueTypeId:any='';
     this.answerTypeList.push(newType);
   }
   //----------------------------
+
+
   getAttachment(){
      this.attachmentService.getAttachment().subscribe({
       next: res => this.attachmentType = res.body.data,
       error: err => this.utilityService.showError(err.status, err.error?.message || 'Get failed.')
     });
   }
-
 
   selectAll() {
     this.selectedPhotoTypes = this.attachmentType.map(m => m.name);
@@ -190,28 +326,37 @@ issueTypeId:any='';
   clearAll() {
     this.selectedPhotoTypes = [];
   }
+
   toggleAttachment(type: any, event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
-
+  
     if (checked) {
       if (!this.selectedAttachments.some(t => t.id === type.id)) {
         this.selectedAttachments.push(type);
         this.mediaRequired.push(this.fb.group({
-          mediaType: [type.name, Validators.required],
-          maximum: ['', Validators.required],
-          maximumSize: ['', Validators.required],
-          issueMediaTypeLinks: this.fb.array([])
+          attachmentTypeId: [type.id],
+          maximum: [''],
+          maximumSize: [''],
+          issueMediaType: this.fb.array([])
         }));
         this.selectedMediaTypeList.push([]);
       }
     } else {
       const index = this.selectedAttachments.findIndex(t => t.id === type.id);
       if (index > -1) {
+        // Track deletion if it previously existed in the DB
+        const original = this.selectedAttachments.find((a: any) => a.attachmentTypeId === type.id);
+        if (original?.mediaRequiredId) {
+          this.removedAttachmentIds.push(original.mediaRequiredId);
+        }
+  
         this.selectedAttachments.splice(index, 1);
         this.mediaRequired.removeAt(index);
         this.selectedMediaTypeList.splice(index, 1);
       }
     }
+  
+    this.mediaRequired.markAsDirty();
   }
 
 
@@ -226,13 +371,13 @@ issueTypeId:any='';
   }
 
   selectAllMediaType(index: number) {
-    const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaTypeLinks') as FormArray;
+    const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaType') as FormArray;
 
     this.mediaTypeList.forEach(type => {
       const exists = mediaTypeIds.controls.some(c => c.value.mediaTypeId === type.id);
       if (!exists) {
         mediaTypeIds.push(this.fb.group({
-          mediaTypeId: [type.id, Validators.required],
+          mediaTypeId: [type.id],
           mandatory: [false]
         }));
       }
@@ -242,42 +387,55 @@ issueTypeId:any='';
   }
 
   clearAllMediaType(index: number) {
-    const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaTypeLinks') as FormArray;
+    const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaType') as FormArray;
     while (mediaTypeIds.length !== 0) mediaTypeIds.removeAt(0);
     this.selectedMediaTypeList[index] = [];
   }
 
   isMediaTypeChecked(index: number, id: string): boolean {
-    const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaTypeLinks') as FormArray;
+    const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaType') as FormArray;
     return mediaTypeIds.controls.some(c => c.value.mediaTypeId === id);
   }
 
   onMediaTypeChange(index: number, type: any, event: any) {
     const checked = event.target.checked;
-    const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaTypeLinks') as FormArray;
+    const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaType') as FormArray;
     const exists = mediaTypeIds.controls.find(c => c.value.mediaTypeId === type.id);
-
+  
     if (checked && !exists) {
+      // Add to FormArray
       mediaTypeIds.push(this.fb.group({
         mediaTypeId: [type.id, Validators.required],
         mandatory: [false]
       }));
-      this.selectedMediaTypeList[index].push(type);
+  
+      // Push a consistent object shape to the visual list
+      this.selectedMediaTypeList[index].push({
+        mediaTypeId: type.id,
+        description: type.description,
+        status: true // or false, depending on how you define status in new ones
+      });
+  
     } else if (!checked && exists) {
       const idx = mediaTypeIds.controls.findIndex(c => c.value.mediaTypeId === type.id);
       mediaTypeIds.removeAt(idx);
-      this.selectedMediaTypeList[index] = this.selectedMediaTypeList[index].filter(t => t.id !== type.id);
+  
+      // Remove from visual list using mediaTypeId
+      this.selectedMediaTypeList[index] = this.selectedMediaTypeList[index].filter(
+        (t: any) => t.mediaTypeId !== type.id
+      );
     }
   }
+  
 
   isMandatoryChecked(index: number, mediaTypeId: string): boolean {
-    const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaTypeLinks') as FormArray;
+    const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaType') as FormArray;
     const control = mediaTypeIds.controls.find(c => c.value.mediaTypeId === mediaTypeId);
     return control?.value.mandatory || false;
   }
 
   onMandatoryToggle(index: number, type: any, event: any) {
-    const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaTypeLinks') as FormArray;
+    const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaType') as FormArray;
     const control = mediaTypeIds.controls.find(c => c.value.mediaTypeId === type.id);
     if (control) {
       control.patchValue({ mandatory: event.target.checked });
@@ -297,7 +455,7 @@ issueTypeId:any='';
 
   removeMediaType(tag: any, formIndex: number) {
     const formArray = this.issueTypeForm.get('mediaRequired') as FormArray;
-    const mediaTypeIdsArray = formArray.at(formIndex).get('issueMediaTypeLinks') as FormArray;
+    const mediaTypeIdsArray = formArray.at(formIndex).get('issueMediaType') as FormArray;
 
     this.selectedMediaTypeList[formIndex] = this.selectedMediaTypeList[formIndex].filter(
       (t: any) => t.id !== tag.id
@@ -314,65 +472,221 @@ issueTypeId:any='';
   }
 // -------------------------------------------------------------------------------
 
-// ------------SUBMIT------------------------------------------------------------
-  submit() {
-    const form = this.issueTypeForm.value;
-    console.log(form);
 
-    this.issueTypeService.createIssueType(form).subscribe({
-      next: (res) => {
-        console.log(res);
-        this.utilityService.success(res.body.message);
-        this.router.navigate(['admin/issue-type'])
-      },
-      error: err => {
-        console.log(err);
 
-        this.utilityService.showError(err.status, err.error.message);
-      }
-    });
-  }
-// -----------------------------
-issueTypeData :any;
-issueAttachment:any;
-getIssueTypeById(){
-this.issueTypeService.getIssueTypeBYId(this.issueTypeId).subscribe({
-  next:(res)=>{
-    console.log(res);
-    
-  this.issueTypeData =res.body.data;
-     this.issueTypeForm.patchValue({
-        issueType: this.issueTypeData .issueType,  
-      });
-        this.answerTypeIds = this.issueTypeData.answerTypeIds
-        this.issueAttachment= this.issueTypeData.mediaRequired
-console.log(this.issueAttachment);
-
-    
-  }
-})
-}
 isAttachmentSelected(id: string): boolean {
-  return this.issueAttachment?.some((item:any) => item.attachmentTypeId === id);
+  return this.selectedAttachments?.some((item: any) => item.attachmentTypeId === id);
 }
-onAttachmentToggle(attachment: any, event: Event) {
+
+onAttachmentToggle(type: any, event: Event) {
   const checked = (event.target as HTMLInputElement).checked;
+  const formArray = this.issueTypeForm.get('mediaRequired') as FormArray;
 
   if (checked) {
-    // Add to list if not already present
-    if (!this.issueAttachment.some((a:any) => a.attachmentTypeId === attachment.attachmentTypeId)) {
-      this.issueAttachment.push({
-        ...attachment,
+    // Prevent duplicates
+    if (!this.selectedAttachments.some((a: any) => a.attachmentTypeId === type.id)) {
+      this.selectedAttachments.push({
+        attachmentTypeId: type.id,
+        attachmentType: type.attachmentType,
         maximum: 1,
         maximumSize: 1,
-        issueMediaType: [],
+        issueMediaType: []
       });
+
+      // Push to FormArray as well
+      formArray.push(this.fb.group({
+        attachmentTypeId: [type.id, Validators.required],
+        maximum: [1, Validators.required],
+        maximumSize: [1, Validators.required],
+        issueMediaType: this.fb.array([])
+      }));
+
+      // Optional: push to selectedMediaTypeList for visual media tag rendering
+      this.selectedMediaTypeList.push([]);
     }
   } else {
-    // Remove from the list
-    this.issueAttachment = this.issueAttachment.filter((a:any) => a.attachmentTypeId !== attachment.attachmentTypeId
-    );
+    const index = this.selectedAttachments.findIndex((a: any) => a.attachmentTypeId === type.id);
+    if (index > -1) {
+      this.selectedAttachments.splice(index, 1);
+      formArray.removeAt(index);
+      this.selectedMediaTypeList.splice(index, 1); // sync visual list
+    }
   }
 }
+
+// ------------SUBMIT------------------------------------------------------------
+
+
+generateUpdatePayload(): any {
+  const form = this.issueTypeForm;
+  const payload: any = {
+    id: this.issueTypeId,
+    issueAnswerTypes: [], // handled separately
+    mediaRequired: []
+  };
+
+  // ---------- Handle issueType ----------
+  if (form.get('issueType')?.dirty) {
+    payload.issueType = form.get('issueType')?.value;
+  }
+
+  // ---------- Handle Answer Types ----------
+  const answerArray = form.get('answerTypeIds') as FormArray;
+  const originalAnswers = this.issueAnswerType;
+  const answerTypeChanges: any[] = [];
+
+  answerArray.controls.forEach(ctrl => {
+    const val = ctrl.value;
+    const original = originalAnswers.find((o: any) => o.answerTypeId === val.answerTypeId);
+
+    if (val.issueAnswerTypeId) {
+      if (original && original.status !== val.status) {
+        answerTypeChanges.push({
+          issueAnswerTypeId: val.issueAnswerTypeId
+        });
+      }
+    } else {
+      answerTypeChanges.push({
+        answerTypeId: val.answerTypeId
+      });
+    }
+  });
+
+  // ✅ Add deletions
+  this.deletedAnswerTypeIds.forEach(id => {
+    answerTypeChanges.push({
+      issueAnswerTypeId: id
+    });
+  });
+
+  if (answerTypeChanges.length > 0) {
+    payload.issueAnswerTypes = answerTypeChanges;
+  }
+
+  // ---------- Handle Media Required ----------
+  const formArray = form.get('mediaRequired') as FormArray;
+  const formAttachmentIds = formArray.controls.map(ctrl => ctrl.get('attachmentTypeId')?.value);
+  const removedMediaRequired = (this.selectedAttachments || []).filter((orig: any) =>
+    !formAttachmentIds.includes(orig.attachmentTypeId)
+  );
+
+  const mediaRequiredChanges: any[] = [];
+
+  removedMediaRequired.forEach((item: any) => {
+    if (item.mediaRequiredId) {
+      mediaRequiredChanges.push({
+        mediaRequiredId: item.mediaRequiredId,
+        issueMediaType: []
+      });
+    }
+  });
+
+  formArray.controls.forEach((group, index) => {
+    const groupValue = group.value;
+    const original = this.selectedAttachments.find(
+      (orig: any) => orig.attachmentTypeId === groupValue.attachmentTypeId
+    );
+
+    const mediaArray = group.get('issueMediaType') as FormArray;
+    const formMediaList = mediaArray.controls.map(c => c.value);
+    const originalMedia = original?.issueMediaType || [];
+
+    const issueMediaTypeChanges: any[] = [];
+
+    const removedMedia = originalMedia.filter(
+      (om: any) => !formMediaList.find((fm: any) => fm.mediaTypeId === om.mediaTypeId)
+    );
+
+    removedMedia.forEach((rm: any) => {
+      if (rm.issueMediaTypeId) {
+        issueMediaTypeChanges.push({ issueMediaTypeId: rm.issueMediaTypeId });
+      }
+    });
+
+    formMediaList.forEach((fm: any) => {
+      const originalMatch = originalMedia.find((om: any) => om.mediaTypeId === fm.mediaTypeId);
+
+      if (!originalMatch) {
+        issueMediaTypeChanges.push({
+          mediaTypeId: fm.mediaTypeId,
+          mandatory: fm.mandatory
+        });
+      } else if (originalMatch.mandatory !== fm.mandatory) {
+        issueMediaTypeChanges.push({
+          mediaTypeId: fm.mediaTypeId,
+          mandatory: fm.mandatory
+        });
+      }
+    });
+
+    const isNew = !original || !original.mediaRequiredId;
+    const maxChanged = isNew || original.maximum !== groupValue.maximum;
+    const sizeChanged = isNew || original.maximumSize !== groupValue.maximumSize;
+    const statusChanged = isNew || original.status !== groupValue.status;
+
+    const itemPayload: any = {
+      attachmentTypeId: groupValue.attachmentTypeId
+    };
+
+    if (!isNew) {
+      itemPayload.mediaRequiredId = original.mediaRequiredId;
+    }
+
+    if (isNew || issueMediaTypeChanges.length > 0) {
+      itemPayload.issueMediaType = issueMediaTypeChanges;
+    }
+
+    if (maxChanged) itemPayload.maximum = groupValue.maximum;
+    if (sizeChanged) itemPayload.maximumSize = groupValue.maximumSize;
+    if (statusChanged) itemPayload.status = groupValue.status ?? true;
+
+    if (
+      isNew ||
+      issueMediaTypeChanges.length > 0 ||
+      maxChanged ||
+      sizeChanged ||
+      statusChanged
+    ) {
+      if (!itemPayload.issueMediaType) {
+        itemPayload.issueMediaType = [];
+      }
+      mediaRequiredChanges.push(itemPayload);
+    }
+  });
+
+  if (mediaRequiredChanges.length > 0) {
+    payload.mediaRequired = mediaRequiredChanges;
+  }
+
+  return payload;
+}
+
+
+submit() {
+
+  const payload = {
+    id: this.issueTypeForm.value.id,
+    issueType: this.issueTypeForm.value.issueType,
+    status: this.issueTypeForm.value.status,
+    answerTypeIds: this.issueTypeForm.value.answerTypeIds,
+    mediaRequired: this.issueTypeForm.value.mediaRequired
+  };
+ 
+  console.log('Payload to send:',this.generateUpdatePayload());
+
+  // this.issueTypeService.updateIssueType(payload).subscribe({
+  //   next: (res) => {
+  //     this.utilityService.success(res.body.message);
+  //     this.router.navigate(['admin/issue-type']);
+  //   },
+  //   error: err => {
+  //     this.utilityService.showError(err.status, err.error.message);
+  //   }
+  // });
+}
+
+
+
+
 
 }
