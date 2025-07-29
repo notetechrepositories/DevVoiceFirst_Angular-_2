@@ -13,15 +13,23 @@ export class IssueTypeService {
   getAllIssueType(){
     return this.http.get<any>(`${this.apiUrl}/issue-type/all`,{observe:'response'});
   }
+
   createIssueType(data:any){
-    return this.http.post<any>(`${this.apiUrl}/issue-type`,data,{observe:'response'})
+    return this.http.post<any>(`${this.apiUrl}/issue-type`,data,{observe:'response'});
   }
+
   deleteIssueType(data:any){
     return this.http.delete<any>(`${this.apiUrl}/issue-type`,{body:data,observe:'response'});
   }
+
+  updateIssueType(data:any){
+    return this.http.put<any>(`${this.apiUrl}/issue-type`,data,{observe:'response'});
+  }
+
   updateIssueTypeStatus(data:any){
     return this.http.patch<any>(`${this.apiUrl}/issue-type`,data,{observe:'response'});
   }
+
   getIssueTypeBYId(id:any){
     return this.http.get<any>(`${this.apiUrl}/issue-type/id?Id=${id}`,{observe:'response'});
   }

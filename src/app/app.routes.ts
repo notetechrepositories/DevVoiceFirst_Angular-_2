@@ -5,7 +5,7 @@ import { AdminLayout } from './Layout/admin-layout/admin-layout';
 import { BlankLayout } from './Layout/blank-layout/blank-layout';
 
 export const routes: Routes = [
-    {
+  {
     path: '',
     component: UserLayout,
     children: [

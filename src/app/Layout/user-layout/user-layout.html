@@ -5,15 +5,20 @@
   </div>
   <ul class="nav-list" [class.nav-active]="isMenuOpen">
 
-    <!-- <li>
-      <a *ngIf="isloggedin; else landingLink" routerLink="/user/home" routerLinkActive="active-link"
-        [routerLinkActiveOptions]="{ exact: true }">Home</a>
-      <ng-template #landingLink>
-        <a routerLink="/landing" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }">Home</a>
-      </ng-template>
-    </li>
+    
+      @if (isloggedin) {
+        <li>
+          <a routerLink="/user/home" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }">Home</a>
+        </li>
+      } @else {
+        <li>
+          <a routerLink="" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }">Home</a>
+        </li>
+      }
 
-    <li>
+    
+
+    <!-- <li>
       <a *ngIf="isloggedin; else docLink" routerLink="/user/documents" routerLinkActive="active-link">Documents</a>
       <ng-template #docLink>
         <a routerLink="/documents" routerLinkActive="active-link">Documents</a>
@@ -63,25 +68,25 @@
     @if(isloggedin){
     <li routerLinkActive="active-link" routerLink="/user/home" [routerLinkActiveOptions]="{ exact: true }"
       (click)="onMenuClick()">
-      <a>Home</a>
+      <i class="pi pi-home me-2"></i><a>Home</a>
     </li>
     <li routerLinkActive="active-link" routerLink="/user/qr-scanner" (click)="onMenuClick()">
-      <a>QR Scanner</a>
+      <i class="pi pi-qrcode me-2"></i><a>QR Scanner</a>
     </li>
     <li routerLinkActive="active-link" routerLink="/user/profile" (click)="onMenuClick()">
-      <a>Profile</a>
+      <i class="pi pi-user me-2"></i><a>Profile</a>
     </li>
     <li>
-      <a>Logout</a>
+      <i class="pi pi-sign-out me-2"></i><a>Logout</a>
     </li>
     }
     @else{
     <li routerLinkActive="active-link" routerLink="/landing" [routerLinkActiveOptions]="{ exact: true }"
       (click)="onMenuClick()">
-      <a>Home</a>
+      <i class="pi pi-home me-2"></i><a>Home</a>
     </li>
-    <li (click)="onMenuClick()">
-      <a>Login</a>
+    <li (click)="onMenuClick()" routerLink="/authentication/login">
+      <i class="pi pi-sign-in me-2"></i><a >Login</a>
     </li>
     }
 
