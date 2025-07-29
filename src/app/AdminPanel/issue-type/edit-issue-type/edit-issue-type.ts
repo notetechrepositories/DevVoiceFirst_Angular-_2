@@ -46,8 +46,8 @@ issueTypeId:any='';
 
   deletedAnswerTypeIds: string[] = [];
   removedAttachments: any[] = [];
-  isEdit:Boolean=true;
-
+  isEdit:Boolean=false;
+  originalFormState:any
 
 
   constructor(private fb: FormBuilder,
@@ -105,17 +105,99 @@ issueTypeId:any='';
     return this.issueTypeForm.get('mediaRequired') as FormArray;
   }
 
-  onEdit(){
-    this.isEdit=true;
+  private setAnswerTypeArray(data: any[]): void {
+    const answerTypeArray = this.issueTypeForm.get('answerTypeIds') as FormArray;
+    answerTypeArray.clear();
+  
+    (data || []).forEach(item => {
+      answerTypeArray.push(this.fb.group({
+        issueAnswerTypeId: [item.issueAnswerTypeId],
+        answerTypeId: [item.answerTypeId],
+        answerTypeName: [item.answerTypeName],
+        issueTypeId: [item.issueTypeId],
+        status: [item.status ?? true]
+      }));
+    });
   }
 
+  private setMediaRequiredArray(data: any[]): void {
+    const mediaRequiredArray = this.issueTypeForm.get('mediaRequired') as FormArray;
+    mediaRequiredArray.clear();
+    this.selectedMediaTypeList = [];
+  
+    (data || []).forEach((item: any) => {
+      const mediaGroup = this.fb.group({
+        mediaRequiredId: [item.mediaRequiredId],
+        attachmentTypeId: [item.attachmentTypeId, Validators.required],
+        maximum: [item.maximum, Validators.required],
+        maximumSize: [item.maximumSize, Validators.required],
+        status: [item.status ?? true],
+        issueMediaType: this.fb.array([])
+      });
+  
+      const issueMediaTypeArray = mediaGroup.get('issueMediaType') as FormArray;
+      const selectedMediaTypes: any[] = [];
+  
+      (item.issueMediaType || []).forEach((mt: any) => {
+        issueMediaTypeArray.push(this.fb.group({
+          issueMediaTypeId: [mt.issueMediaTypeId],
+          mediaTypeId: [mt.mediaTypeId, Validators.required],
+          description: [mt.description],
+          mandatory: [mt.mandatory],
+          status: [mt.status ?? true]
+        }));
+  
+        selectedMediaTypes.push({
+          mediaTypeId: mt.mediaTypeId,
+          description: mt.description,
+          mandatory: mt.mandatory,
+          status: mt.status
+        });
+      });
+  
+      mediaRequiredArray.push(mediaGroup);
+      this.selectedMediaTypeList.push(selectedMediaTypes);
+    });
+  }
+  
 
+  enableEdit() {
+    this.isEdit = true;
+    this.issueTypeForm.enable();
+  }
+
+  cancelEdit() {
+    this.isEdit = false;
+  
+    if (!this.originalFormState?.form) return;
+  
+    const formValue = this.originalFormState.form;
+  
+    // Restore simple fields
+    this.issueTypeForm.patchValue({
+      id: formValue.id,
+      issueType: formValue.issueType,
+      status: formValue.status
+    });
+  
+    // Restore answerTypeIds FormArray
+    this.setAnswerTypeArray(formValue.answerTypeIds);
+  
+    // Restore mediaRequired FormArray
+    this.setMediaRequiredArray(formValue.mediaRequired);
+  
+    // Restore selectedMediaTypeList
+    this.selectedMediaTypeList = JSON.parse(JSON.stringify(this.originalFormState.selectedMediaTypeList));
+
+  }
+  
+  
   getIssueTypeById() {
     this.issueTypeService.getIssueTypeBYId(this.issueTypeId).subscribe({
       next: res => {
         const data = res.body.data;
         console.log(data);
-        
+  
         this.issueAnswerType = data.answerTypeIds || [];
         this.selectedAttachments = data.mediaRequired || [];
   
@@ -125,68 +207,25 @@ issueTypeId:any='';
           status: data.status ?? true,
           answerTypeIds: this.issueAnswerType.map((a: any) => a.answerTypeId)
         });
-
-        const answerTypeArray = this.issueTypeForm.get('answerTypeIds') as FormArray;
-        data.answerTypeIds.forEach((item: any) => {
-          answerTypeArray.push(this.fb.group({
-            issueAnswerTypeId: [item.issueAnswerTypeId],
-            answerTypeId: [item.answerTypeId],
-            answerTypeName: [item.answerTypeName],
-            issueTypeId: [item.issueTypeId],
-            status: [item.status ?? true]
-          }));
-        });
-
-        console.log(answerTypeArray.value);
-        
   
-        // Clear existing mediaRequired array
-        const mediaRequiredArray = this.issueTypeForm.get('mediaRequired') as FormArray;
-        mediaRequiredArray.clear();
-        this.selectedMediaTypeList = []; // Clear before pushing new data
-        
-        this.selectedAttachments.forEach((item: any) => {
-          const mediaGroup = this.fb.group({
-            mediaRequiredId: [item.mediaRequiredId],
-            attachmentTypeId: [item.attachmentTypeId, Validators.required],
-            maximum: [item.maximum, Validators.required],
-            maximumSize: [item.maximumSize, Validators.required],
-            status: [item.status ?? true], // Add this
-            issueMediaType: this.fb.array([])
-          });
-        
-          const mediaTypeArray = mediaGroup.get('issueMediaType') as FormArray;
-        
-          const selectedMediaTypes: any[] = []; // Will collect this row's types
-        
-          (item.issueMediaType || []).forEach((mt: any) => {
-            mediaTypeArray.push(this.fb.group({
-              issueMediaTypeId: [mt.issueMediaTypeId],
-              mediaTypeId: [mt.mediaTypeId, Validators.required],
-              description: [mt.description],
-              mandatory: [mt.mandatory],
-              status: [mt.status ?? true]
-            }));
-        
-            // Push to tracking array for UI
-            selectedMediaTypes.push({
-              mediaTypeId: mt.mediaTypeId,
-              description: mt.description,
-              mandatory: mt.mandatory,
-              status:mt.status
-            });
-          });
-        
-          mediaRequiredArray.push(mediaGroup);
-          this.selectedMediaTypeList.push(selectedMediaTypes); // Push to visual array
-          console.log(this.selectedMediaTypeList);
-          
-        });
-        
+        // Populate answerTypeIds FormArray
+        this.setAnswerTypeArray(data.answerTypeIds);
   
+        // Populate mediaRequired FormArray
+        this.setMediaRequiredArray(this.selectedAttachments);
+  
+        // Save original form state
+        this.originalFormState = {
+          form: this.issueTypeForm.getRawValue(),
+          selectedMediaTypeList: JSON.parse(JSON.stringify(this.selectedMediaTypeList)),
+        };
       },
       error: err => this.utilityService.showError(err.status, err.error?.message || 'Fetch failed.')
     });
+  }
+
+  get answerTypeListFromForm(): any[] {
+    return (this.issueTypeForm.get('answerTypeIds') as FormArray).controls.map(c => c.value);
   }
   
 
@@ -683,15 +722,12 @@ generateUpdatePayload(): any {
   async submit() {
 
   const payload= await this.generateUpdatePayload()
- 
-  console.log('Payload to send:',payload);
 
   this.issueTypeService.updateIssueType(payload).subscribe({
     next: (res) => {
-      console.log(res);
-      
-      this.utilityService.success(res.body.message);
-      // this.router.navigate(['admin/issue-type']);
+      if(res.status==200){
+        this.utilityService.success(res.body.message);
+      } 
     },
     error: err => {
       this.utilityService.showError(err.status, err.error.message);

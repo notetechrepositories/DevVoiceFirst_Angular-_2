@@ -33,3 +33,36 @@
     line-height: 1;
     border-radius: 0.2rem;
   }
+
+  .status-active {
+    background-color: #d1f7e4;
+    color: #1a7f4d;
+  }
+  
+  .status-inactive {
+    background-color: #fce1e1;
+    color: #a94442;
+  }
+
+  /* Target scrollable areas */
+.table-responsive::-webkit-scrollbar {
+  width: 3px;
+  /* Thin scrollbar */
+}
+
+.table-responsive::-webkit-scrollbar-track {
+  background: transparent;
+  /* Optional: transparent track */
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  /* Light gray thumb */
+  border-radius: 4px;
+  /* Rounded edges */
+}
+
+/* Remove scrollbar buttons (up/down arrows) */
+.table-responsive::-webkit-scrollbar-button {
+  display: none;
+}

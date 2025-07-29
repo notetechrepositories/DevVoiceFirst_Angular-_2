@@ -8,9 +8,12 @@
         </ol>
     </nav>
     <div class="card-container p-4">
-    <div class="d-flex justify-content-end mb-2">
-      <button class="btn btn-primary" (click)="onEdit()">Edit</button>
-    </div>
+    @if(!isEdit){
+      <div class="d-flex justify-content-end mb-2">
+        <button class="btn btn-primary btn-sm" (click)="enableEdit()">Edit</button>
+      </div>
+    }
+
     <form [formGroup]="issueTypeForm" >
 
       <!-- Issue Type Name -->
@@ -104,13 +107,13 @@
             <div class="table-responsive" style="max-height: 150px; overflow-y: auto;">
               <table class="table mb-0">
                 <tbody>
-                  @for (type of issueAnswerType; track type.answerTypeId) {
+                  @for (type of answerTypeListFromForm; track type.answerTypeId) {
                     <tr>
                       <td>{{ type.answerTypeName }}</td>
-                      <td>
+                      <td class="text-end">
                         <span
                           class="badge"
-                          [ngClass]="type.status ? 'bg-success' : 'bg-secondary'"
+                          [ngClass]="type.status ? 'status-active' : 'status-Inactive'"
                           style="cursor: pointer;"
                         >
                           {{ type.status ? 'Active' : 'Inactive' }}
@@ -140,7 +143,7 @@
 
   <!-- Media Form Array Section -->
   <div class="row" formArrayName="mediaRequired">
-    @for (attachment of selectedAttachments; let i = $index; track attachment.id) {
+    @for (attachment of selectedAttachments; let i = $index; track i){
       <div class="col-md-6 mb-2" [formGroupName]="i">
         <div class="border p-3 rounded">
           <div class="row">
@@ -248,10 +251,10 @@
                     @for(type of selectedMediaTypeList[i]; let j = $index; track j){
                       <tr>
                         <td>{{type.description}}</td>
-                        <td>
+                        <td class="text-end">
                           <span
                             class="badge"
-                            [ngClass]="type.status ? 'bg-success' : 'bg-secondary'"
+                            [ngClass]="type.status ? 'status-active' : 'status-Inactive'"
                             style="cursor: pointer;"
                           >
                             {{ type.status ? 'Active' : 'Inactive' }}
@@ -279,8 +282,11 @@
 
 
       <!-- Submit Button -->
-      <div class="d-grid mt-4">
-        <button class="btn btn-primary" type="submit" (click)="submit()">Submit</button>
+      <div class="d-flex gap-2 justify-content-end">
+        @if(isEdit){
+          <button class="btn btn-success" type="submit" (click)="submit()">Save Changes</button>
+          <button class="btn btn-danger" type="button" (click)="cancelEdit()">Cancel</button>
+        }
       </div>
     </form>
   </div>
