@@ -1,6 +1,6 @@
 export const environment = {
     production: false,
-    apiUrl: 'http://192.168.0.202:8022/api', // Local API URL
+    apiUrl: 'http://59.94.176.2:8022/api', // Local API URL
   };
 
   
