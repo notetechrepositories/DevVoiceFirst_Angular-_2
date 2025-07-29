@@ -8,6 +8,9 @@
         </ol>
     </nav>
     <div class="card-container p-4">
+    <div class="d-flex justify-content-end mb-2">
+      <button class="btn btn-primary" (click)="onEdit()">Edit</button>
+    </div>
     <form [formGroup]="issueTypeForm" >
 
       <!-- Issue Type Name -->
@@ -279,7 +282,7 @@
 
       <!-- Submit Button -->
       <div class="d-grid mt-4">
-        <button class="btn btn-success" type="submit" (click)="submit()">Submit</button>
+        <button class="btn btn-primary" type="submit" (click)="submit()">Submit</button>
       </div>
     </form>
   </div>

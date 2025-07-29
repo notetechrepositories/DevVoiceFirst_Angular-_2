@@ -28,11 +28,10 @@ issueTypeForm!: FormGroup;
   addPopupphotoVisible: boolean = false;
   isMediaModalVisible: boolean = false;
   selectedMediaTypeList: any[][] = [];
-  videoTypeList: any;
   answerTypeList: any[] = [];
   selectedAnswerTypes: any[] = [];
   mediaTypeList: any[] = [];
-   answerTypeIds: any[] = [];
+  answerTypeIds: any[] = [];
 // -------------
 issueTypeId:any='';
 
@@ -47,7 +46,7 @@ issueTypeId:any='';
 
   deletedAnswerTypeIds: string[] = [];
   removedAttachments: any[] = [];
-  
+  isEdit:Boolean=false;
 
 
 
@@ -104,6 +103,10 @@ issueTypeId:any='';
 
   get mediaRequired(): FormArray {
     return this.issueTypeForm.get('mediaRequired') as FormArray;
+  }
+
+  onEdit(){
+    
   }
 
 
@@ -192,8 +195,6 @@ issueTypeId:any='';
   openAnswerModal() {
     this.isAnswerModalVisible = true;
   }
-
-
 
   closeModal() {
     this.isAnswerModalVisible = false;
@@ -599,60 +600,55 @@ generateUpdatePayload(): any {
     const original = this.selectedAttachments.find(
       (orig: any) => orig.attachmentTypeId === groupValue.attachmentTypeId
     );
-
+  
     const mediaArray = group.get('issueMediaType') as FormArray;
     const formMediaList = mediaArray.controls.map(c => c.value);
     const originalMedia = original?.issueMediaType || [];
-
+  
     const issueMediaTypeChanges: any[] = [];
-
+  
     const removedMedia = originalMedia.filter(
       (om: any) => !formMediaList.find((fm: any) => fm.mediaTypeId === om.mediaTypeId)
     );
-
+  
     removedMedia.forEach((rm: any) => {
       if (rm.issueMediaTypeId) {
         issueMediaTypeChanges.push({ issueMediaTypeId: rm.issueMediaTypeId });
       }
     });
-
+  
     formMediaList.forEach((fm: any) => {
       const originalMatch = originalMedia.find((om: any) => om.mediaTypeId === fm.mediaTypeId);
-
-      if (!originalMatch) {
-        issueMediaTypeChanges.push({
-          mediaTypeId: fm.mediaTypeId,
-          mandatory: fm.mandatory
-        });
-      } else if (originalMatch.mandatory !== fm.mandatory) {
+  
+      if (!originalMatch || originalMatch.mandatory !== fm.mandatory) {
         issueMediaTypeChanges.push({
           mediaTypeId: fm.mediaTypeId,
           mandatory: fm.mandatory
         });
       }
     });
-
+  
     const isNew = !original || !original.mediaRequiredId;
     const maxChanged = isNew || original.maximum !== groupValue.maximum;
     const sizeChanged = isNew || original.maximumSize !== groupValue.maximumSize;
     const statusChanged = isNew || original.status !== groupValue.status;
-
-    const itemPayload: any = {
-      attachmentTypeId: groupValue.attachmentTypeId
-    };
-
-    if (!isNew) {
+  
+    const itemPayload: any = {};
+  
+    if (isNew) {
+      itemPayload.attachmentTypeId = groupValue.attachmentTypeId;
+    } else {
       itemPayload.mediaRequiredId = original.mediaRequiredId;
     }
-
+  
     if (isNew || issueMediaTypeChanges.length > 0) {
       itemPayload.issueMediaType = issueMediaTypeChanges;
     }
-
+  
     if (maxChanged) itemPayload.maximum = groupValue.maximum;
     if (sizeChanged) itemPayload.maximumSize = groupValue.maximumSize;
     if (statusChanged) itemPayload.status = groupValue.status ?? true;
-
+  
     if (
       isNew ||
       issueMediaTypeChanges.length > 0 ||
@@ -666,6 +662,7 @@ generateUpdatePayload(): any {
       mediaRequiredChanges.push(itemPayload);
     }
   });
+  
 
   if (mediaRequiredChanges.length > 0) {
     payload.mediaRequired = mediaRequiredChanges;
@@ -682,26 +679,24 @@ submit() {
   const payload = {
     id: this.issueTypeForm.value.id,
     issueType: this.issueTypeForm.value.issueType,
-    status: this.issueTypeForm.value.status,
     answerTypeIds: this.issueTypeForm.value.answerTypeIds,
     mediaRequired: this.issueTypeForm.value.mediaRequired
   };
  
   console.log('Payload to send:',this.generateUpdatePayload());
 
-  // this.issueTypeService.updateIssueType(payload).subscribe({
-  //   next: (res) => {
-  //     this.utilityService.success(res.body.message);
-  //     this.router.navigate(['admin/issue-type']);
-  //   },
-  //   error: err => {
-  //     this.utilityService.showError(err.status, err.error.message);
-  //   }
-  // });
+  this.issueTypeService.updateIssueType(payload).subscribe({
+    next: (res) => {
+      console.log(res);
+      
+      this.utilityService.success(res.body.message);
+      // this.router.navigate(['admin/issue-type']);
+    },
+    error: err => {
+      this.utilityService.showError(err.status, err.error.message);
+    }
+  });
 }
-
-
-
 
 
 }
