@@ -72,11 +72,6 @@ i{
       border-color: #007bff;
     }
 
-    .page-link:hover {
-      background-color: #e9ecef;
-      text-decoration: none;
-    }
-
     &.disabled .page-link,
     .disabled-link {
       pointer-events: none;
