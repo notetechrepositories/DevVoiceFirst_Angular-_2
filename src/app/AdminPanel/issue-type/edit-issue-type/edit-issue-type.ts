@@ -46,7 +46,7 @@ issueTypeId:any='';
 
   deletedAnswerTypeIds: string[] = [];
   removedAttachments: any[] = [];
-  isEdit:Boolean=false;
+  isEdit:Boolean=true;
 
 
 
@@ -106,7 +106,7 @@ issueTypeId:any='';
   }
 
   onEdit(){
-    
+    this.isEdit=true;
   }
 
 
@@ -310,8 +310,9 @@ issueTypeId:any='';
   addNewAnswerTypeToList(newType: any) {
     this.answerTypeList.push(newType);
   }
-  //----------------------------
 
+
+  //----------------------------
 
   getAttachment(){
      this.attachmentService.getAttachment().subscribe({
@@ -409,13 +410,18 @@ issueTypeId:any='';
         mediaTypeId: [type.id, Validators.required],
         mandatory: [false]
       }));
+
+      if (!this.selectedMediaTypeList[index]) {
+        this.selectedMediaTypeList[index] = [];
+      }
   
       // Push a consistent object shape to the visual list
       this.selectedMediaTypeList[index].push({
         mediaTypeId: type.id,
         description: type.description,
-        status: true // or false, depending on how you define status in new ones
+        status: true
       });
+      
   
     } else if (!checked && exists) {
       const idx = mediaTypeIds.controls.findIndex(c => c.value.mediaTypeId === type.id);
@@ -459,7 +465,7 @@ issueTypeId:any='';
     const mediaTypeIdsArray = formArray.at(formIndex).get('issueMediaType') as FormArray;
 
     this.selectedMediaTypeList[formIndex] = this.selectedMediaTypeList[formIndex].filter(
-      (t: any) => t.id !== tag.id
+      (t: any) => t.mediaTypeId !== tag.mediaTypeId
     );
     const indexToRemove = mediaTypeIdsArray.controls.findIndex(
       c => c.value.mediaTypeId === tag.id
@@ -674,16 +680,11 @@ generateUpdatePayload(): any {
 }
 
 
-submit() {
+  async submit() {
 
-  const payload = {
-    id: this.issueTypeForm.value.id,
-    issueType: this.issueTypeForm.value.issueType,
-    answerTypeIds: this.issueTypeForm.value.answerTypeIds,
-    mediaRequired: this.issueTypeForm.value.mediaRequired
-  };
+  const payload= await this.generateUpdatePayload()
  
-  console.log('Payload to send:',this.generateUpdatePayload());
+  console.log('Payload to send:',payload);
 
   this.issueTypeService.updateIssueType(payload).subscribe({
     next: (res) => {

@@ -18,13 +18,13 @@
          <div class="col-md-6">
             <div class="formGroup mb-4">
               <label for="issueTypeName" class="form-label">Issue Type Name</label>
-              <input type="text" id="issueTypeName" class="form-control" placeholder="Enter issue type name" formControlName="issueType" required>
+              <input type="text" id="issueTypeName" class="form-control" placeholder="Enter issue type name" formControlName="issueType" required [readOnly]="!isEdit">
             </div>
             <div class="formGroup mb-4">
                <label for="issueTypeName" class="form-label">Media Type Options</label>
   <!-- Attachment Type Dropdown -->
               <div class="dropdown flex-grow-1 mb-3">
-                <button class="btn btn-outline-secondary dropdown-toggle w-100 text-start" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" >
+                <button class="btn btn-outline-secondary dropdown-toggle w-100 text-start" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" [disabled]="!isEdit">
                   Select Attachment Types
                 </button>
 
@@ -63,7 +63,7 @@
             <label class="form-label">Answer Type</label>
             <div class="d-flex align-items-center gap-2">
               <div class="dropdown flex-grow-1">
-                <button class="btn btn-outline-secondary dropdown-toggle text-start btn-xs" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                <button class="btn btn-outline-secondary dropdown-toggle text-start btn-xs" data-bs-toggle="dropdown" data-bs-auto-close="outside" [disabled]="!isEdit">
                   <i class="pi pi-list-check"></i> Select Answer Types
                 </button>
           
@@ -93,7 +93,7 @@
                 </ul>
               </div>
           
-              <button type="button" class="btn btn-primary btn-xs" (click)="openAnswerModal()">
+              <button type="button" class="btn btn-primary btn-xs" (click)="openAnswerModal()" [disabled]="!isEdit">
                 <i class="fas fa-plus"></i>
               </button>
             </div>
@@ -140,7 +140,7 @@
 
   <!-- Media Form Array Section -->
   <div class="row" formArrayName="mediaRequired">
-    @for (attachment of selectedAttachments; let i = $index; track i) {
+    @for (attachment of selectedAttachments; let i = $index; track attachment.id) {
       <div class="col-md-6 mb-2" [formGroupName]="i">
         <div class="border p-3 rounded">
           <div class="row">
@@ -154,7 +154,7 @@
                   class="form-control mb-2"
                   formControlName="maximumSize"
                   min="1"
-                  [readonly]="isPhotoDisabled" />
+                  [readonly]="!isEdit" />
 
                 <label class="form-label">Max Number</label>
                 <input
@@ -162,7 +162,7 @@
                   class="form-control"
                   formControlName="maximum"
                   min="1"
-                  [readonly]="isPhotoDisabled" />
+                  [readonly]="!isEdit" />
 
                 <small class="text-danger" *ngIf="issueTypeForm.get('photo_max_numbers')?.errors?.['max']">
                   Max number cannot exceed 4.
@@ -179,7 +179,7 @@
                     type="button"
                     data-bs-toggle="dropdown"
                     data-bs-auto-close="outside"
-                    [disabled]="isPhotoDisabled">
+                    [disabled]="!isEdit">
                     <i class="pi pi-list-check"></i> Select Media Types
                   </button>
 
@@ -206,7 +206,7 @@
                                 [id]="'media-' + type.id"
                                  [checked]="isMediaTypeChecked(i, type.id)"
                                 (change)="onMediaTypeChange(i, type, $event)">
-                              <label class="form-check-label" [for]="'media-' + type.id">
+                              <label class="form-check-label">
                                 {{ type.description }}
                               </label>
                             </div>
@@ -235,7 +235,7 @@
                   </ul>
                 </div>
 
-                <button class="btn btn-primary btn-xs" type="button" (click)="openMediaModal()">
+                <button class="btn btn-primary btn-xs" type="button" (click)="openMediaModal()" [disabled]="!isEdit">
                   <i class="fas fa-plus"></i>
                 </button>
               </div>
@@ -263,8 +263,6 @@
                       <div class="h-100">
                         <p class="text-center text-muted">No media type selected</p>
                       </div>
-                        
-                      
                     }
                   </tbody>
                 </table>

@@ -23,6 +23,8 @@ export class IssueTypeService {
   }
 
   updateIssueType(data:any){
+    console.log(data);
+    
     return this.http.put<any>(`${this.apiUrl}/issue-type`,data,{observe:'response'});
   }
 
