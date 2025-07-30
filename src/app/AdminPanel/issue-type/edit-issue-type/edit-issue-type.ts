@@ -190,39 +190,52 @@ export class EditIssueType {
     });
   }
 
+  isFormChanged(): boolean {
+    const currentFormState = this.issueTypeForm.getRawValue();
+    const currentMediaTypes = JSON.stringify(this.selectedMediaTypeList);
+  
+    return (
+      JSON.stringify(this.originalFormState.form) !== JSON.stringify(currentFormState) ||
+      JSON.stringify(this.originalFormState.selectedMediaTypeList) !== currentMediaTypes
+    );
+  }
 
   enableEdit() {
     this.isEdit = true;
     this.issueTypeForm.enable();
   }
 
-  cancelEdit() {
-    this.isEdit = false;
+  async cancelEdit() {
+    if(this.isFormChanged()){
+      const message = `Are you sure to discard changes?`;
+      const result = await this.utilityService.confirmDialog(message, 'discard');
+      if (result.isConfirmed) {
+        this.isEdit = false;
 
-    if (!this.originalFormState?.form) return;
+      if (!this.originalFormState?.form) return;
 
-    const formValue = this.originalFormState.form;
+      const formValue = this.originalFormState.form;
 
-    // Restore simple fields
-    this.issueTypeForm.patchValue({
-      id: formValue.id,
-      issueType: formValue.issueType,
-      status: formValue.status
-    });
-
-    // Restore answerTypeIds FormArray
-    this.setAnswerTypeArray(formValue.answerTypeIds);
-
-    // Restore mediaRequired FormArray
-    this.setMediaRequiredArray(formValue.mediaRequired);
-
-    // Restore selectedMediaTypeList
-    this.selectedMediaTypeList = JSON.parse(JSON.stringify(this.originalFormState.selectedMediaTypeList));
-
-    this.mediatypeSearchTerm = '';
-    this.attachmentTypeSearchTerm = '';
-    this.answerTypeSearchTerm = '';
-
+      // Restore simple fields
+      this.issueTypeForm.patchValue({
+        id: formValue.id,
+        issueType: formValue.issueType,
+        status: formValue.status
+      });
+      // Restore answerTypeIds FormArray
+      this.setAnswerTypeArray(formValue.answerTypeIds);
+      // Restore mediaRequired FormArray
+      this.setMediaRequiredArray(formValue.mediaRequired);
+      // Restore selectedMediaTypeList
+      this.selectedMediaTypeList = JSON.parse(JSON.stringify(this.originalFormState.selectedMediaTypeList));
+      this.mediatypeSearchTerm = '';
+      this.attachmentTypeSearchTerm = '';
+      this.answerTypeSearchTerm = '';
+      }
+    }
+    else{
+      this.isEdit=false;
+    }
   }
 
   get answerTypeListFromForm(): any[] {
@@ -239,7 +252,6 @@ export class EditIssueType {
   closeModal() {
     this.isAnswerModalVisible = false;
   }
-
 
   getAnswerType() {
     this.answerTypeSevice.getAnswerType().subscribe({
@@ -261,9 +273,7 @@ export class EditIssueType {
   selectAllAnswerType() {
     const answerArray = this.issueTypeForm.get('answerTypeIds') as FormArray;
     answerArray.clear();
-
     this.issueAnswerType = []; // Clear old list
-
     this.answerTypeList.forEach(type => {
       const group = this.fb.group({
         issueAnswerTypeId: [null],
@@ -272,17 +282,14 @@ export class EditIssueType {
         issueTypeId: [this.issueTypeForm.value.id],
         status: [true]
       });
-
       answerArray.push(group);
       this.issueAnswerType.push(group.value);
     });
-
     answerArray.markAsDirty();
   }
 
   clearAllAnswerType() {
     const answerArray = this.issueTypeForm.get('answerTypeIds') as FormArray;
-
     // Track items with issueAnswerTypeId before clearing
     for (const control of answerArray.controls) {
       const item = control.value;
@@ -290,12 +297,10 @@ export class EditIssueType {
         this.deletedAnswerTypeIds.push(item.issueAnswerTypeId);
       }
     }
-
     // Now clear the FormArray and visual list
     while (answerArray.length !== 0) {
       answerArray.removeAt(0);
     }
-
     this.issueAnswerType = []; // Clear the visual list
     answerArray.markAsDirty();
   }
@@ -303,7 +308,6 @@ export class EditIssueType {
   onAnswerTypeToggle(type: any, event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
     const answerArray = this.issueTypeForm.get('answerTypeIds') as FormArray;
-
     if (checked) {
       const exists = answerArray.controls.some(ctrl => ctrl.value.answerTypeId === type.id);
       if (!exists) {
@@ -314,7 +318,6 @@ export class EditIssueType {
           issueTypeId: [this.issueTypeForm.value.id],
           status: [true]
         });
-
         answerArray.push(group);
         this.issueAnswerType.push(group.value); // ✅ add to visual list
       }
@@ -324,20 +327,17 @@ export class EditIssueType {
       if (index > -1) {
         const removedItem = answerArray.at(index).value;
         answerArray.removeAt(index);
-
         // ✅ Track for deletion if it has issueAnswerTypeId
         if (removedItem.issueAnswerTypeId) {
           this.deletedAnswerTypeIds.push(removedItem.issueAnswerTypeId);
         }
       }
-
       // Remove from display list
       const visualIndex = this.issueAnswerType.findIndex((item: any) => item.answerTypeId === type.id);
       if (visualIndex > -1) {
         this.issueAnswerType.splice(visualIndex, 1);
       }
     }
-
     answerArray.markAsDirty();
   }
 
@@ -348,11 +348,9 @@ export class EditIssueType {
 
   getSelectedAnswerTypeNames(): string {
     const selectedIds: string[] = this.issueTypeForm.get('answerTypeIds')?.value || [];
-
     if (selectedIds.length === 0) {
       return 'Select Answer Types';
     }
-
     const selectedNames = this.answerTypeList
       .filter(type => selectedIds.includes(type.id))
       .map(type => type.answerTypeName);
@@ -363,7 +361,6 @@ export class EditIssueType {
       const visible = selectedNames.slice(0, maxDisplay).join(', ');
       return `${visible},... +${selectedNames.length - maxDisplay} more`;
     }
-
     return selectedNames.join(', ');
   }
 
@@ -372,7 +369,6 @@ export class EditIssueType {
   }
 
   async statusUpdateAnswertype(item: any) {
-    console.log(item);
 
     const updatedStatus = !item.status;
     const payload = {
@@ -391,14 +387,11 @@ export class EditIssueType {
             const index = formArray.controls.findIndex(ctrl =>
               ctrl.value.issueAnswerTypeId === item.issueAnswerTypeId
             );
-
             if (index > -1) {
               formArray.at(index).patchValue({ status: updatedStatus });
             }
-
             this.utilityService.success(res.body.message)
           }
-
         },
         error: err => {
           this.utilityService.showError(err.status, err.error?.message || 'Failed to update status.');
@@ -453,7 +446,6 @@ export class EditIssueType {
   onAttachmentToggle(type: any, event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
     const formArray = this.issueTypeForm.get('mediaRequired') as FormArray;
-
     if (checked) {
       // Prevent duplicates
       if (!this.selectedAttachments.some((a: any) => a.attachmentTypeId === type.id)) {
@@ -466,7 +458,6 @@ export class EditIssueType {
         };
 
         this.selectedAttachments.push(newAttachment);
-
         formArray.push(this.fb.group({
           attachmentTypeId: [type.id, Validators.required],
           maximum: [1, Validators.required],
@@ -481,16 +472,13 @@ export class EditIssueType {
       // Find the attachment to be removed
       const index = this.selectedAttachments.findIndex((a: any) => a.attachmentTypeId === type.id);
       const removedAttachment = this.selectedAttachments[index];
-
       if (index > -1) {
         // Track the removed item so mediaRequiredId is not lost
         if (removedAttachment?.mediaRequiredId) {
           this.removedAttachments.push(removedAttachment);
         }
-
         this.selectedAttachments.splice(index, 1);
       }
-
       // Remove form control by matching attachmentTypeId, not index
       const formIndex = formArray.controls.findIndex(
         ctrl => ctrl.get('attachmentTypeId')?.value === type.id
@@ -507,14 +495,12 @@ export class EditIssueType {
     if (!this.selectedAttachments || this.selectedAttachments.length === 0) {
       return 'Select Attachment Types';
     }
-
     const names = this.selectedAttachments.map(t => t.attachmentType); // or t.name if applicable
     const maxVisible = 3;
 
     if (names.length <= maxVisible) {
       return names.join(', ');
     }
-
     const visibleNames = names.slice(0, maxVisible).join(', ');
     const remainingCount = names.length - maxVisible;
     return `${visibleNames}, +${remainingCount} more`;
@@ -546,7 +532,6 @@ export class EditIssueType {
               formGroup.patchValue({ status: updatedStatus });
             }
           }
-
         },
         error: err => {
           this.utilityService.showError(err.status, err.error?.message || 'Failed to update status.');
@@ -577,7 +562,6 @@ export class EditIssueType {
 
   selectAllMediaType(index: number) {
     const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaType') as FormArray;
-
     this.mediaTypeList.forEach(type => {
       const exists = mediaTypeIds.controls.some(c => c.value.mediaTypeId === type.id);
       if (!exists) {
@@ -587,7 +571,6 @@ export class EditIssueType {
         }));
       }
     });
-
     this.selectedMediaTypeList[index] = [...this.mediaTypeList];
   }
 
@@ -617,26 +600,22 @@ export class EditIssueType {
       if (!this.selectedMediaTypeList[index]) {
         this.selectedMediaTypeList[index] = [];
       }
-
       // Push a consistent object shape to the visual list
       this.selectedMediaTypeList[index].push({
         mediaTypeId: type.id,
         description: type.description,
         status: true
       });
-
-
-    } else if (!checked && exists) {
+    } 
+    else if (!checked && exists) {
       const idx = mediaTypeIds.controls.findIndex(c => c.value.mediaTypeId === type.id);
       mediaTypeIds.removeAt(idx);
-
       // Remove from visual list using mediaTypeId
       this.selectedMediaTypeList[index] = this.selectedMediaTypeList[index].filter(
         (t: any) => t.mediaTypeId !== type.id
       );
     }
   }
-
 
   isMandatoryChecked(index: number, mediaTypeId: string): boolean {
     const mediaTypeIds = this.mediaRequired.at(index).get('issueMediaType') as FormArray;
@@ -682,16 +661,12 @@ export class EditIssueType {
   }
 
   async statusUpdateMediatype(item: any, formIndex: number) {
-    console.log(item);
 
     const updatedStatus = !item.status;
     const payload = {
       id: item.issueMediaTypeId,
       status: updatedStatus,
     };
-
-    console.log(payload);
-
 
     const message = `Are you sure you want to set this media type as ${updatedStatus ? 'Active' : 'Inactive'}?`;
     const result = await this.utilityService.confirmDialog(message, 'update');
@@ -705,7 +680,6 @@ export class EditIssueType {
             if (match) {
               match.status = updatedStatus;
             }
-
             // ✅ Also update in reactive form for consistency
             const mediaTypeArray = (this.mediaRequired.at(formIndex).get('issueMediaType') as FormArray);
             const formControl = mediaTypeArray.controls.find(c => c.value.mediaTypeId === item.mediaTypeId);
@@ -713,7 +687,6 @@ export class EditIssueType {
               formControl.patchValue({ status: updatedStatus });
             }
           }
-
         },
         error: err => {
           this.utilityService.showError(err.status, err.error?.message || 'Failed to update status.');
@@ -733,12 +706,10 @@ export class EditIssueType {
       issueAnswerTypes: [],
       mediaRequired: []
     };
-
     // Handle issueType
     if (form.get('issueType')?.dirty) {
       payload.issueType = form.get('issueType')?.value;
     }
-
     // Handle Answer Types
     const answerArray = form.get('answerTypeIds') as FormArray;
     const originalAnswers = this.issueAnswerType;
@@ -760,7 +731,6 @@ export class EditIssueType {
         });
       }
     });
-
     // ✅ Add deletions
     this.deletedAnswerTypeIds.forEach(id => {
       answerTypeChanges.push({
@@ -771,14 +741,11 @@ export class EditIssueType {
     if (answerTypeChanges.length > 0) {
       payload.issueAnswerTypes = answerTypeChanges;
     }
-
     // Handle Media Required 
     const formArray = form.get('mediaRequired') as FormArray;
     const formAttachmentIds = formArray.controls.map(ctrl => ctrl.get('attachmentTypeId')?.value);
     const removedMediaRequired = this.removedAttachments || [];
-
     const mediaRequiredChanges: any[] = [];
-
     removedMediaRequired.forEach((item: any) => {
       if (item.mediaRequiredId) {
         mediaRequiredChanges.push({
@@ -793,13 +760,10 @@ export class EditIssueType {
       const original = this.selectedAttachments.find(
         (orig: any) => orig.attachmentTypeId === groupValue.attachmentTypeId
       );
-
       const mediaArray = group.get('issueMediaType') as FormArray;
       const formMediaList = mediaArray.controls.map(c => c.value);
       const originalMedia = original?.issueMediaType || [];
-
       const issueMediaTypeChanges: any[] = [];
-
       const removedMedia = originalMedia.filter(
         (om: any) => !formMediaList.find((fm: any) => fm.mediaTypeId === om.mediaTypeId)
       );
@@ -812,7 +776,6 @@ export class EditIssueType {
 
       formMediaList.forEach((fm: any) => {
         const originalMatch = originalMedia.find((om: any) => om.mediaTypeId === fm.mediaTypeId);
-
         if (!originalMatch || originalMatch.mandatory !== fm.mandatory) {
           issueMediaTypeChanges.push({
             mediaTypeId: fm.mediaTypeId,
@@ -830,7 +793,8 @@ export class EditIssueType {
 
       if (isNew) {
         itemPayload.attachmentTypeId = groupValue.attachmentTypeId;
-      } else {
+      } 
+      else {
         itemPayload.mediaRequiredId = original.mediaRequiredId;
       }
 
@@ -856,19 +820,22 @@ export class EditIssueType {
       }
     });
 
-
     if (mediaRequiredChanges.length > 0) {
       payload.mediaRequired = mediaRequiredChanges;
     }
-
     this.removedAttachments = [];
-
     return payload;
   }
 
 
   async submit() {
-    const payload = await this.generateUpdatePayload()
+    if (!this.isFormChanged()) {
+      this.utilityService.warning('No changes detected.');
+      this.isEdit=false;
+      return;
+    }
+
+    const payload = await this.generateUpdatePayload();
     this.issueTypeService.updateIssueType(payload).subscribe({
       next: (res) => {
         if (res.status == 200) {
@@ -882,6 +849,5 @@ export class EditIssueType {
       }
     });
   }
-
 
 }
