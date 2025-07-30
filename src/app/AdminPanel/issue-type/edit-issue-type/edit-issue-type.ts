@@ -17,26 +17,28 @@ import { AttachmentSevice } from '../../../Service/AttachmentService/attachment-
   styleUrl: './edit-issue-type.css'
 })
 export class EditIssueType {
-issueTypeForm!: FormGroup;
-  isPhotoDisabled: boolean = false;
-  isVideoDisabled: boolean = false;
-  selectedPhotoTypes: string[] = [];
-  selectedVideoTypes: string[] = [];
-  selectedPhotoTypesId: number[] = [];
-  selectedVideoTypesId: number[] = [];
+  issueTypeForm!: FormGroup;
   addPopupVisible: boolean = false;
   addPopupphotoVisible: boolean = false;
   isMediaModalVisible: boolean = false;
   selectedMediaTypeList: any[][] = [];
-  answerTypeList: any[] = [];
+
+  allAnswerTypes: any[] = [];
+  answerTypeList: any[] = []; //filtered list
+
   selectedAnswerTypes: any[] = [];
+
+  allMediaTypes:any[]=[];
   mediaTypeList: any[] = [];
+
   answerTypeIds: any[] = [];
-// -------------
-issueTypeId:any='';
+
+  issueTypeId:any='';
 
 
   isAnswerModalVisible: boolean = false;
+
+  allAttachmentType : any[]=[];
   attachmentType :any[]=[];
 
   selectedAttachments: any[] = [];
@@ -46,8 +48,12 @@ issueTypeId:any='';
 
   deletedAnswerTypeIds: string[] = [];
   removedAttachments: any[] = [];
-  isEdit:Boolean=false;
-  originalFormState:any
+  isEdit:Boolean=true;
+  originalFormState:any;
+
+  answerTypeSearchTerm:string='';
+  attachmentTypeSearchTerm:string='';
+  mediatypeSearchTerm:string='';
 
 
   constructor(private fb: FormBuilder,
@@ -213,6 +219,10 @@ issueTypeId:any='';
     // Restore selectedMediaTypeList
     this.selectedMediaTypeList = JSON.parse(JSON.stringify(this.originalFormState.selectedMediaTypeList));
 
+    this.mediatypeSearchTerm='';
+    this.attachmentTypeSearchTerm='';
+    this.answerTypeSearchTerm='';
+
   }
   
   
@@ -242,12 +252,22 @@ issueTypeId:any='';
   }
 
 
-  getAnswerType() {
-    this.answerTypeSevice.getAnswerType().subscribe({
-      next: res => this.answerTypeList = res.body.data,
-      error: err => this.utilityService.showError(err.status, err.error?.message || 'Get failed.')
-    });
-  }
+ getAnswerType() {
+  this.answerTypeSevice.getAnswerType().subscribe({
+    next: res => {
+      this.allAnswerTypes = res.body.data;
+      this.answerTypeList = [...this.allAnswerTypes]; // start with full list
+    },
+    error: err => this.utilityService.showError(err.status, err.error?.message || 'Get failed.')
+  });
+}
+
+onSearchAnswerType() {
+  const term = this.answerTypeSearchTerm.toLowerCase();
+  this.answerTypeList = this.allAnswerTypes.filter(item =>
+    item.answerTypeName.toLowerCase().includes(term)
+  );
+}
 
   selectAllAnswerType() {
     const answerArray = this.issueTypeForm.get('answerTypeIds') as FormArray;
@@ -275,9 +295,22 @@ issueTypeId:any='';
   
   clearAllAnswerType() {
     const answerArray = this.issueTypeForm.get('answerTypeIds') as FormArray;
-    answerArray.clear();
+  
+    // Track items with issueAnswerTypeId before clearing
+    for (const control of answerArray.controls) {
+      const item = control.value;
+      if (item.issueAnswerTypeId) {
+        this.deletedAnswerTypeIds.push(item.issueAnswerTypeId);
+      }
+    }
+  
+    // Now clear the FormArray and visual list
+    while (answerArray.length !== 0) {
+      answerArray.removeAt(0);
+    }
+  
+    this.issueAnswerType = []; // Clear the visual list
     answerArray.markAsDirty();
-    this.issueAnswerType=[];
   }
   
   onAnswerTypeToggle(type: any, event: Event) {
@@ -393,49 +426,95 @@ issueTypeId:any='';
 
   getAttachment(){
      this.attachmentService.getAttachment().subscribe({
-      next: res => this.attachmentType = res.body.data,
+      next: res => {
+        this.allAttachmentType = res.body.data;
+        this.attachmentType = [...this.allAttachmentType];
+      },
       error: err => this.utilityService.showError(err.status, err.error?.message || 'Get failed.')
     });
   }
 
+  onSearchAttachmentType() {
+    const term = this.attachmentTypeSearchTerm.toLowerCase();
+    this.attachmentType = this.allAttachmentType.filter(item =>
+      item.attachmentType.toLowerCase().includes(term)
+    );
+  }
+
   selectAll() {
-    this.selectedPhotoTypes = this.attachmentType.map(m => m.name);
+    for (const type of this.attachmentType) {
+      if (!this.isAttachmentSelected(type.id)) {
+        this.onAttachmentToggle(type, { target: { checked: true } } as unknown as Event);
+      }
+    }
   }
 
   clearAll() {
-    this.selectedPhotoTypes = [];
+  
+    const attachmentsToClear = [...this.selectedAttachments];
+  
+    for (const type of attachmentsToClear) {
+      const attachment = this.attachmentType.find(a => a.id === type.attachmentTypeId);
+      if (attachment) {
+        this.onAttachmentToggle(attachment, { target: { checked: false } } as unknown as Event);
+      }
+    }
   }
+  
 
-  toggleAttachment(type: any, event: Event) {
+  isAttachmentSelected(id: string): boolean {
+    return this.selectedAttachments?.some((item: any) => item.attachmentTypeId === id);
+  }
+  
+  onAttachmentToggle(type: any, event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
+    const formArray = this.issueTypeForm.get('mediaRequired') as FormArray;
   
     if (checked) {
-      if (!this.selectedAttachments.some(t => t.id === type.id)) {
-        this.selectedAttachments.push(type);
-        this.mediaRequired.push(this.fb.group({
-          attachmentTypeId: [type.id],
-          maximum: [''],
-          maximumSize: [''],
+      // Prevent duplicates
+      if (!this.selectedAttachments.some((a: any) => a.attachmentTypeId === type.id)) {
+        const newAttachment = {
+          attachmentTypeId: type.id,
+          attachmentType: type.attachmentType,
+          maximum: 1,
+          maximumSize: 1,
+          issueMediaType: []
+        };
+  
+        this.selectedAttachments.push(newAttachment);
+  
+        formArray.push(this.fb.group({
+          attachmentTypeId: [type.id, Validators.required],
+          maximum: [1, Validators.required],
+          maximumSize: [1, Validators.required],
           issueMediaType: this.fb.array([])
         }));
+  
         this.selectedMediaTypeList.push([]);
       }
     } else {
-      const index = this.selectedAttachments.findIndex(t => t.id === type.id);
+      // Find the attachment to be removed
+      const index = this.selectedAttachments.findIndex((a: any) => a.attachmentTypeId === type.id);
+      const removedAttachment = this.selectedAttachments[index];
+  
       if (index > -1) {
-        // Track deletion if it previously existed in the DB
-        const original = this.selectedAttachments.find((a: any) => a.attachmentTypeId === type.id);
-        if (original?.mediaRequiredId) {
-          this.removedAttachments.push(original.mediaRequiredId);
+        // Track the removed item so mediaRequiredId is not lost
+        if (removedAttachment?.mediaRequiredId) {
+          this.removedAttachments.push(removedAttachment);
         }
   
         this.selectedAttachments.splice(index, 1);
-        this.mediaRequired.removeAt(index);
-        this.selectedMediaTypeList.splice(index, 1);
+      }
+  
+      // Remove form control by matching attachmentTypeId, not index
+      const formIndex = formArray.controls.findIndex(
+        ctrl => ctrl.get('attachmentTypeId')?.value === type.id
+      );
+      if (formIndex > -1) {
+        formArray.removeAt(formIndex);
+        this.selectedMediaTypeList.splice(formIndex, 1);
       }
     }
-  
-    this.mediaRequired.markAsDirty();
   }
 
 
@@ -503,9 +582,20 @@ issueTypeId:any='';
 
   getMediaType() {
     this.mediaTypeService.getMediatype().subscribe({
-      next: res => this.mediaTypeList = res.body.data,
+      next: res =>{
+        this.allMediaTypes = res.body.data;
+        this.mediaTypeList = [...this.allMediaTypes];
+      } ,
       error: err => this.utilityService.showError(err.status, err.error?.message || 'Get failed.')
     });
+  }
+
+  
+  onSearchMediaType() {
+    const term = this.mediatypeSearchTerm.toLowerCase();
+    this.mediaTypeList = this.allMediaTypes.filter(item =>
+      item.description.toLowerCase().includes(term)
+    );
   }
 
   selectAllMediaType(index: number) {
@@ -654,64 +744,7 @@ issueTypeId:any='';
       })
     }
   }
-// -------------------------------------------------------------------------------
 
-
-
-isAttachmentSelected(id: string): boolean {
-  return this.selectedAttachments?.some((item: any) => item.attachmentTypeId === id);
-}
-
-onAttachmentToggle(type: any, event: Event) {
-  const checked = (event.target as HTMLInputElement).checked;
-  const formArray = this.issueTypeForm.get('mediaRequired') as FormArray;
-
-  if (checked) {
-    // Prevent duplicates
-    if (!this.selectedAttachments.some((a: any) => a.attachmentTypeId === type.id)) {
-      const newAttachment = {
-        attachmentTypeId: type.id,
-        attachmentType: type.attachmentType,
-        maximum: 1,
-        maximumSize: 1,
-        issueMediaType: []
-      };
-
-      this.selectedAttachments.push(newAttachment);
-
-      formArray.push(this.fb.group({
-        attachmentTypeId: [type.id, Validators.required],
-        maximum: [1, Validators.required],
-        maximumSize: [1, Validators.required],
-        issueMediaType: this.fb.array([])
-      }));
-
-      this.selectedMediaTypeList.push([]);
-    }
-  } else {
-    // Find the attachment to be removed
-    const index = this.selectedAttachments.findIndex((a: any) => a.attachmentTypeId === type.id);
-    const removedAttachment = this.selectedAttachments[index];
-
-    if (index > -1) {
-      // Track the removed item so mediaRequiredId is not lost
-      if (removedAttachment?.mediaRequiredId) {
-        this.removedAttachments.push(removedAttachment);
-      }
-
-      this.selectedAttachments.splice(index, 1);
-    }
-
-    // Remove form control by matching attachmentTypeId, not index
-    const formIndex = formArray.controls.findIndex(
-      ctrl => ctrl.get('attachmentTypeId')?.value === type.id
-    );
-    if (formIndex > -1) {
-      formArray.removeAt(formIndex);
-      this.selectedMediaTypeList.splice(formIndex, 1);
-    }
-  }
-}
 
 // ------------SUBMIT------------------------------------------------------------
 

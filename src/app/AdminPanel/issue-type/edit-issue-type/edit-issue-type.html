@@ -26,7 +26,17 @@
                   {{ selectedAttachmentLabel }}
                 </button>
 
-                <ul class="dropdown-menu p-3">
+                <ul class="dropdown-menu p-3" style="max-height: 250px;overflow-y: auto;">
+                  <li class="mb-2">
+                    <input
+                      type="text"
+                      class="form-control"
+                      placeholder="Search"  
+                      [(ngModel)]="attachmentTypeSearchTerm"
+                      [ngModelOptions]="{ standalone: true }"
+                      (input)="onSearchAttachmentType()"
+                    />
+                  </li>
                   <li class="mb-2 d-flex justify-content-between">
                     <div>
                       <button class="btn btn-sm btn-success me-2" (click)="selectAll()">Select All</button>
@@ -50,6 +60,11 @@
                       </div>
                     </li>
                   }
+                  @empty {
+                    <li class="mt-3">
+                      <p class="text-muted text-center">No data found</p>
+                    </li>
+                  } 
                 </ul>
               </div>
             </div>
@@ -67,15 +82,31 @@
                   data-bs-toggle="dropdown"
                   data-bs-auto-close="outside"
                   [disabled]="!isEdit">
-                  <i class="pi pi-list-check"></i> Select Answer Types
+                  <i class="pi pi-list"></i> Select Answer Types
                 </button>
           
-                <ul class="dropdown-menu p-3 w-100" style="max-height: 200px;overflow-y: auto;">
-                  <li class="mb-2 d-flex justify-content-between">
-                    <div>
-                      <button class="btn btn-sm btn-success me-2" (click)="selectAllAnswerType()">Select All</button>
-                      <button class="btn btn-sm btn-danger" (click)="clearAllAnswerType()">Clear All</button>
+                <ul class="dropdown-menu p-3 w-100" style="max-height: 300px;overflow-y: auto;">
+                  <li class="mb-2">
+                    <div class="row">
+                      <div class="col-md-8">
+                        <input
+                          type="text"
+                          class="form-control"
+                          placeholder="Search"  
+                          [(ngModel)]="answerTypeSearchTerm"
+                          [ngModelOptions]="{ standalone: true }"
+                          (input)="onSearchAnswerType()"
+                        />
+                      </div>
+                      <div class="col-md-4">
+                        <div class="d-flex gap-1 mt-1">
+                          <button class="btn btn-sm btn-success me-2" (click)="selectAllAnswerType()">Select All</button>
+                          <button class="btn btn-sm btn-danger" (click)="clearAllAnswerType()">Clear All</button>
+                        </div>
+                      </div>
                     </div>
+                    
+                    
                   </li>
           
                   @for (type of answerTypeList; track type.id) {
@@ -93,6 +124,11 @@
                       </div>
                     </li>
                   }
+                  @empty {
+                    <li class="mt-3">
+                      <p class="text-muted text-center">No data found</p>
+                    </li>
+                  } 
                 </ul>
               </div>
               <button type="button" class="btn btn-primary btn-xs" (click)="openAnswerModal()" [disabled]="!isEdit">
@@ -201,8 +237,17 @@
                     <i class="pi pi-list-check"></i> Select Media Types
                   </button>
 
-                  <ul class="dropdown-menu p-3 dropdown-menu-container">
-                    @if (mediaTypeList.length > 0) {
+                  <ul class="dropdown-menu p-3 dropdown-menu-container" style="max-height: 250px;overflow-y: auto;">
+                      <li class="mb-2">
+                        <input
+                          type="text"
+                          class="form-control"
+                          placeholder="Search"  
+                          [(ngModel)]="mediatypeSearchTerm"
+                          [ngModelOptions]="{ standalone: true }"
+                          (input)="onSearchMediaType()"
+                        />
+                      </li>
                       <li class="mb-2 d-flex justify-content-between">
                         <div>
                           <button class="btn btn-sm btn-success me-2" (click)="selectAllMediaType(i)">Select All</button>
@@ -247,9 +292,12 @@
                           </div>
                         </li>
                       }
-                    } @else {
-                      <li class="text-muted">No media types available</li>
-                    }
+                      @empty {
+                        <li class="mt-3">
+                          <p class="text-muted text-center">No data found</p>
+                        </li>
+                      } 
+
                   </ul>
                 </div>
 
