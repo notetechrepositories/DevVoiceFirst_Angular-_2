@@ -72,6 +72,18 @@ export class UtilityService {
       });
     }
 
+    if(action === 'discard'){
+      return Swal.fire({
+        title: 'Discard Changes',
+        text: message,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#2daf1f',
+        cancelButtonColor: '#565656',
+        confirmButtonText: 'Yes, discard!'
+      });
+    }
+
     return Promise.resolve({ isConfirmed: false } as SweetAlertResult<any>);
 
   }
