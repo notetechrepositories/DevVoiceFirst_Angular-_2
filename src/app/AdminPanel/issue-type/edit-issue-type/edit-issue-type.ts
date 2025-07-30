@@ -49,6 +49,8 @@ export class EditIssueType {
   isEdit: Boolean = false;
   originalFormState: any;
 
+  originalMediaRequiredMap: Map<string, any> = new Map();
+
 
   constructor(private fb: FormBuilder,
     private answerTypeSevice: AnswerTypeService,
@@ -124,6 +126,8 @@ export class EditIssueType {
     this.selectedMediaTypeList = [];
 
     (data || []).forEach((item: any) => {
+      this.originalMediaRequiredMap.set(item.attachmentTypeId, item); // ✅ cache original
+    
       const mediaGroup = this.fb.group({
         mediaRequiredId: [item.mediaRequiredId],
         attachmentTypeId: [item.attachmentTypeId, Validators.required],
@@ -132,6 +136,7 @@ export class EditIssueType {
         status: [item.status ?? true],
         issueMediaType: this.fb.array([])
       });
+    
 
       const issueMediaTypeArray = mediaGroup.get('issueMediaType') as FormArray;
       const selectedMediaTypes: any[] = [];
@@ -206,37 +211,55 @@ export class EditIssueType {
   }
 
   async cancelEdit() {
-    if(this.isFormChanged()){
+    if (this.isFormChanged()) {
       const message = `Are you sure to discard changes?`;
       const result = await this.utilityService.confirmDialog(message, 'discard');
-      if (result.isConfirmed) {
-        this.isEdit = false;
-
-      if (!this.originalFormState?.form) return;
-
-      const formValue = this.originalFormState.form;
-
-      // Restore simple fields
-      this.issueTypeForm.patchValue({
-        id: formValue.id,
-        issueType: formValue.issueType,
-        status: formValue.status
-      });
-      // Restore answerTypeIds FormArray
-      this.setAnswerTypeArray(formValue.answerTypeIds);
-      // Restore mediaRequired FormArray
-      this.setMediaRequiredArray(formValue.mediaRequired);
-      // Restore selectedMediaTypeList
-      this.selectedMediaTypeList = JSON.parse(JSON.stringify(this.originalFormState.selectedMediaTypeList));
-      this.mediatypeSearchTerm = '';
-      this.attachmentTypeSearchTerm = '';
-      this.answerTypeSearchTerm = '';
-      }
+  
+      if (!result.isConfirmed) return;
     }
-    else{
-      this.isEdit=false;
-    }
+  
+    this.isEdit = false;
+  
+    if (!this.originalFormState?.form) return;
+  
+    const formValue = this.originalFormState.form;
+  
+    // ✅ Restore simple form fields
+    this.issueTypeForm.patchValue({
+      id: formValue.id,
+      issueType: formValue.issueType,
+      status: formValue.status
+    });
+  
+    // ✅ Restore answer type array
+    this.setAnswerTypeArray(formValue.answerTypeIds);
+  
+    // ✅ Restore mediaRequired FormArray
+    this.setMediaRequiredArray(formValue.mediaRequired);
+  
+    // ✅ Restore only original attachments
+    this.selectedAttachments = (formValue.mediaRequired || []).map((item:any) => {
+      const fullType = this.attachmentType.find(t => t.id === item.attachmentTypeId);
+      return {
+        ...item,
+        attachmentType: fullType?.attachmentType || 'Unnamed'
+      };
+    });
+  
+    // ✅ Restore selectedMediaTypeList
+    this.selectedMediaTypeList = JSON.parse(JSON.stringify(this.originalFormState.selectedMediaTypeList));
+  
+    // ✅ Clear search fields
+    this.mediatypeSearchTerm = '';
+    this.attachmentTypeSearchTerm = '';
+    this.answerTypeSearchTerm = '';
+  
+    // ✅ Reset removed list (important)
+    this.removedAttachments = [];
   }
+  
+  
+  
 
   get answerTypeListFromForm(): any[] {
     return (this.issueTypeForm.get('answerTypeIds') as FormArray).controls.map(c => c.value);
@@ -446,49 +469,87 @@ export class EditIssueType {
   onAttachmentToggle(type: any, event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
     const formArray = this.issueTypeForm.get('mediaRequired') as FormArray;
+  
     if (checked) {
-      // Prevent duplicates
       if (!this.selectedAttachments.some((a: any) => a.attachmentTypeId === type.id)) {
-        const newAttachment = {
+        const cached = this.originalMediaRequiredMap.get(type.id);
+    
+        const restoredAttachment = cached ? { ...cached } : {
           attachmentTypeId: type.id,
           attachmentType: type.attachmentType,
           maximum: 1,
           maximumSize: 1,
+          status: true,
           issueMediaType: []
         };
-
-        this.selectedAttachments.push(newAttachment);
-        formArray.push(this.fb.group({
+    
+        this.selectedAttachments.push(restoredAttachment);
+    
+        // ✅ Remove from removedAttachments if previously marked for deletion
+        const removedIndex = this.removedAttachments.findIndex(
+          (r: any) => r.mediaRequiredId === restoredAttachment.mediaRequiredId
+        );
+        if (removedIndex > -1) {
+          this.removedAttachments.splice(removedIndex, 1);
+        }
+    
+        // Build issueMediaType form array
+        const issueMediaTypeFormArray = this.fb.array([] as FormGroup[]);
+        const selectedMediaTypes: any[] = [];
+    
+        if (cached?.issueMediaType?.length) {
+          cached.issueMediaType.forEach((mt: any) => {
+            issueMediaTypeFormArray.push(this.fb.group({
+              issueMediaTypeId: [mt.issueMediaTypeId],
+              mediaTypeId: [mt.mediaTypeId, Validators.required],
+              description: [mt.description],
+              mandatory: [mt.mandatory],
+              status: [mt.status ?? true]
+            }));
+    
+            selectedMediaTypes.push({ ...mt });
+          });
+        }
+    
+        const mediaGroup = this.fb.group({
+          mediaRequiredId: [restoredAttachment.mediaRequiredId ?? null],
           attachmentTypeId: [type.id, Validators.required],
-          maximum: [1, Validators.required],
-          maximumSize: [1, Validators.required],
-          issueMediaType: this.fb.array([])
-        }));
-
-        this.selectedMediaTypeList.push([]);
+          maximum: [restoredAttachment.maximum, Validators.required],
+          maximumSize: [restoredAttachment.maximumSize, Validators.required],
+          status: [restoredAttachment.status ?? true],
+          issueMediaType: issueMediaTypeFormArray
+        });
+    
+        formArray.push(mediaGroup);
+        this.selectedMediaTypeList.push(selectedMediaTypes);
       }
     }
-    else {
-      // Find the attachment to be removed
+     else {
+      // Remove logic
       const index = this.selectedAttachments.findIndex((a: any) => a.attachmentTypeId === type.id);
       const removedAttachment = this.selectedAttachments[index];
+  
       if (index > -1) {
-        // Track the removed item so mediaRequiredId is not lost
         if (removedAttachment?.mediaRequiredId) {
           this.removedAttachments.push(removedAttachment);
         }
+  
         this.selectedAttachments.splice(index, 1);
       }
-      // Remove form control by matching attachmentTypeId, not index
+  
       const formIndex = formArray.controls.findIndex(
         ctrl => ctrl.get('attachmentTypeId')?.value === type.id
       );
+  
       if (formIndex > -1) {
         formArray.removeAt(formIndex);
         this.selectedMediaTypeList.splice(formIndex, 1);
       }
     }
+  
+    formArray.markAsDirty();
   }
+  
 
 
   get selectedAttachmentLabel(): string {
@@ -836,15 +897,23 @@ export class EditIssueType {
     }
 
     const payload = await this.generateUpdatePayload();
+    console.log(payload);
+    
     this.issueTypeService.updateIssueType(payload).subscribe({
       next: (res) => {
         if (res.status == 200) {
           this.utilityService.success(res.body.message);
           this.isEdit = false;
           this.bindIssueTypeData(res.body.data);
+          this.removedAttachments = [];
+          this.attachmentTypeSearchTerm = '';
+          this.answerTypeSearchTerm = '';
+          this.mediatypeSearchTerm = '';
         }
       },
       error: err => {
+        console.log(err);
+        
         this.utilityService.showError(err.status, err.error.message);
       }
     });
