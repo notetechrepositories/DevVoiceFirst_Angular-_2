@@ -17,6 +17,10 @@ export class CountryService {
     return this.http.get<any>(`${this.apiUrl}/country/all`,{observe: 'response'});
   }
 
+  getActiveCountries(){
+    return this.http.get<any>(`${this.apiUrl}/country`,{observe: 'response'});
+  }
+
   createCountry(data:any){
     return this.http.post<any>(`${this.apiUrl}/country`, data,{observe: 'response'});
   }
@@ -37,6 +41,10 @@ export class CountryService {
 
   getDivisionOne(id:string|null){
     return this.http.get<any>(`${this.apiUrl}/division-one/all?country=${id}`, {observe: 'response'});
+  }
+
+  getActiveDivisionOne(id:string|null){
+    return this.http.get<any>(`${this.apiUrl}/division-one?country=${id}`, {observe: 'response'});
   }
 
   createDivisionOne(data:any){
@@ -61,6 +69,10 @@ export class CountryService {
     return this.http.get<any>(`${this.apiUrl}/division-two/all?divisionOne=${id}`, {observe: 'response'});
   }
 
+  getActiveDivisionTwo(id:string|null){
+    return this.http.get<any>(`${this.apiUrl}/division-two?divisionOne=${id}`, {observe: 'response'});
+  }
+
   createDivisionTwo(data:any){
     return this.http.post<any>(`${this.apiUrl}/division-two`, data,{observe: 'response'});
   }
@@ -81,6 +93,10 @@ export class CountryService {
 
   getDivisionThree(id:string|null){
     return this.http.get<any>(`${this.apiUrl}/division-three/all?divisionTwo=${id}`, {observe: 'response'});
+  }
+
+  getActiveDivisionThree(id:string|null){
+    return this.http.get<any>(`${this.apiUrl}/division-three?divisionTwo=${id}`, {observe: 'response'});
   }
 
   createDivisionThree(data:any){
