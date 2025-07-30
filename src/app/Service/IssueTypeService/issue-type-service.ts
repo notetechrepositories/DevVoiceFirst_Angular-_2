@@ -35,4 +35,18 @@ export class IssueTypeService {
   getIssueTypeBYId(id:any){
     return this.http.get<any>(`${this.apiUrl}/issue-type/id?Id=${id}`,{observe:'response'});
   }
+
+  // --------
+
+  updateStatusAnswerType(data:any){
+    return this.http.patch<any>(`${this.apiUrl}/issue-type/issue-answer-type`,data,{observe:'response'});
+  }
+
+  updateStatusAttchmentType(data:any){
+    return this.http.patch<any>(`${this.apiUrl}/issue-type/media-required`,data,{observe:'response'});
+  }
+
+  updateStatusMediaType(data:any){
+    return this.http.patch<any>(`${this.apiUrl}/issue-type/issue-media-type`,data,{observe:'response'});
+  }
 }

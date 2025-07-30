@@ -148,6 +148,7 @@ issueTypeId:any='';
         }));
   
         selectedMediaTypes.push({
+          issueMediaTypeId:mt.issueMediaTypeId,
           mediaTypeId: mt.mediaTypeId,
           description: mt.description,
           mandatory: mt.mandatory,
@@ -158,6 +159,29 @@ issueTypeId:any='';
       mediaRequiredArray.push(mediaGroup);
       this.selectedMediaTypeList.push(selectedMediaTypes);
     });
+  }
+
+
+  private bindIssueTypeData(data: any): void {
+    this.issueAnswerType = data.answerTypeIds || [];
+    this.selectedAttachments = data.mediaRequired || [];
+  
+    this.issueTypeForm.patchValue({
+      id: data.id,
+      issueType: data.issueType,
+      status: data.status ?? true,
+      answerTypeIds: this.issueAnswerType.map((a: any) => a.answerTypeId)
+    });
+  
+    this.setAnswerTypeArray(data.answerTypeIds);
+    this.setMediaRequiredArray(this.selectedAttachments);
+  
+    this.originalFormState = {
+      form: this.issueTypeForm.getRawValue(),
+      selectedMediaTypeList: JSON.parse(JSON.stringify(this.selectedMediaTypeList)),
+    };
+
+    
   }
   
 
@@ -196,29 +220,7 @@ issueTypeId:any='';
     this.issueTypeService.getIssueTypeBYId(this.issueTypeId).subscribe({
       next: res => {
         const data = res.body.data;
-        console.log(data);
-  
-        this.issueAnswerType = data.answerTypeIds || [];
-        this.selectedAttachments = data.mediaRequired || [];
-  
-        this.issueTypeForm.patchValue({
-          id: data.id,
-          issueType: data.issueType,
-          status: data.status ?? true,
-          answerTypeIds: this.issueAnswerType.map((a: any) => a.answerTypeId)
-        });
-  
-        // Populate answerTypeIds FormArray
-        this.setAnswerTypeArray(data.answerTypeIds);
-  
-        // Populate mediaRequired FormArray
-        this.setMediaRequiredArray(this.selectedAttachments);
-  
-        // Save original form state
-        this.originalFormState = {
-          form: this.issueTypeForm.getRawValue(),
-          selectedMediaTypeList: JSON.parse(JSON.stringify(this.selectedMediaTypeList)),
-        };
+        this.bindIssueTypeData(data)
       },
       error: err => this.utilityService.showError(err.status, err.error?.message || 'Fetch failed.')
     });
@@ -350,6 +352,42 @@ issueTypeId:any='';
     this.answerTypeList.push(newType);
   }
 
+  async statusUpdateAnswertype(item:any){
+    console.log(item);
+    
+    const updatedStatus = !item.status;
+    const payload = {
+      id: item.issueAnswerTypeId,
+      status: updatedStatus,
+    };
+
+    const message = `Are you sure you want to set this division as ${updatedStatus ? 'Active' : 'Inactive'}?`;
+    const result = await this.utilityService.confirmDialog(message, 'update');
+
+    if (result.isConfirmed) {
+      this.issueTypeService.updateStatusAnswerType(payload).subscribe({
+        next:res=>{
+          if(res.status==200){
+            const formArray = this.issueTypeForm.get('answerTypeIds') as FormArray;
+            const index = formArray.controls.findIndex(ctrl =>
+              ctrl.value.issueAnswerTypeId === item.issueAnswerTypeId
+            );
+
+            if (index > -1) {
+              formArray.at(index).patchValue({ status: updatedStatus });
+            }
+
+            this.utilityService.success(res.body.message)
+          }
+          
+        },
+        error:err=>{
+          this.utilityService.showError(err.status, err.error?.message || 'Failed to update status.');
+        }
+      })
+    }
+  }
+
 
   //----------------------------
 
@@ -399,6 +437,65 @@ issueTypeId:any='';
   
     this.mediaRequired.markAsDirty();
   }
+
+
+  get selectedAttachmentLabel(): string {
+    if (!this.selectedAttachments || this.selectedAttachments.length === 0) {
+      return 'Select Attachment Types';
+    }
+  
+    const names = this.selectedAttachments.map(t => t.attachmentType); // or t.name if applicable
+    const maxVisible = 3;
+  
+    if (names.length <= maxVisible) {
+      return names.join(', ');
+    }
+  
+    const visibleNames = names.slice(0, maxVisible).join(', ');
+    const remainingCount = names.length - maxVisible;
+    return `${visibleNames}, +${remainingCount} more`;
+  }
+
+  async statusUpdateAttachmentType(item:any){    
+    const updatedStatus = !item.status;
+    const payload = {
+      id: item.mediaRequiredId,
+      status: updatedStatus,
+    };
+
+    console.log(payload);
+    
+
+    const message = `Are you sure you want to set this attachment type as ${updatedStatus ? 'Active' : 'Inactive'}?`;
+    const result = await this.utilityService.confirmDialog(message, 'update');
+
+    if (result.isConfirmed) {
+      this.issueTypeService.updateStatusAttchmentType(payload).subscribe({
+        next:res=>{
+          if(res.status==200){
+            const index = this.selectedAttachments.findIndex((a: any) => a.mediaRequiredId === item.mediaRequiredId);
+            if (index > -1) {
+              this.selectedAttachments[index].status = updatedStatus;
+            }
+  
+            // ✅ 2. Update the mediaRequired FormArray
+            const formArray = this.issueTypeForm.get('mediaRequired') as FormArray;
+            const formGroup = formArray.at(index) as FormGroup;
+            if (formGroup) {
+              formGroup.patchValue({ status: updatedStatus });
+            }
+          
+          }
+          
+        },
+        error:err=>{
+          this.utilityService.showError(err.status, err.error?.message || 'Failed to update status.');
+        }
+      })
+    }
+  }
+
+
 
 
 
@@ -514,6 +611,47 @@ issueTypeId:any='';
       mediaTypeIdsArray.removeAt(indexToRemove);
       mediaTypeIdsArray.markAsDirty();
       mediaTypeIdsArray.markAsTouched();
+    }
+  }
+
+  async statusUpdateMediatype(item:any,formIndex:number){
+    console.log(item);
+    
+    const updatedStatus = !item.status;
+    const payload = {
+      id: item.issueMediaTypeId,
+      status: updatedStatus,
+    };
+
+    console.log(payload);
+    
+
+    const message = `Are you sure you want to set this media type as ${updatedStatus ? 'Active' : 'Inactive'}?`;
+    const result = await this.utilityService.confirmDialog(message, 'update');
+
+    if (result.isConfirmed) {
+      this.issueTypeService.updateStatusMediaType(payload).subscribe({
+        next:res=>{
+          if(res.status==200){
+          const mediaList = this.selectedMediaTypeList[formIndex];
+          const match = mediaList.find((m: any) => m.mediaTypeId === item.mediaTypeId);
+          if (match) {
+            match.status = updatedStatus;
+          }
+
+          // ✅ Also update in reactive form for consistency
+          const mediaTypeArray = (this.mediaRequired.at(formIndex).get('issueMediaType') as FormArray);
+          const formControl = mediaTypeArray.controls.find(c => c.value.mediaTypeId === item.mediaTypeId);
+          if (formControl) {
+            formControl.patchValue({ status: updatedStatus });
+          }
+          }
+          
+        },
+        error:err=>{
+          this.utilityService.showError(err.status, err.error?.message || 'Failed to update status.');
+        }
+      })
     }
   }
 // -------------------------------------------------------------------------------
@@ -723,10 +861,15 @@ generateUpdatePayload(): any {
 
   const payload= await this.generateUpdatePayload()
 
+  console.log(payload);
+  
+
   this.issueTypeService.updateIssueType(payload).subscribe({
     next: (res) => {
       if(res.status==200){
         this.utilityService.success(res.body.message);
+        this.isEdit=false;
+        this.bindIssueTypeData(res.body.data);
       } 
     },
     error: err => {
