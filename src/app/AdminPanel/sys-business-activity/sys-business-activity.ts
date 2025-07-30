@@ -19,7 +19,7 @@ export class SysBusinessActivity {
   data: BusinessActivityModel[] = [];
   filteredData: BusinessActivityModel[] = [];
 
-  itemsPerPage = 1;
+  itemsPerPage = 10;  
   currentPage = 1;
   searchTerm: string = '';
   statusFilter: string = '';
