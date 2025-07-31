@@ -16,9 +16,12 @@
   }
   
   .form-group label {
-    font-weight: 500;
+    font-size: 0.75rem;
+    color: #555555;
+    font-weight: 700;
     margin-bottom: 0.3rem;
   }
+
   
   /* Container wrapper */
   .registration-container {
@@ -145,5 +148,31 @@
     .left-panel p {
       font-size: 0.85rem;
     }
+  }
+
+  .message-box{
+    background-color: rgb(217 239 217);
+    border: 1px solid rgb(0 169 0);
+    padding: 20px;
+    border-radius: 10px;
+    color: rgb(8 112 8);
+  }
+
+  .styled-select {
+    font-size: 15px;
+    appearance: none; /* Remove default arrow (for some browsers) */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg fill='gray' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+  }
+  
+  /* Ensure consistent height */
+  .styled-select:focus {
+    outline: none;
+    border-color: #80bdff;
+    box-shadow: 0 0 5px rgba(0,123,255,.25);
   }
   

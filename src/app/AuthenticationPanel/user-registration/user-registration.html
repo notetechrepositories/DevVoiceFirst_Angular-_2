@@ -5,19 +5,28 @@
       <img src="images/logo-vf.png" alt="Logo" class="mb-4" width="50" />
       <h2>Welcome Back!</h2>
       <p>To keep connected with us please login with your personal info</p>
-      <button class="btn btn-outline-light mt-3">SIGN IN</button>
+      <button class="btn btn-outline-light mt-3" routerLink="/authentication/login">Sign In</button>
     </div>
 
     <!-- Right Panel -->
     <div class="right-panel">
+      
+      @if (isgoogleAuthenticated) {
+        <div class="message-box mb-4">
+          <p class="fw-bold mb-0">Google Sign-In Successful</p>
+          <small class="mb-0">Complete the remaining fields to register your account.</small>
+        </div>
+      }
+     @else{
       <h2>Create Account</h2>
-      <form [formGroup]="registrationForm" (ngSubmit)="onSubmit()" class="container">
+      }
+      <form [formGroup]="registrationForm" class="container">
 
         <div class="row">
           <!-- First Name -->
           <div class="form-group col-md-6">
             <label for="firstname">First Name</label>
-            <input id="firstname" type="text" class="form-control" formControlName="firstname" placeholder="Enter first name">
+            <input id="firstname" type="text" class="form-control" formControlName="firstname" placeholder="Enter first name" [readOnly]="isgoogleAuthenticated">
             <div class="text-danger small-error" *ngIf="registrationForm.get('firstname')?.touched && registrationForm.get('firstname')?.invalid">
               <small *ngIf="registrationForm.get('firstname')?.errors?.['required']">First name is required.</small>
               <small *ngIf="registrationForm.get('firstname')?.errors?.['minlength']">Minimum 2 characters required.</small>
@@ -27,7 +36,7 @@
           <!-- Last Name -->
           <div class="form-group col-md-6">
             <label for="lastname">Last Name</label>
-            <input id="lastname" type="text" class="form-control" formControlName="lastname" placeholder="Enter last name">
+            <input id="lastname" type="text" class="form-control" formControlName="lastname" placeholder="Enter last name" [readOnly]="isgoogleAuthenticated">
             <div class="text-danger small-error" *ngIf="registrationForm.get('lastname')?.touched && registrationForm.get('lastname')?.invalid">
               <small *ngIf="registrationForm.get('lastname')?.errors?.['required']">Last name is required.</small>
               <small *ngIf="registrationForm.get('lastname')?.errors?.['minlength']">Minimum 2 characters required.</small>
@@ -37,7 +46,7 @@
           <!-- Email -->
           <div class="form-group col-md-6">
             <label for="email">Email</label>
-            <input id="email" type="email" class="form-control" formControlName="email" placeholder="Enter email">
+            <input id="email" type="email" class="form-control" formControlName="email" placeholder="Enter email" [readOnly]="isgoogleAuthenticated">
             <div class="text-danger small-error" *ngIf="registrationForm.get('email')?.touched && registrationForm.get('email')?.invalid">
               <small *ngIf="registrationForm.get('email')?.errors?.['required']">Email is required.</small>
               <small *ngIf="registrationForm.get('email')?.errors?.['email']">Enter a valid email.</small>
@@ -46,18 +55,58 @@
   
           <!-- Mobile -->
           <div class="form-group col-md-6">
-            <label for="mobile">Mobile</label>
-            <input id="mobile" type="text" class="form-control" formControlName="mobile" placeholder="Enter mobile number">
-            <div class="text-danger small-error" *ngIf="registrationForm.get('mobile')?.touched && registrationForm.get('mobile')?.invalid">
-              <small *ngIf="registrationForm.get('mobile')?.errors?.['required']">Mobile number is required.</small>
-              <small *ngIf="registrationForm.get('mobile')?.errors?.['pattern']">Enter a valid 10-digit number.</small>
+            <div class="row">
+              <div class="col-3 col-xs-4">
+                <label for="mobile">Code</label>
+                <select id="gender" class="form-control styled-select" style="font-size: 10px;padding: 10px;">
+                  <option value=""></option>
+                  <option value="Male">+91</option>
+                  <option value="Female">+1</option>
+                  <option value="Other">+971</option>
+                </select>
+              </div>
+              <div class="col-9 col-xs-8">
+                <label for="mobile">Mobile</label>
+                <input id="mobile" type="text" class="form-control" formControlName="mobile" placeholder="Enter mobile number" (keypress)="utilityService.allowOnlyNumbers($event)">
+                <div class="text-danger small-error" *ngIf="registrationForm.get('mobile')?.touched && registrationForm.get('mobile')?.invalid" style="margin-left: 102px;">
+                  <small *ngIf="registrationForm.get('mobile')?.errors?.['required']">Mobile number is required.</small>
+                  <small *ngIf="registrationForm.get('mobile')?.errors?.['pattern']">Enter a valid 10-digit number.</small>
+                </div>
+              </div>
             </div>
           </div>
+
+            <!-- Birth Year -->
+            <div class="form-group col-md-6">
+              <label for="birthYear">Birth Year</label>
+              <select id="birthYear" class="form-control styled-select" formControlName="birthYear">
+                <option value="">Select birth year</option>
+                <option *ngFor="let year of years" [value]="year">{{ year }}</option>
+              </select>
+              <div class="text-danger small-error" *ngIf="registrationForm.get('birthYear')?.touched && registrationForm.get('birthYear')?.invalid">
+                <small *ngIf="registrationForm.get('birthYear')?.errors?.['required']">Birth year is required.</small>
+              </div>
+            </div>
+            
+    
+            <!-- Gender -->
+            <div class="form-group col-md-6">
+              <label for="gender">Gender</label>
+              <select id="gender" class="form-control styled-select" formControlName="gender">
+                <option value="">Select gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+              <div class="text-danger small-error" *ngIf="registrationForm.get('gender')?.touched && registrationForm.get('gender')?.invalid">
+                <small *ngIf="registrationForm.get('gender')?.errors?.['required']">Gender is required.</small>
+              </div>
+            </div>
   
           <!-- Address 1 -->
           <div class="form-group col-md-6">
             <label for="address1">Address 1</label>
-            <input id="address1" type="text" class="form-control" formControlName="address1" placeholder="Enter address line 1">
+            <input id="address1" type="text" class="form-control" formControlName="addressOne" placeholder="Enter address line 1">
             <div class="text-danger small-error" *ngIf="registrationForm.get('address1')?.touched && registrationForm.get('address1')?.invalid">
               <small *ngIf="registrationForm.get('address1')?.errors?.['required']">Address 1 is required.</small>
             </div>
@@ -66,38 +115,15 @@
           <!-- Address 2 -->
           <div class="form-group col-md-6">
             <label for="address2">Address 2</label>
-            <input id="address2" type="text" class="form-control" formControlName="address2" placeholder="Enter address line 2">
+            <input id="address2" type="text" class="form-control" formControlName="addressTwo" placeholder="Enter address line 2">
           </div>
   
-          <!-- Birth Year -->
-          <div class="form-group col-md-6">
-            <label for="birthYear">Birth Year</label>
-            <input id="birthYear" type="number" class="form-control" formControlName="birthYear" placeholder="Enter birth year">
-            <div class="text-danger small-error" *ngIf="registrationForm.get('birthYear')?.touched && registrationForm.get('birthYear')?.invalid">
-              <small *ngIf="registrationForm.get('birthYear')?.errors?.['required']">Birth year is required.</small>
-              <small *ngIf="registrationForm.get('birthYear')?.errors?.['min']">Too early to be born.</small>
-              <small *ngIf="registrationForm.get('birthYear')?.errors?.['max']">Future birth year not allowed.</small>
-            </div>
-          </div>
-  
-          <!-- Gender -->
-          <div class="form-group col-md-6">
-            <label for="gender">Gender</label>
-            <select id="gender" class="form-control" formControlName="gender">
-              <option value="">Select gender</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Other">Other</option>
-            </select>
-            <div class="text-danger small-error" *ngIf="registrationForm.get('gender')?.touched && registrationForm.get('gender')?.invalid">
-              <small *ngIf="registrationForm.get('gender')?.errors?.['required']">Gender is required.</small>
-            </div>
-          </div>
+        
   
           <!-- Country Dropdown -->
           <div class="form-group col-md-6">
             <label for="country">Country</label>
-            <select id="country" class="form-control" formControlName="country" (change)="onCountryChange($event)">
+            <select id="country" class="form-control styled-select" formControlName="country" (change)="onCountryChange($event)">
               <option value="">Select Country</option>
               <option *ngFor="let country of countries" [value]="country.id">{{ country.country }}</option>
             </select>
@@ -110,7 +136,7 @@
            @if(divisionLabels.one){
             <div class="form-group col-md-6">
               <label for="divisionOne">{{divisionLabels.one}}</label>
-              <select id="divisionOne" class="form-control" formControlName="divisionOne" (change)="onDivisionOneChange($event)">
+              <select id="divisionOne" class="form-control styled-select" formControlName="divisionOne" (change)="onDivisionOneChange($event)">
                 <option value="">{{'Select ' + divisionLabels.one}}</option>
                 <option *ngFor="let d1 of divisionOneList" [value]="d1.id">{{ d1.divisionOne }}</option>
               </select>
@@ -121,7 +147,7 @@
           @if(divisionLabels.two){
           <div class="form-group col-md-6">
             <label for="divisiontwo">{{divisionLabels.two}}</label>
-            <select id="divisiontwo" class="form-control" formControlName="divisionTwo" (change)="onDivisionTwoChange($event)">
+            <select id="divisiontwo" class="form-control styled-select" formControlName="divisionTwo" (change)="onDivisionTwoChange($event)">
               <option value="">{{'Select ' + divisionLabels.two}}</option>
               <option *ngFor="let d2 of divisionTwoList" [value]="d2.id">{{ d2.divisionTwo }}</option>
             </select>
@@ -132,7 +158,7 @@
            @if(divisionLabels.three){
             <div class="form-group col-md-6">
               <label for="divisionThree">{{divisionLabels.three}}</label>
-              <select id="divisionThree" class="form-control" formControlName="divisionThree">
+              <select id="divisionThree" class="form-control styled-select" formControlName="divisionThree">
                 <option value="">{{'Select ' + divisionLabels.three}}</option>
                 <option *ngFor="let d3 of divisionThreeList" [value]="d3.id">{{ d3.divisionThree }}</option>
               </select>
@@ -155,9 +181,10 @@
             <input id="zipcode" type="text" class="form-control" formControlName="zipcode" placeholder="Enter zip code">
             <div class="text-danger small-error" *ngIf="registrationForm.get('zipcode')?.touched && registrationForm.get('zipcode')?.invalid">
               <small *ngIf="registrationForm.get('zipcode')?.errors?.['required']">Zip code is required.</small>
-              <small *ngIf="registrationForm.get('zipcode')?.errors?.['pattern']">Enter a valid 5–6 digit zip code.</small>
             </div>
           </div>
+
+          @if(!isgoogleAuthenticated){
 
           <!-- Password -->
           <div class="form-group col-md-6">
@@ -176,12 +203,23 @@
               <small *ngIf="registrationForm.get('confirmPassword')?.errors?.['required']">Confirmation is required.</small>
             </div>
           </div>
+          }
 
         </div>
   
         <!-- Submit Button -->
         <div class="form-group col-md-12 mt-4">
-          <button type="submit" class="btn btn-primary w-100">Register</button>
+          @if(isgoogleAuthenticated){
+            <button type="submit" 
+            class="btn btn-primary w-100 d-flex justify-content-center align-items-center gap-2"
+            (click)="onGoogleRegister()">
+            Continue <i class="pi pi-angle-double-right"></i>
+          </button>
+          }
+          @else {
+            <button type="submit" class="btn btn-primary w-100" (click)="onRegister()">Register</button>
+          }
+          
         </div>
       </form>
     </div>

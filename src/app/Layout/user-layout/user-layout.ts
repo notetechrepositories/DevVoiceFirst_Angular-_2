@@ -10,7 +10,8 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 })
 export class UserLayout {
  isMenuOpen = false;
-isloggedin = false;
+ isloggedin = false;
+
  navigateToLogin(){
 
  }

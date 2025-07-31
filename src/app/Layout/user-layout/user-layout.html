@@ -46,7 +46,7 @@
       <button *ngIf="isloggedin; else loginButton" class="action-btn">Logout</button>
       <ng-template #loginButton>
         <!-- <button class="action-btn" routerLink="authentication/login">Login</button> -->
-        <a class="action-btn" routerLink="/authentication/login">Login</a>
+        <a class="action-btn" routerLink="/authentication/login">Sign In</a>
       </ng-template>
     </li>
   </ul>
@@ -86,7 +86,7 @@
       <i class="pi pi-home me-2"></i><a>Home</a>
     </li>
     <li (click)="onMenuClick()" routerLink="/authentication/login">
-      <i class="pi pi-sign-in me-2"></i><a >Login</a>
+      <i class="pi pi-sign-in me-2"></i><a >Sign In</a>
     </li>
     }
 

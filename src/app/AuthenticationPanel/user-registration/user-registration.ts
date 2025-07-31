@@ -1,13 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { CountryModel, DivisionOneModel, DivisionThreeModel, DivisionTwoModel } from '../../Models/CountryModel';
 import { CountryService } from '../../Service/CountryService/country-service';
+import { Auth } from '../../Service/AuthService/auth';
+import { UtilityService } from '../../Service/UtilityService/utility-service';
 
 @Component({
   selector: 'app-user-registration',
-  imports: [FormsModule, ReactiveFormsModule, CommonModule],
+  imports: [FormsModule, ReactiveFormsModule, CommonModule, RouterLink],
   templateUrl: './user-registration.html',
   styleUrl: './user-registration.css'
 })
@@ -25,15 +27,23 @@ export class UserRegistration {
     three: ''
   };
 
+  isgoogleAuthenticated : boolean = false;
+  authenticatedUser : any ;
+
+  years: number[] = [];
+
   constructor(
     private fb:FormBuilder,
     private router:Router,
-    private countryService:CountryService
+    private countryService:CountryService,
+    private authService:Auth,
+    public utilityService:UtilityService
   ){}
 
   ngOnInit(): void {
     this.formInit();
     this.loadCountry();
+    this.googleAuthenticationCheck();
   }
 
   formInit(){
@@ -42,9 +52,9 @@ export class UserRegistration {
       lastname: [''],
       email: ['', [Validators.required, Validators.email]],
       mobile: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
-      address1: ['', Validators.required],
-      address2: [''],
-      birthYear: ['', [Validators.required, Validators.min(1900), Validators.max(new Date().getFullYear())]],
+      addressOne: ['', Validators.required],
+      addressTwo: [''],
+      birthYear: ['', Validators.required],
       gender: ['', Validators.required],
       country: ['', Validators.required],
       divisionOne: [''],
@@ -53,8 +63,34 @@ export class UserRegistration {
       place: ['', Validators.required],
       password: ['', Validators.required],
       confirmPassword: ['', Validators.required],
-      zipcode: ['', [Validators.required, Validators.pattern(/^\d{5,6}$/)]]
+      zipcode: ['', Validators.required]
     });
+
+    const currentYear = new Date().getFullYear();
+    for (let year = currentYear; year >= 1900; year--) {
+      this.years.push(year);
+    }
+  }
+
+  googleAuthenticationCheck(){
+    this.authenticatedUser =this.authService.getLoggedInUser();
+    console.log(this.authenticatedUser);
+    if(this.authenticatedUser){
+      this.isgoogleAuthenticated = true;
+      if (!this.registrationForm.contains('subject')) {
+        this.registrationForm.addControl('subject', this.fb.control('', Validators.required));
+      }
+
+      this.registrationForm.get('password')?.clearValidators();
+      this.registrationForm.get('confirmPassword')?.clearValidators();
+
+      this.registrationForm.patchValue({
+        firstname:this.authenticatedUser.given_name,
+        lastname:this.authenticatedUser.family_name,
+        email:this.authenticatedUser.email,
+        subject:this.authenticatedUser.sub,
+      });
+    }
   }
 
   loadCountry(){
@@ -65,7 +101,7 @@ export class UserRegistration {
         }
       },
       error:err=>{
-
+        this.utilityService.showError(err.status , err.error.message);
       }
     });
   }
@@ -79,7 +115,6 @@ export class UserRegistration {
       this.divisionLabels.one = selectedCountry.divisionOneLabel?.trim() || '';
       this.divisionLabels.two = selectedCountry.divisionTwoLabel?.trim() || '';
       this.divisionLabels.three = selectedCountry.divisionThreeLabel?.trim() || '';
-  
       // Optionally reset division values
       this.registrationForm.patchValue({
         divisionOne: '',
@@ -95,7 +130,7 @@ export class UserRegistration {
         }
       },
       error:err=>{
-
+        this.utilityService.showError(err.status , err.error.message);
       }
     });
   }
@@ -111,7 +146,7 @@ export class UserRegistration {
         }
       },
       error:err=>{
-
+        this.utilityService.showError(err.status , err.error.message);
       }
     });
   }
@@ -127,22 +162,56 @@ export class UserRegistration {
         }
       },
       error:err=>{
-
+        this.utilityService.showError(err.status , err.error.message);
       }
     });
   }
   
 
-  onSubmit() {
+  onRegister() {
     if (this.registrationForm.invalid) {
       this.registrationForm.markAllAsTouched();
       return;
     }
-  
-    console.log(this.registrationForm.value);
-    this.registrationForm.reset();
-    this.router.navigate(['authentication/login']);
-    alert('Registration successful!');
+    const payload=this.registrationForm.value;
+    payload.birthYear = Number(payload.birthYear);
+    this.authService.userRegistration(payload).subscribe({
+      next:res=>{
+        if(res.status==201){
+          this.utilityService.success(res.body.message);
+          this.registrationForm.reset();
+          this.router.navigate(['authentication/login']);
+        }
+      },
+      error:err=>{
+        this.utilityService.showError(err.status , err.error.message);
+      }
+    });
+  }
+
+  onGoogleRegister(){
+    console.log("working");
+    
+    if (this.registrationForm.invalid) {
+      this.registrationForm.markAllAsTouched();
+      return;
+    }
+    const payload=this.registrationForm.value;
+    payload.birthYear = Number(payload.birthYear);
+    console.log(payload);
+    
+    this.authService.googleRegistration(payload).subscribe({
+      next:res=>{
+        if(res.status==201){
+          this.utilityService.success(res.body.message);
+          this.registrationForm.reset();
+          this.router.navigate(['user/home']);
+        }
+      },
+      error:err=>{
+        this.utilityService.showError(err.status , err.error.message);
+      }
+    });
   }
   
 }
