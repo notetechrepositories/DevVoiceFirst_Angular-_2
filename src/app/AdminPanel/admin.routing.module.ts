@@ -12,6 +12,7 @@ import { IssueType } from './issue-type/issue-type';
 import { AddIssueType } from './issue-type/add-issue-type/add-issue-type';
 import { EditIssueType } from './issue-type/edit-issue-type/edit-issue-type';
 import { Company } from './company/company';
+import { BusinessActivity } from '../CompanyPanel/business-activity/business-activity';
 
 
 export const AdminRoutes: Routes = [
@@ -69,6 +70,7 @@ export const AdminRoutes: Routes = [
    {
     path:'company',
     component:Company
-  }
+  },
 
+ 
 ];

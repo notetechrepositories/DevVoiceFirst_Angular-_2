@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { CompanyDashboard } from './company-dashboard/company-dashboard';
 import { Roles } from './roles/roles';
 import { BusinessActivity } from './business-activity/business-activity';
+import { AnswerType } from './answer-type/answer-type';
 
 
 
@@ -20,5 +21,9 @@ export const CompanyRoutes: Routes = [
   {
     path: 'business-activity',
     component: BusinessActivity
+  },
+  {
+    path: 'answer-type',
+    component: AnswerType
   }
 ];

@@ -18,6 +18,7 @@ import { AddIssueType } from './issue-type/add-issue-type/add-issue-type';
 import { AddAnswerType } from './sys-answer-type/add-answer-type/add-answer-type';
 import { EditIssueType } from './issue-type/edit-issue-type/edit-issue-type';
 import { Company } from './company/company';
+import { BusinessActivity } from '../CompanyPanel/business-activity/business-activity';
 
 
 
@@ -44,7 +45,9 @@ import { Company } from './company/company';
     IssueType,
     AddIssueType,
     EditIssueType,
-    Company
+    Company,
+   
+
 
   ],
   declarations: [
