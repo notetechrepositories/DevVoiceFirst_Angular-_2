@@ -35,7 +35,7 @@ export class SysAnswerType {
   constructor(
     private fb: FormBuilder,
     private utilityService: UtilityService,
-    private answerTypeSevice: AnswerTypeService
+    private answerTypeService: AnswerTypeService
   ) { }
 
   ngOnInit() {
@@ -116,7 +116,7 @@ export class SysAnswerType {
   }
 
   getAnswerType() {
-    this.answerTypeSevice.getAllAnswerType().subscribe({
+    this.answerTypeService.getAllAnswerType().subscribe({
       next: res => {
         this.data = res.body.data;
         this.filteredData = [...this.data];
@@ -147,7 +147,7 @@ export class SysAnswerType {
         this.utilityService.warning('No changes detected.');
         return;
       }
-      this.answerTypeSevice.updateAnswerType(updatedFields).subscribe({
+      this.answerTypeService.updateAnswerType(updatedFields).subscribe({
         next: (res) => {
           const updatedItem = res.body?.data;
 
@@ -166,7 +166,7 @@ export class SysAnswerType {
       });
     }
     else {
-      this.answerTypeSevice.createAnswertype(payload).subscribe({
+      this.answerTypeService.createAnswertype(payload).subscribe({
         next: (res) => {
           const newItem = res.body?.data;
           if (newItem) {
@@ -187,7 +187,7 @@ export class SysAnswerType {
     const message = `Delete ${this.selectedAnswerTypeIds.length} Answer type(s)`;
     const result = await this.utilityService.confirmDialog(message, 'delete');
     if (result.isConfirmed) {
-      this.answerTypeSevice.deleteAnswerType(this.selectedAnswerTypeIds).subscribe({
+      this.answerTypeService.deleteAnswerType(this.selectedAnswerTypeIds).subscribe({
         next: (res) => {
           const deletedIds: string[] = res.body?.data || [];
           this.filteredData = this.filteredData.filter(item => !deletedIds.includes(item.id));
@@ -244,7 +244,7 @@ export class SysAnswerType {
 
     if (result.isConfirmed) {
 
-      this.answerTypeSevice.updateAnswerTypeStatus(payload).subscribe({
+      this.answerTypeService.updateAnswerTypeStatus(payload).subscribe({
         next: () => {
           item.status = updatedStatus;
           this.utilityService.success('Status updated successfully');

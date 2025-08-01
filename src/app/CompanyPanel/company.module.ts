@@ -6,6 +6,7 @@ import { CompanyRoutes } from './company.routing.module';
 import { CompanyDashboard } from './company-dashboard/company-dashboard';
 import { Roles } from './roles/roles';
 import { BusinessActivity } from './business-activity/business-activity';
+import { AnswerType } from './answer-type/answer-type';
 
 @NgModule({
   imports: [
@@ -14,7 +15,8 @@ import { BusinessActivity } from './business-activity/business-activity';
     RouterModule.forChild(CompanyRoutes),
     CompanyDashboard,
     Roles,
-    BusinessActivity
+    BusinessActivity,
+    AnswerType
   ],
   declarations: [
 
