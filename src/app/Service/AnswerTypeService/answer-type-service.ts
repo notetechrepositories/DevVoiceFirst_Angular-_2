@@ -36,8 +36,8 @@ export class AnswerTypeService {
     return this.http.get<any>(`${this.apiUrl}/answer-type`,{observe: 'response'});
   }
 // -----------------------Company Answer type ----------------------------------------
- getAllCompanyAnswerType(){
-    return this.http.get<any>(`${this.apiUrl}/company-answer-type/all`,{observe: 'response'});
+ getAllCompanyAnswerType(page:any, limit :any){ 
+    return this.http.get<any>(`${this.apiUrl}/company-answer-type/all?PageNumber=${page}&Limit=${limit}`,{observe: 'response'});
   }
   createCompanyAnswertype(data:any){
     return this.http.post<any>(`${this.apiUrl}/company-answer-type`, data,{observe: 'response'});

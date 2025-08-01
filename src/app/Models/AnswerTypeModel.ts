@@ -11,4 +11,5 @@ export interface AnswerTypeModel {
      companyAnswerTypeName:string;
      status:string,
      selected?: boolean;
+     
   }

@@ -29,6 +29,7 @@ export class AnswerType {
 
   itemsPerPage = 10;
   currentPage = 1;
+  totalPages!:number;
   searchTerm: string = '';
   isModalVisible: boolean = false;
   isEditModalVisible: boolean = false;
@@ -47,7 +48,7 @@ export class AnswerType {
   ) {}
 
   ngOnInit() {
-    this.getCompanyAnswerType();
+    this.getCompanyAnswerType(this.currentPage,this.itemsPerPage);
     this.getAnswerType();
     this.answerTypeForm = this.fb.group({
       id: [''],
@@ -55,9 +56,9 @@ export class AnswerType {
     });
   }
 
-  get totalPages(): number {
-    return Math.ceil(this.filteredData.length / this.itemsPerPage);
-  }
+  // get totalPages(): number {
+  //   return Math.ceil(this.filteredData.length / this.itemsPerPage);
+  // }
 
   get totalPagesArray(): number[] {
     return Array(this.totalPages)
@@ -66,9 +67,11 @@ export class AnswerType {
   }
 
   get pagedData() {
-    const start = (this.currentPage - 1) * this.itemsPerPage;
-    return this.filteredData.slice(start, start + this.itemsPerPage);
+    // const start = (this.currentPage - 1) * this.itemsPerPage;
+    // return this.filteredData.slice(start, start + this.itemsPerPage);
+    return this.filteredData;
   }
+
   onSearch() {
     const term = this.searchTerm.toLowerCase();
     this.filteredData = this.data.filter(item =>
@@ -79,14 +82,22 @@ export class AnswerType {
 
   goToPage(page: number) {
     this.currentPage = page;
+    this.getCompanyAnswerType(this.currentPage,this.itemsPerPage);
   }
 
   previousPage() {
-    if (this.currentPage > 1) this.currentPage--;
+    if (this.currentPage > 1){
+      this.currentPage--;
+      this.getCompanyAnswerType(this.currentPage,this.itemsPerPage);
+    } 
   }
 
   nextPage() {
-    if (this.currentPage < this.totalPages) this.currentPage++;
+    if (this.currentPage < this.totalPages){
+      this.currentPage++;
+      this.getCompanyAnswerType(this.currentPage,this.itemsPerPage);
+      
+    } 
   }
 
   openModal() {
@@ -118,8 +129,6 @@ export class AnswerType {
 
   openEditModal(item: CompanyAnswerTypeModel) {
     this.isEditModalVisible = true;
-  
-    // Convert 'y'/'n' to true/false
     this.answerTypeForm.patchValue({
     
      
@@ -202,16 +211,29 @@ toggleAnswerType(answerType: any) {
       });
     }
   }
-  // ------------------
-    getCompanyAnswerType() {
-    this.answerTypeService.getAllCompanyAnswerType().subscribe({
-      next: res => {
-        this.data = res.body.data;
-        this.filteredData = [...this.data];
-      },
-      error: err => { this.utilityService.showError(err.status, err.error?.message || 'Get failed.') }
-    });
-  }
+
+
+// ------------------
+
+
+ getCompanyAnswerType(currentPage:number,itemsPerPage:number) {
+  this.answerTypeService.getAllCompanyAnswerType(currentPage,itemsPerPage).subscribe({
+    next: res => {
+      console.log(res);
+      
+      const all = res.body.data.items;
+      this.filteredData = [...all];  
+      this.totalPages = res.body.data.totalPage;
+      console.log("pages",this.totalPages);
+      
+      
+    },
+    error: err => {
+      this.utilityService.showError(err.status, err.error?.message || 'Get failed.');
+    }
+  });
+}
+
    getAnswerType() {
     this.answerTypeService.getAnswerType().subscribe({
       next: res => {
@@ -221,6 +243,8 @@ toggleAnswerType(answerType: any) {
       error: err => { this.utilityService.showError(err.status, err.error?.message || 'Get failed.') }
     });
   }
+
+
  async deleteAnswerType(): Promise<void> {
     const message = `Delete ${this.selectedAnswerTypeIds.length} Answer type(s)`;
     const result = await this.utilityService.confirmDialog(message, 'delete');
