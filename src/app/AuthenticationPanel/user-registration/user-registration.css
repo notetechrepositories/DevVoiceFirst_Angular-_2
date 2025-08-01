@@ -175,4 +175,12 @@
     border-color: #80bdff;
     box-shadow: 0 0 5px rgba(0,123,255,.25);
   }
+
+  .is-valid {
+    border-color: #28a745 !important;
+  }
+  
+  .is-invalid {
+    border-color: #dc3545 !important;
+  }
   

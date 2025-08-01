@@ -18,11 +18,6 @@ import { AddIssueType } from './issue-type/add-issue-type/add-issue-type';
 import { AddAnswerType } from './sys-answer-type/add-answer-type/add-answer-type';
 import { EditIssueType } from './issue-type/edit-issue-type/edit-issue-type';
 
-
-
-
-
-
 @NgModule({
   imports: [
     CommonModule,

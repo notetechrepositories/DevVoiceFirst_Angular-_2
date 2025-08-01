@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { CountryModel, DivisionOneModel, DivisionThreeModel, DivisionTwoModel } from '../../Models/CountryModel';
 import { CountryService } from '../../Service/CountryService/country-service';
@@ -64,12 +64,21 @@ export class UserRegistration {
       password: ['', Validators.required],
       confirmPassword: ['', Validators.required],
       zipcode: ['', Validators.required]
+    },{
+      validators: this.passwordMatchValidator
     });
+
 
     const currentYear = new Date().getFullYear();
     for (let year = currentYear; year >= 1900; year--) {
       this.years.push(year);
     }
+  }
+
+  passwordMatchValidator(form: AbstractControl): null | object {
+    const password = form.get('password')?.value;
+    const confirmPassword = form.get('confirmPassword')?.value;
+    return password === confirmPassword ? null : { mismatch: true };
   }
 
   googleAuthenticationCheck(){

@@ -92,7 +92,7 @@
             <!-- Gender -->
             <div class="form-group col-md-6">
               <label for="gender">Gender</label>
-              <select id="gender" class="form-control styled-select" formControlName="gender">
+              <select class="form-control styled-select" formControlName="gender">
                 <option value="">Select gender</option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
@@ -124,7 +124,7 @@
           <div class="form-group col-md-6">
             <label for="country">Country</label>
             <select id="country" class="form-control styled-select" formControlName="country" (change)="onCountryChange($event)">
-              <option value="">Select Country</option>
+              <option value="" disabled>Select Country</option>
               <option *ngFor="let country of countries" [value]="country.id">{{ country.country }}</option>
             </select>
             <div class="text-danger small-error" *ngIf="registrationForm.get('country')?.touched && registrationForm.get('country')?.invalid">
@@ -137,7 +137,7 @@
             <div class="form-group col-md-6">
               <label for="divisionOne">{{divisionLabels.one}}</label>
               <select id="divisionOne" class="form-control styled-select" formControlName="divisionOne" (change)="onDivisionOneChange($event)">
-                <option value="">{{'Select ' + divisionLabels.one}}</option>
+                <option value="" disabled>{{'Select ' + divisionLabels.one}}</option>
                 <option *ngFor="let d1 of divisionOneList" [value]="d1.id">{{ d1.divisionOne }}</option>
               </select>
             </div>
@@ -148,7 +148,7 @@
           <div class="form-group col-md-6">
             <label for="divisiontwo">{{divisionLabels.two}}</label>
             <select id="divisiontwo" class="form-control styled-select" formControlName="divisionTwo" (change)="onDivisionTwoChange($event)">
-              <option value="">{{'Select ' + divisionLabels.two}}</option>
+              <option value="" disabled>{{'Select ' + divisionLabels.two}}</option>
               <option *ngFor="let d2 of divisionTwoList" [value]="d2.id">{{ d2.divisionTwo }}</option>
             </select>
           </div>
@@ -159,7 +159,7 @@
             <div class="form-group col-md-6">
               <label for="divisionThree">{{divisionLabels.three}}</label>
               <select id="divisionThree" class="form-control styled-select" formControlName="divisionThree">
-                <option value="">{{'Select ' + divisionLabels.three}}</option>
+                <option value="" disabled>{{'Select ' + divisionLabels.three}}</option>
                 <option *ngFor="let d3 of divisionThreeList" [value]="d3.id">{{ d3.divisionThree }}</option>
               </select>
             </div>
@@ -198,9 +198,24 @@
           <!-- Confirm Password -->
           <div class="form-group col-md-6">
             <label for="confirmPassword">Confirm Password</label>
-            <input id="confirmPassword" type="password" class="form-control" formControlName="confirmPassword" placeholder="Confirm password">
+            <input id="confirmPassword"
+                   type="password"
+                   class="form-control"
+                   [ngClass]="{
+                     'is-valid': registrationForm.get('confirmPassword')?.touched &&
+                                 registrationForm.hasError('mismatch') === false &&
+                                 registrationForm.get('confirmPassword')?.valid,
+                     'is-invalid': registrationForm.get('confirmPassword')?.touched &&
+                                   registrationForm.hasError('mismatch')
+                   }"
+                   formControlName="confirmPassword"
+                   placeholder="Confirm password">
+          
             <div class="text-danger small-error" *ngIf="registrationForm.get('confirmPassword')?.touched && registrationForm.get('confirmPassword')?.invalid">
               <small *ngIf="registrationForm.get('confirmPassword')?.errors?.['required']">Confirmation is required.</small>
+            </div>
+            <div class="text-danger small-error" *ngIf="registrationForm.hasError('mismatch') && registrationForm.get('confirmPassword')?.touched">
+              <small>Passwords do not match.</small>
             </div>
           </div>
           }
