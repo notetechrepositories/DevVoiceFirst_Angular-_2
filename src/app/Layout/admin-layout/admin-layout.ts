@@ -101,7 +101,8 @@ export class AdminLayout implements OnInit {
     this.checkScreenSize();
     this.loggedInUser = this.authService.getLoggedInUser();
     const role = this.loggedInUser?.role === 'company' ? 'company' : 'admin';
-    this.baseRoutePrefix = `/${role}`;
+    // this.baseRoutePrefix = `/${role}`;
+    this.baseRoutePrefix = `/admin`;
     this.getMenus();
   }
 

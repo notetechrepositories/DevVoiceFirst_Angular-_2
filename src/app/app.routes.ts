@@ -35,7 +35,7 @@ export const routes: Routes = [
     ],
   },
   {
-    path: 'company',
+    path: 'admin',
     component: AdminLayout,
     children: [
       {
