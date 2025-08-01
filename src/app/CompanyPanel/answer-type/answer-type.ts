@@ -6,26 +6,18 @@ import { UtilityService } from '../../Service/UtilityService/utility-service';
 import { AnswerTypeService } from '../../Service/AnswerTypeService/answer-type-service';
 import { AnswerTypeModel, CompanyAnswerTypeModel } from '../../Models/AnswerTypeModel';
 
-interface BusinessActivityItem {
-  id: string;
-  business_activity_name: string;
-  company: string;
-  branch: string;
-  section: string;
-  sub_section: string;
-  selected?: boolean; // optional, because it's added dynamically
-}
-
 @Component({
   selector: 'app-answer-type',
   imports: [RouterLink, CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './answer-type.html',
   styleUrl: './answer-type.css'
 })
+
 export class AnswerType {
+
   data: CompanyAnswerTypeModel[] = [];
   filteredData: CompanyAnswerTypeModel[] = [];
-  sysAnswerTypes:AnswerTypeModel[]=[];
+  sysAnswerTypes: AnswerTypeModel[] = [];
 
   itemsPerPage = 10;
   currentPage = 1;
@@ -33,7 +25,6 @@ export class AnswerType {
   isModalVisible: boolean = false;
   isEditModalVisible: boolean = false;
   answerTypeForm!: FormGroup;
-
   selectedAnswerTypeIds: string[] = [];
   selectedAnswerTypeId: string[] = [];
   isAllSelected = false;
@@ -42,9 +33,9 @@ export class AnswerType {
   crossIcon = '<i class="fa-solid fa-xmark text-danger"></i>';
 
   constructor(private fb: FormBuilder,
-    private utilityService :UtilityService,
-    private answerTypeService:AnswerTypeService
-  ) {}
+    private utilityService: UtilityService,
+    private answerTypeService: AnswerTypeService
+  ) { }
 
   ngOnInit() {
     this.getCompanyAnswerType();
@@ -100,64 +91,39 @@ export class AnswerType {
     this.answerTypeForm.reset();
   }
 
-  // addBusinessActivity() {
-  //   const formValue = this.answerTypeForm.value;
-  
-  //   // Generate a random ID for new entries (optional)
-  //   const newId = Math.floor(Math.random() * 100000000).toString();
-  
-  //   const newItem: CompanyAnswerTypeModel = {
-  //     id: newId,
-  //     companyAnswerTypeName: formValue.companyAnswerTypeName,
-    
-  //   };
-  
-  //   this.data.push(newItem);
-  //   this.filteredData = [...this.data];
-  //   this.closeModal();
-  // }
-
   openEditModal(item: CompanyAnswerTypeModel) {
     this.isEditModalVisible = true;
     this.answerTypeForm.patchValue({
-    
-     
     });
   }
 
- 
-toggleAnswerType(answerType: any) {
-  if (!answerType.selected) {
-    const payload = {
-      answerTypeId: answerType.id,
-    };
-    this.answerTypeService.createCompanyAnswertype(payload).subscribe({
-      next: (res) => {
-        console.log(res);
-        
-        const newItem = res.body?.data;
-
-        if (newItem) {
-          // Normalize if needed
-          newItem.status = newItem.status ?? true;
-          this.data.push(newItem);
-          this.filteredData = [...this.data];
+  toggleAnswerType(answerType: any) 
+  {
+    if (!answerType.selected) {
+      const payload = {
+        answerTypeId: answerType.id,
+      };
+      this.answerTypeService.createCompanyAnswertype(payload).subscribe({
+        next: (res) => {
+          const newItem = res.body?.data;
+          if (newItem) {
+            newItem.status = newItem.status ?? true;
+            this.data.push(newItem);
+            this.filteredData = [...this.data];
+          }
+          answerType.selected = true;
+          this.utilityService.success(res.body.message);
+        },
+        error: (err) => {
+          this.utilityService.showError(err.status, err.error?.message || 'Creation failed');
         }
-
-        answerType.selected = true;
-        this.utilityService.success(res.body.message);
-      },
-      error: (err) => {
-        this.utilityService.showError(err.status, err.error?.message || 'Creation failed');
-      }
-    });
+      });
+    }
   }
-}
 
-  // -----------------
-    toggleSelection(id: string, event: Event) {
+  toggleSelection(id: string, event: Event) 
+  {
     const checked = (event.target as HTMLInputElement).checked;
-
     if (checked) {
       if (!this.selectedAnswerTypeIds.includes(id)) {
         this.selectedAnswerTypeIds.push(id);
@@ -167,19 +133,19 @@ toggleAnswerType(answerType: any) {
     }
   }
 
-  toggleSelectAll(event: Event) {
+  toggleSelectAll(event: Event) 
+  {
     const checked = (event.target as HTMLInputElement).checked;
-
     if (checked) {
       this.selectedAnswerTypeIds = this.pagedData.map(x => x.id);
     } else {
       this.selectedAnswerTypeIds = [];
     }
-
     this.isAllSelected = checked;
   }
 
-  async toggleStatus(item: any): Promise<void> {
+  async toggleStatus(item: any): Promise<void>
+ {
     const updatedStatus = !item.status;
     const payload = {
       id: item.id,
@@ -187,9 +153,7 @@ toggleAnswerType(answerType: any) {
     };
     const message = `Are you sure you want to set this answer type as ${updatedStatus ? 'Active' : 'Inactive'}?`;
     const result = await this.utilityService.confirmDialog(message, 'update');
-
     if (result.isConfirmed) {
-
       this.answerTypeService.updateCompanyAnswerTypeStatus(payload).subscribe({
         next: () => {
           item.status = updatedStatus;
@@ -197,31 +161,30 @@ toggleAnswerType(answerType: any) {
         },
         error: err => {
           this.utilityService.showError(err.status, err.error?.message || 'Failed to Update Status.')
-
         }
       });
     }
   }
 
+  // ------------------
 
-// ------------------
+  getCompanyAnswerType()
+ {
+    this.answerTypeService.getAllCompanyAnswerType().subscribe({
+      next: res => {
+        this.data = res.body.data
+        console.log(this.data);
+        this.filteredData = [...this.data];
+        this.markSelectedTypes();
+      },
+      error: err => {
+        this.utilityService.showError(err.status, err.error?.message || 'Get failed.');
+      }
+    });
+  }
 
-
- getCompanyAnswerType() {
-  this.answerTypeService.getAllCompanyAnswerType().subscribe({
-    next: res => {
-      this.data = res.body.data
-      console.log(this.data);
-      this.filteredData = [...this.data];
-       this.markSelectedTypes();
-    },
-    error: err => {
-      this.utilityService.showError(err.status, err.error?.message || 'Get failed.');
-    }
-  });
-}
-
-   getAnswerType() {
+  getAnswerType() 
+  {
     this.answerTypeService.getAnswerType().subscribe({
       next: res => {
         this.sysAnswerTypes = res.body.data;
@@ -231,17 +194,16 @@ toggleAnswerType(answerType: any) {
     });
   }
 
-  private markSelectedTypes() {
-  if (!this.sysAnswerTypes.length || !this.data.length) return;
+  private markSelectedTypes()
+  {
+    if (!this.sysAnswerTypes.length || !this.data.length) return;
+    const companyAnswerTypeIds = new Set(this.data.map((item) => item.answerTypeId));
+    this.sysAnswerTypes.forEach(type => {
+      type.selected = companyAnswerTypeIds.has(type.id);
+    });
+  }
 
-  const companyAnswerTypeIds = new Set(this.data.map((item) => item.answerTypeId));
-  this.sysAnswerTypes.forEach(type => {
-    type.selected = companyAnswerTypeIds.has(type.id);
-  });
-}
-
-
- async deleteAnswerType(): Promise<void> {
+  async deleteAnswerType(): Promise<void> {
     const message = `Delete ${this.selectedAnswerTypeIds.length} Answer type(s)`;
     const result = await this.utilityService.confirmDialog(message, 'delete');
     if (result.isConfirmed) {
@@ -256,32 +218,28 @@ toggleAnswerType(answerType: any) {
         error: (err) => {
           this.utilityService.showError(err.status, err.error?.message || 'Failed to delete items.');
         }
-
       });
       this.selectedAnswerTypeIds = [];
       this.isAllSelected = false;
 
     }
   }
-  
-  submitAnswerType() {
+
+  submitAnswerType()
+  {
     const form = this.answerTypeForm;
     const formValue = form.value;
     const payload = {
       companyAnswerTypeName: formValue.companyAnswerTypeName,
 
     };
-    console.log(payload);
-    
     if (this.answerTypeForm.invalid) {
       this.answerTypeForm.markAllAsTouched();
       return;
     }
     if (this.isEditMode) {
       const updatedFields: any = { id: this.selectedAnswerTypeId };
-
       this.utilityService.setIfDirty(form, 'companyAnswerTypeName', updatedFields);
-      // Only send update if any field has changed
       if (Object.keys(updatedFields).length === 1) {
         this.utilityService.warning('No changes detected.');
         return;
@@ -305,7 +263,6 @@ toggleAnswerType(answerType: any) {
       });
     }
     else {
-      
       this.answerTypeService.createCompanyAnswertype(payload).subscribe({
         next: (res) => {
           const newItem = res.body?.data;
@@ -320,7 +277,5 @@ toggleAnswerType(answerType: any) {
         }
       });
     }
-
-
   }
 }
