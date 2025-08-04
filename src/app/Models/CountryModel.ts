@@ -1,6 +1,7 @@
 export interface CountryModel{
     id:string;
     country:string;
+    countryCode:string;
     divisionOneLabel:string;
     divisionTwoLabel:string;
     divisionThreeLabel:string;

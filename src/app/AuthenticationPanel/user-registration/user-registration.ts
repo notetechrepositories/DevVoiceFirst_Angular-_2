@@ -57,6 +57,7 @@ export class UserRegistration {
       birthYear: ['', Validators.required],
       gender: ['', Validators.required],
       country: ['', Validators.required],
+      countryCode: ['',Validators.required],
       divisionOne: [''],
       divisionTwo: [''],
       divisionThree: [''],

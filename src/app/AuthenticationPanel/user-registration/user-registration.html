@@ -57,12 +57,11 @@
           <div class="form-group col-md-6">
             <div class="row">
               <div class="col-3 col-xs-4">
-                <label for="mobile">Code</label>
-                <select id="gender" class="form-control styled-select" style="font-size: 10px;padding: 10px;">
-                  <option value=""></option>
-                  <option value="Male">+91</option>
-                  <option value="Female">+1</option>
-                  <option value="Other">+971</option>
+                <label for="code">Code</label>
+                <select id="code" class="form-control styled-select" style="font-size: 10px;padding: 10px;">
+                  @for(country of countries; track country.id){
+                    <option [value]="country.countryCode">{{ country.countryCode }}</option>
+                  }
                 </select>
               </div>
               <div class="col-9 col-xs-8">
@@ -125,7 +124,9 @@
             <label for="country">Country</label>
             <select id="country" class="form-control styled-select" formControlName="country" (change)="onCountryChange($event)">
               <option value="" disabled>Select Country</option>
-              <option *ngFor="let country of countries" [value]="country.id">{{ country.country }}</option>
+              @for(country of countries; track country.id){
+                <option [value]="country.id">{{ country.country }}</option>
+              }
             </select>
             <div class="text-danger small-error" *ngIf="registrationForm.get('country')?.touched && registrationForm.get('country')?.invalid">
               <small *ngIf="registrationForm.get('country')?.errors?.['required']">Country is required.</small>
