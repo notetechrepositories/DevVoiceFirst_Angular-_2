@@ -45,7 +45,7 @@
           <img [src]="loggedInUser?.picture || 'images/user-default.png'" alt="User Avatar"
                width="30" height="30" class="rounded-circle me-2 user-avatar">
                @if(isSidebarExpanded){
-                <span class="fw-semibold me-2 font-size-10">{{loggedInUser.name}}</span>
+                <span class="fw-semibold me-2 font-size-10">{{loggedInUser?.name}}</span>
                }
         </a>
       

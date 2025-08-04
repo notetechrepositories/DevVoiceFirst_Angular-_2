@@ -359,3 +359,54 @@
       font-size: 0.85rem;
     }
   }
+
+  /* ====================Modal=================== */
+
+/* Modal overlay */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Modal box */
+.modal-content-2 {
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+/* Button styling */
+.modal-content-2 .btn-warning {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  font-size: 30px;
+  margin-bottom: 8px;
+  transition: all 0.3s ease;
+}
+
+.modal-content-2 .btn-warning:hover {
+  background-color: #f0ad4e;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Label styling */
+.input_label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}

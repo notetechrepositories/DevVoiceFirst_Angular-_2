@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Auth } from '../../Service/AuthService/auth';
 
 @Component({
   selector: 'app-user-layout',
@@ -10,7 +11,19 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 })
 export class UserLayout {
  isMenuOpen = false;
- isloggedin = false;
+ isLoggedIn : boolean = false;
+
+constructor(private authService:Auth){}
+
+ngOnInit(){
+  this.loginCheck();
+}
+
+ loginCheck(){
+  this.authService.isLoggedIn$.subscribe((status) => {
+    this.isLoggedIn = status;
+  });
+}
 
  navigateToLogin(){
 
@@ -31,5 +44,9 @@ export class UserLayout {
     if(this.isMenuOpen){
       this.isMenuOpen=false;
     }
+  }
+
+  logout(){
+    this.authService.logout();
   }
 }

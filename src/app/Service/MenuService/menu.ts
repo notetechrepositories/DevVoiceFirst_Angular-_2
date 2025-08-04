@@ -15,6 +15,6 @@ export class Menu {
   ) { }
 
   getMenu(){
-    return this.http.get<any>(this.apiUrl+'/menus/web');
+    return this.http.get<any>(this.apiUrl+'/menus/web', {observe:'response'});
   }
 }

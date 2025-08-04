@@ -93,7 +93,7 @@ export class UtilityService {
 
   showError(statusCode: number , message?:string) {
 
-    if(statusCode === 500){
+    if(statusCode === 500 || statusCode === 400){
       Swal.fire({
         icon: "error",
         title: "Oops...",
@@ -101,11 +101,11 @@ export class UtilityService {
       });
     }
 
-    if(statusCode === 400){
+    if(statusCode === 404){
       Swal.fire({
         icon: "error",
-        title: "Bad Request",
-        text: "Please check your request and try again.",
+        title: "Not Found",
+        text: `${message}`,
       });
     }
 

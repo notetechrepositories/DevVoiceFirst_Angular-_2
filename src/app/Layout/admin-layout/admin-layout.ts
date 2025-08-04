@@ -15,11 +15,19 @@ export interface MenuItem {
 }
 
 // Clean route and initialize empty children array
-export function cleanMenuData(data: any[]): MenuItem[] {
-  return data.map((item) => ({
-    ...item,
-    route: item.route?.trim() || undefined,
-    children: [],
+export function cleanMenuData(data: any): MenuItem[] {
+  if (!Array.isArray(data)) {
+    console.error('Invalid menu data:', data);
+    return [];
+  }
+
+  return data.map(item => ({
+    id: item.id,
+    name: item.name,
+    icon: item.icon,
+    route: item.route,
+    position: item.position,
+    children: [] // assuming flat data initially
   }));
 }
 
@@ -79,6 +87,7 @@ export class AdminLayout implements OnInit {
   isSidebarExpanded: boolean = true;
   baseRoutePrefix = '';
   loggedInUser:any;
+  isLoggedIn:boolean=false;
 
   iconMap: { [key: string]: string } = {
     dashboard: 'pi pi-gauge',
@@ -100,14 +109,19 @@ export class AdminLayout implements OnInit {
     window.addEventListener('resize', () => this.checkScreenSize());
     this.checkScreenSize();
     this.loggedInUser = this.authService.getLoggedInUser();
-    const role = this.loggedInUser?.role === 'company' ? 'company' : 'admin';
-    // this.baseRoutePrefix = `/${role}`;
+    this.loginCheck();
     this.baseRoutePrefix = `/admin`;
     this.getMenus();
   }
 
   toggleSidebar() {
     this.isSidebarExpanded = !this.isSidebarExpanded;
+  }
+
+  loginCheck(){
+    this.authService.isLoggedIn$.subscribe((status) => {
+      this.isLoggedIn = status;
+    });
   }
 
   @HostListener('window:resize', [])
@@ -130,13 +144,14 @@ export class AdminLayout implements OnInit {
    getMenus() {
     this.menuService.getMenu().subscribe({
       next: (res: any) => {
-        const cleaned = cleanMenuData(res.data);
-        const tree = buildMenuTree(cleaned);
-        const prefixed = applyRoutePrefix(tree, this.baseRoutePrefix);
-        this.menuItems = prefixed;
-        console.log(this.menuItems);
-        
-        this.initializeToggleStates(this.menuItems);
+        if(res.status==200){          
+          const cleaned = cleanMenuData(res.body.data);
+          const tree = buildMenuTree(cleaned);
+          const prefixed = applyRoutePrefix(tree, this.baseRoutePrefix);
+          this.menuItems = prefixed;
+          console.log(this.menuItems);
+          this.initializeToggleStates(this.menuItems);
+        }
       },
       error: (error) => console.error(error)
     });
