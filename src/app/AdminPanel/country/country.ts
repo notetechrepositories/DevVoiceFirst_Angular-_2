@@ -56,6 +56,7 @@ export class Country {
     this.countryForm=this.fb.group({
       id:[''],
       country:['',Validators.required],
+      countryCode:['',Validators.required],
       divisionOneLabel:[''],
       divisionTwoLabel:[''],
       divisionThreeLabel:[''],
@@ -119,12 +120,12 @@ export class Country {
       this.countryForm.patchValue({
         id:editItem.id,
         country:editItem.country,
+        countryCode:editItem.countryCode,
         divisionOneLabel:editItem.divisionOneLabel,
         divisionTwoLabel:editItem.divisionTwoLabel,
         divisionThreeLabel:editItem.divisionThreeLabel
       })
     }
-    console.log(this.isModalVisible);
   }
 
   closeModal() {
@@ -133,13 +134,13 @@ export class Country {
     this.countryForm.reset(); 
   }
 
-
-
   getCountry() {
     this.countryService.getCountry().subscribe({
       next: res => {
-        this.data = res.body.data;
-        this.filteredData = [...this.data];
+        if(res.status===200){
+          this.data = res.body.data;
+          this.filteredData = [...this.data];
+        }
       },
       error: err => console.error('Error fetching roles:', err)
     });
@@ -147,13 +148,6 @@ export class Country {
 
   submitForm() {
     const form = this.countryForm;
-    const formValue = form.value;
-    const payload = {
-      country: formValue.country,
-      divisionOneLabel: formValue.divisionOneLabel,
-      divisionTwoLabel: formValue.divisionTwoLabel,
-      divisionThreeLabel: formValue.divisionThreeLabel,
-    };
     if (this.countryForm.invalid) {
       this.countryForm.markAllAsTouched();
       return;
@@ -162,6 +156,7 @@ export class Country {
      
       const updatedFields: any = { id: this.selectedCountryId };
       this.utilityService.setIfDirty(form, 'country', updatedFields);
+      this.utilityService.setIfDirty(form, 'countryCode', updatedFields);
       this.utilityService.setIfDirty(form, 'divisionOneLabel', updatedFields);
       this.utilityService.setIfDirty(form, 'divisionTwoLabel', updatedFields);
       this.utilityService.setIfDirty(form, 'divisionThreeLabel', updatedFields);
@@ -169,10 +164,10 @@ export class Country {
         this.utilityService.warning('No changes detected.');
         return;
       }
+      
        this.countryService.updateCountry(updatedFields).subscribe({
         next: res => {
-           const updatedItem = res.body?.data;
-
+          const updatedItem = res.body?.data;
           if (updatedItem) {
             const filteredIndex = this.filteredData.findIndex(item => item.id === updatedItem.id);
             if (filteredIndex !== -1) {
@@ -184,14 +179,19 @@ export class Country {
         },
         error: err => {
           console.log("error",err);
-          
           this.utilityService.showError(err.status, err.error?.message || 'Update failed.');
-        
         }
-      })
+      });
     }
     else {
-      this.countryService.createCountry(payload).subscribe({
+      const updatedFields: any = {};
+      this.utilityService.setIfDirty(form, 'country', updatedFields);
+      this.utilityService.setIfDirty(form, 'countryCode', updatedFields);
+      this.utilityService.setIfDirty(form, 'divisionOneLabel', updatedFields);
+      this.utilityService.setIfDirty(form, 'divisionTwoLabel', updatedFields);
+      this.utilityService.setIfDirty(form, 'divisionThreeLabel', updatedFields);
+      
+      this.countryService.createCountry(updatedFields).subscribe({
         next: res => {
           const newItem = res.body?.data;
           if (newItem) {
@@ -203,7 +203,6 @@ export class Country {
         error: err => {
           this.utilityService.showError(err.status, err.error.message);
           console.log("error",err);
-          
         }
       });
     }

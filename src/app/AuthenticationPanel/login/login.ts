@@ -1,6 +1,6 @@
 declare var google: any;
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Auth } from '../../Service/AuthService/auth';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -9,7 +9,7 @@ import { Deviceinfo } from '../../Service/DeviceinfoService/deviceinfo';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule,CommonModule],
+  imports: [FormsModule,CommonModule,RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.css'
 })
@@ -20,6 +20,7 @@ export class Login {
 
   deviceInfo: any;
 
+
   constructor(
       private router:Router,
       private authService:Auth,
@@ -27,7 +28,8 @@ export class Login {
     ){}
 
   ngOnInit(): void {
-   
+   localStorage.clear();
+   sessionStorage.clear();
   }
 
   ngAfterViewInit(): void {
@@ -66,6 +68,7 @@ private decodeToken(token: string) {
   );
   return JSON.parse(jsonPayload);
 }
+
 
 handleLogin(response:any){
     if(response){

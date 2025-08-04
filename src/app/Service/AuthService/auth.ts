@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
+import { environment } from '../../../environment/environment';
 
 export interface User {
   id: number;
@@ -32,7 +33,7 @@ export class Auth {
         name: "Bincy",
         password: null,
         sub: "113306282126888142011",
-        type: "company"
+        type: "user"
       },
       {
         id: 3,
@@ -52,9 +53,11 @@ export class Auth {
       }
     ];
 
+  private apiUrl = environment.apiUrl;
 
   constructor(
-    private router:Router
+    private router:Router,
+    private http:HttpClient
   ) {}
 
   userExists(email: string): Observable<{ exists: boolean; user?: User }> {
@@ -102,7 +105,21 @@ export class Auth {
   
 
   logout(){
+    localStorage.clear();
     sessionStorage.clear();
     this.router.navigate(['']);
   }
+
+
+  // -----------------------------------------------------------
+
+
+  userRegistration(data:any){
+    return this.http.post<any>(`${this.apiUrl}/Auth/register`, data,{observe: 'response'});
+  }
+
+  googleRegistration(data:any){
+    return this.http.post<any>(`${this.apiUrl}/Auth/google-registration`, data,{observe: 'response'});
+  }
+
 }

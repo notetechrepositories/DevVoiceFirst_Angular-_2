@@ -20,11 +20,6 @@ import { EditIssueType } from './issue-type/edit-issue-type/edit-issue-type';
 import { Company } from './company/company';
 import { BusinessActivity } from '../CompanyPanel/business-activity/business-activity';
 
-
-
-
-
-
 @NgModule({
   imports: [
     CommonModule,

@@ -46,6 +46,7 @@
                             (change)="toggleSelectAll($event)" />
                     </th>
                     <th>Country</th>
+                    <th>Country Code</th>
                     <th>Division One</th>
                     <th>Division Two</th>
                     <th>Division Three</th>
@@ -68,6 +69,7 @@
                             (change)="toggleSelection(item.id, $event)" />
                     </td>
                     <td>{{ item.country }}</td>
+                    <td>{{ item.countryCode }}</td>
                     <td>{{ item.divisionOneLabel }}</td>
                     <td>{{ item.divisionTwoLabel }}</td>
                     <td>{{ item.divisionThreeLabel }}</td>
@@ -94,7 +96,7 @@
 
                 @empty {
                 <tr>
-                    <td colspan="7" class="text-center">No data found</td>
+                    <td colspan="8" class="text-center text-muted p-4">No data found</td>
                 </tr>
                 }
             </tbody>
@@ -137,7 +139,15 @@
                 <small class="text-danger">This field is required</small>
                 }
         </div>
-        
+
+        <!-- Country Code -->
+        <div class="form-group mb-3">
+            <label for="countryCode">Country Code</label>
+            <input type="text" class="form-control" id="countryCode" placeholder="Enter country code" formControlName="countryCode">
+            @if(countryForm.get('countryCode')?.invalid && countryForm.get('countryCode')?.touched){
+                <small class="text-danger">This field is required</small>
+                }
+        </div>
         <!-- Division One -->
         <div class="form-group mb-3">
             <label for="divisionOneLabel">Division One Label Name</label>

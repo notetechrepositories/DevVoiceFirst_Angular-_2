@@ -126,4 +126,20 @@ export class UtilityService {
       target[key] = control.value;
     }
   }
+
+  // ------------ Keyboard Event ------------
+
+  allowOnlyNumbers(event: KeyboardEvent): void {
+    const charCode = event.key.charCodeAt(0);
+    if (charCode < 48 || charCode > 57) {
+      event.preventDefault();
+    }
+  }
+  
+  preventPasteNonNumeric(event: ClipboardEvent): void {
+    const pastedInput: string = event.clipboardData?.getData('text') || '';
+    if (!/^\d+$/.test(pastedInput)) {
+      event.preventDefault();
+    }
+  }
 }
