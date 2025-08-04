@@ -13,7 +13,7 @@ import { CompanyMediaTypeModel, MediaTypeModel } from '../../Models/MediaTypeMod
   styleUrl: './company-media-type.css'
 })
 export class CompanyMediaType {
-data: CompanyMediaTypeModel[] = [];
+  data: CompanyMediaTypeModel[] = [];
   filteredData: CompanyMediaTypeModel[] = [];
   sysMediaTypes: MediaTypeModel[] = [];
 
@@ -21,20 +21,19 @@ data: CompanyMediaTypeModel[] = [];
   currentPage = 1;
   searchTerm: string = '';
   isModalVisible: boolean = false;
-  isEditModalVisible: boolean = false;
   mediaTypeForm!: FormGroup;
   selectedMediaTypeIds: string[] = [];
   selectedMediaTypeId: string[] = [];
   isAllSelected = false;
   isEditMode: boolean = false;
-   selectedMediaId: string | null = null;
-   originalItem: any;
+  selectedMediaId: string | null = null;
+  originalItem: any;
   checkIcon = '<i class="fa-solid fa-check text-success"></i>';
   crossIcon = '<i class="fa-solid fa-xmark text-danger"></i>';
 
   constructor(private fb: FormBuilder,
     private utilityService: UtilityService,
-    private mediaTypeService:MediaTypeService
+    private mediaTypeService: MediaTypeService
   ) { }
 
   ngOnInit() {
@@ -82,9 +81,9 @@ data: CompanyMediaTypeModel[] = [];
   }
 
 
-  openModal(editItem?:CompanyMediaTypeModel) {
+  openModal(editItem?: CompanyMediaTypeModel) {
     this.isModalVisible = true;
-        this.isEditMode = !!editItem;
+    this.isEditMode = !!editItem;
     this.selectedMediaId = editItem?.id || null;
     if (editItem) {
       this.originalItem = { ...editItem };
@@ -98,30 +97,22 @@ data: CompanyMediaTypeModel[] = [];
 
   closeModal() {
     this.isModalVisible = false;
-    this.isEditModalVisible = false;
     this.mediaTypeForm.reset();
   }
 
-  openEditModal(item: CompanyMediaTypeModel) {
-    this.isModalVisible = true;
-    this.mediaTypeForm.patchValue({
-    });
-  }
-
-  toggleAnswerType(mediaType: any) 
-  {
+  toggleAnswerType(mediaType: any) {
     if (!mediaType.selected) {
       const payload = {
         mediaTypeId: mediaType.id,
       };
       this.mediaTypeService.createCompanyMediaType(payload).subscribe({
         next: (res) => {
-        if(res.status==201){
-              const newItem = res.body?.data;
-          if (newItem) {
-             this.filteredData.push(newItem);
+          if (res.status == 201) {
+            const newItem = res.body?.data;
+            if (newItem) {
+              this.filteredData.push(newItem);
+            }
           }
-        }
           mediaType.selected = true;
           this.utilityService.success(res.body.message);
         },
@@ -132,8 +123,7 @@ data: CompanyMediaTypeModel[] = [];
     }
   }
 
-  toggleSelection(id: string, event: Event) 
-  {
+  toggleSelection(id: string, event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
     if (checked) {
       if (!this.selectedMediaTypeIds.includes(id)) {
@@ -144,19 +134,17 @@ data: CompanyMediaTypeModel[] = [];
     }
   }
 
-  toggleSelectAll(event: Event) 
-  {
+  toggleSelectAll(event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
     if (checked) {
-      this.selectedMediaTypeIds = this.pagedData.map((x:any) => x.id);
+      this.selectedMediaTypeIds = this.pagedData.map((x: any) => x.id);
     } else {
       this.selectedMediaTypeIds = [];
     }
     this.isAllSelected = checked;
   }
 
-  async toggleStatus(item: any): Promise<void>
- {
+  async toggleStatus(item: any): Promise<void> {
     const updatedStatus = !item.status;
     const payload = {
       id: item.id,
@@ -179,14 +167,12 @@ data: CompanyMediaTypeModel[] = [];
 
   // ------------------
 
-  getCompanyMediaType()
- {
+  getCompanyMediaType() {
     this.mediaTypeService.getAllCompanyMediatype().subscribe({
       next: res => {
         this.data = res.body.data
-        console.log(this.data);
         this.filteredData = [...this.data];
-          this.markSelectedTypes();
+        this.markSelectedTypes();
       },
       error: err => {
         this.utilityService.showError(err.status, err.error?.message || 'Get failed.');
@@ -194,21 +180,17 @@ data: CompanyMediaTypeModel[] = [];
     });
   }
 
-  getAnswerType() 
-  {
+  getAnswerType() {
     this.mediaTypeService.getMediatype().subscribe({
       next: res => {
         this.sysMediaTypes = res.body.data;
-        console.log(this.sysMediaTypes);
-        
-         this.markSelectedTypes();
+        this.markSelectedTypes();
       },
       error: err => { this.utilityService.showError(err.status, err.error?.message || 'Get failed.') }
     });
   }
 
-  private markSelectedTypes()
-  {
+  private markSelectedTypes() {
     if (!this.sysMediaTypes.length || !this.data.length) return;
     const companyAnswerTypeIds = new Set(this.data.map((item) => item.mediaTypeId));
     this.sysMediaTypes.forEach(type => {
@@ -224,16 +206,16 @@ data: CompanyMediaTypeModel[] = [];
         next: (res) => {
           const deletedIds: string[] = res.body?.data || [];
           this.filteredData = this.filteredData.filter(item => !deletedIds.includes(item.id));
-            this.data = this.data.filter(item => !deletedIds.includes(item.id)); 
+          this.data = this.data.filter(item => !deletedIds.includes(item.id));
 
-              const selectedIds = new Set(this.data.map(item => item.mediaTypeId));
-              this.sysMediaTypes.forEach(type => {
-                type.selected = selectedIds.has(type.id);
-              });
+          const selectedIds = new Set(this.data.map(item => item.mediaTypeId));
+          this.sysMediaTypes.forEach(type => {
+            type.selected = selectedIds.has(type.id);
+          });
 
-            this.selectedMediaTypeIds = [];
-            this.isAllSelected = false;
-            this.utilityService.success(res.body?.message || 'Deleted successfully.');
+          this.selectedMediaTypeIds = [];
+          this.isAllSelected = false;
+          this.utilityService.success(res.body?.message || 'Deleted successfully.');
         },
         error: (err) => {
           this.utilityService.showError(err.status, err.error?.message || 'Failed to delete items.');
@@ -245,35 +227,28 @@ data: CompanyMediaTypeModel[] = [];
     }
   }
 
-  submitAnswerType()
-  {
+  submitAnswerType() {
     const form = this.mediaTypeForm;
     const formValue = form.value;
     const payload = {
       companyDescription: formValue.companyDescription
 
     };
-    console.log(payload);
-    
     if (this.mediaTypeForm.invalid) {
       this.mediaTypeForm.markAllAsTouched();
       return;
     }
- if (this.isEditMode) {
+    if (this.isEditMode) {
       const updatedFields: any = { id: this.selectedMediaId };
 
       this.utilityService.setIfDirty(form, 'companyDescription', updatedFields);
-      // Only send update if any field has changed
       if (Object.keys(updatedFields).length === 1) {
         this.utilityService.warning('No changes detected.');
         return;
       }
-      console.log(updatedFields);
-      
       this.mediaTypeService.updateCompanyMediaType(updatedFields).subscribe({
         next: (res) => {
           const updatedItem = res.body?.data;
-
           if (updatedItem) {
             const filteredIndex = this.filteredData.findIndex(item => item.id === updatedItem.id);
             if (filteredIndex !== -1) {
@@ -291,17 +266,15 @@ data: CompanyMediaTypeModel[] = [];
     else {
       this.mediaTypeService.createCompanyMediaType(payload).subscribe({
         next: (res) => {
-          if(res.status==201)
-            {
-              const newItem = res.body?.data;
-              console.log(newItem);
-                if (newItem) {
-                  this.filteredData.push(newItem);
-                }
-              
-                }
-           this.closeModal();
-                this.utilityService.success(res.body.message);
+          if (res.status == 201) {
+            const newItem = res.body?.data;
+            if (newItem) {
+              this.filteredData.push(newItem);
+            }
+
+          }
+          this.closeModal();
+          this.utilityService.success(res.body.message);
         },
         error: err => {
           this.utilityService.showError(err.status, err.error.message);

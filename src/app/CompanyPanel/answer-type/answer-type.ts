@@ -23,7 +23,6 @@ export class AnswerType {
   currentPage = 1;
   searchTerm: string = '';
   isModalVisible: boolean = false;
-  isEditModalVisible: boolean = false;
   answerTypeForm!: FormGroup;
   selectedAnswerTypeIds: string[] = [];
   selectedAnswerTypeId: string[] = [];
@@ -83,9 +82,9 @@ export class AnswerType {
     if (this.currentPage < this.totalPages) this.currentPage++;
   }
 
-  openModal(editItem?:CompanyAnswerTypeModel) {
+  openModal(editItem?: CompanyAnswerTypeModel) {
     this.isModalVisible = true;
-        this.isEditMode = !!editItem;
+    this.isEditMode = !!editItem;
     this.selectedAnswerIds = editItem?.id || null;
     if (editItem) {
       this.originalItem = { ...editItem };
@@ -99,25 +98,23 @@ export class AnswerType {
 
   closeModal() {
     this.isModalVisible = false;
-    this.isEditModalVisible = false;
     this.answerTypeForm.reset();
   }
 
-  toggleAnswerType(answerType: any) 
-  {
+  toggleAnswerType(answerType: any) {
     if (!answerType.selected) {
       const payload = {
         answerTypeId: answerType.id,
       };
       this.answerTypeService.createCompanyAnswertype(payload).subscribe({
         next: (res) => {
-          const newItem = res.body?.data;
-          if (newItem) {
-            newItem.status = newItem.status ?? true;
-            this.data.push(newItem);
-            this.filteredData = [...this.data];
+          if (res.status == 201) {
+            const newItem = res.body?.data;
+            if (newItem) {
+              this.filteredData.push(newItem);
+            }
           }
-          answerType.selected = true;
+          this.closeModal();
           this.utilityService.success(res.body.message);
         },
         error: (err) => {
@@ -127,8 +124,7 @@ export class AnswerType {
     }
   }
 
-  toggleSelection(id: string, event: Event) 
-  {
+  toggleSelection(id: string, event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
     if (checked) {
       if (!this.selectedAnswerTypeIds.includes(id)) {
@@ -139,8 +135,7 @@ export class AnswerType {
     }
   }
 
-  toggleSelectAll(event: Event) 
-  {
+  toggleSelectAll(event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
     if (checked) {
       this.selectedAnswerTypeIds = this.pagedData.map(x => x.id);
@@ -150,8 +145,7 @@ export class AnswerType {
     this.isAllSelected = checked;
   }
 
-  async toggleStatus(item: any): Promise<void>
- {
+  async toggleStatus(item: any): Promise<void> {
     const updatedStatus = !item.status;
     const payload = {
       id: item.id,
@@ -174,12 +168,10 @@ export class AnswerType {
 
   // ------------------
 
-  getCompanyAnswerType()
- {
+  getCompanyAnswerType() {
     this.answerTypeService.getAllCompanyAnswerType().subscribe({
       next: res => {
         this.data = res.body.data
-        console.log(this.data);
         this.filteredData = [...this.data];
         this.markSelectedTypes();
       },
@@ -189,20 +181,17 @@ export class AnswerType {
     });
   }
 
-  getAnswerType() 
-  {
+  getAnswerType() {
     this.answerTypeService.getAnswerType().subscribe({
       next: res => {
         this.sysAnswerTypes = res.body.data;
-        console.log(this.sysAnswerTypes);
         this.markSelectedTypes();
       },
       error: err => { this.utilityService.showError(err.status, err.error?.message || 'Get failed.') }
     });
   }
 
-  private markSelectedTypes()
-  {
+  private markSelectedTypes() {
     if (!this.sysAnswerTypes.length || !this.data.length) return;
     const companyAnswerTypeIds = new Set(this.data.map((item) => item.answerTypeId));
     this.sysAnswerTypes.forEach(type => {
@@ -218,6 +207,12 @@ export class AnswerType {
         next: (res) => {
           const deletedIds: string[] = res.body?.data || [];
           this.filteredData = this.filteredData.filter(item => !deletedIds.includes(item.id));
+          this.data = this.data.filter(item => !deletedIds.includes(item.id));
+
+          const selectedIds = new Set(this.data.map(item => item.answerTypeId));
+          this.sysAnswerTypes.forEach(type => {
+            type.selected = selectedIds.has(type.id);
+          });
           this.selectedAnswerTypeIds = [];
           this.isAllSelected = false;
           this.utilityService.success(res.body?.message || 'Deleted successfully.');
@@ -232,8 +227,7 @@ export class AnswerType {
     }
   }
 
-  submitAnswerType()
-  {
+  submitAnswerType() {
     const form = this.answerTypeForm;
     const formValue = form.value;
     const payload = {
@@ -245,7 +239,7 @@ export class AnswerType {
       return;
     }
     if (this.isEditMode) {
-      const updatedFields: any = { id: this.selectedAnswerTypeId };
+      const updatedFields: any = { id: this.selectedAnswerIds };
       this.utilityService.setIfDirty(form, 'companyAnswerTypeName', updatedFields);
       if (Object.keys(updatedFields).length === 1) {
         this.utilityService.warning('No changes detected.');
@@ -254,7 +248,6 @@ export class AnswerType {
       this.answerTypeService.updateCompanyAnswerType(updatedFields).subscribe({
         next: (res) => {
           const updatedItem = res.body?.data;
-
           if (updatedItem) {
             const filteredIndex = this.filteredData.findIndex(item => item.id === updatedItem.id);
             if (filteredIndex !== -1) {
@@ -262,7 +255,7 @@ export class AnswerType {
             }
           }
           this.closeModal();
-          this.utilityService.success(res.body?.message || 'Activity updated.');
+          this.utilityService.success(res.body?.message || 'Media Type updated.');
         },
         error: err => {
           this.utilityService.showError(err.status, err.error?.message || 'Update failed.');
@@ -272,9 +265,12 @@ export class AnswerType {
     else {
       this.answerTypeService.createCompanyAnswertype(payload).subscribe({
         next: (res) => {
-          const newItem = res.body?.data;
-          if (newItem) {
-            this.filteredData.push(newItem);
+
+          if (res.status == 201) {
+            const newItem = res.body?.data;
+            if (newItem) {
+              this.filteredData.push(newItem);
+            }
           }
           this.closeModal();
           this.utilityService.success(res.body.message);

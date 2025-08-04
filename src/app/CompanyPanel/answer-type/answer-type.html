@@ -50,18 +50,15 @@
                                 </td>
                                 <td>{{ item.companyAnswerTypeName }}</td>
                                 <td>
-                                        <span
-                                            class="badge"
-                                            [ngClass]="item.status ? 'bg-success' : 'bg-secondary'"
-                                            style="cursor: pointer;"
-                                            (click)="toggleStatus(item)"
-                                        >
-                                            {{ item.status ? 'Active' : 'Inactive' }}
-                                        </span>
-                                 </td>
+                                    <span class="badge" [ngClass]="item.status ? 'bg-success' : 'bg-secondary'"
+                                        style="cursor: pointer;" (click)="toggleStatus(item)">
+                                        {{ item.status ? 'Active' : 'Inactive' }}
+                                    </span>
+                                </td>
                                 <td class="text-end">
-                                    <i class="pi pi-pen-to-square fw-bold" *ngIf="!item.answerTypeId" (click)="openModal(item)"></i>
-                                  
+                                    <i class="pi pi-pen-to-square fw-bold" *ngIf="!item.answerTypeId"
+                                        (click)="openModal(item)"></i>
+
                                 </td>
                             </tr>
                             }
@@ -104,7 +101,7 @@
                     Select the system Answer Type that apply to this company.
                 </p>
                 <div class="table-responsive" style="max-height: 555px; overflow-y: auto;">
-                    <table class="table mt-3" >
+                    <table class="table mt-3">
                         <thead>
                             <tr>
                                 <th>Select</th>
@@ -115,8 +112,8 @@
                             @for (answerType of sysAnswerTypes; track answerType) {
                             <tr>
                                 <td>
-                                    <input type="checkbox" [checked]="answerType.selected" [disabled]="answerType.selected"
-                                        (change)="toggleAnswerType(answerType)" />
+                                    <input type="checkbox" [checked]="answerType.selected"
+                                        [disabled]="answerType.selected" (change)="toggleAnswerType(answerType)" />
                                 </td>
                                 <td>{{ answerType.answerTypeName }}</td>
                             </tr>
@@ -133,11 +130,6 @@
         </div>
 
     </div>
-
-
-
-
-
 </div>
 
 
@@ -145,29 +137,31 @@
 
 @if(isModalVisible){
 <div class="overlay">
-  <div class="modal-content-2">
-    <i class="fa-solid fa-xmark text-end w-100" (click)="closeModal()"></i>
-     <h4 class="mb-3">{{ isEditMode ? 'Edit Answer Type' : 'Add Answer Type' }}</h4>
+    <div class="modal-content-2">
+        <i class="fa-solid fa-xmark text-end w-100" (click)="closeModal()"></i>
+        <h4 class="mb-3">{{ isEditMode ? 'Edit Answer Type' : 'Add Answer Type' }}</h4>
 
-    <form class="mt-3" [formGroup]="answerTypeForm" (ngSubmit)="submitAnswerType()">
+        <form class="mt-3" [formGroup]="answerTypeForm" (ngSubmit)="submitAnswerType()">
 
-        <div class="form-group">
-          <label for="name" class="mb-2">Answer Type</label>
-          <input type="text" class="form-control" id="companyAnswerTypeName"  placeholder="Enter Answer Type Name"  formControlName="companyAnswerTypeName"
-           [ngClass]="{'is-invalid': answerTypeForm.get('companyAnswerTypeName')?.invalid && answerTypeForm.get('companyAnswerTypeName')?.touched}" />
-           <div class="invalid-feedback" *ngIf="answerTypeForm.get('companyAnswerTypeName')?.touched && answerTypeForm.get('companyAnswerTypeName')?.hasError('required')">
-              Answer Type Name is required.
-           </div>
-        </div>
-  
+            <div class="form-group">
+                <label for="name" class="mb-2">Answer Type</label>
+                <input type="text" class="form-control" id="companyAnswerTypeName" placeholder="Enter Answer Type Name"
+                    formControlName="companyAnswerTypeName"
+                    [ngClass]="{'is-invalid': answerTypeForm.get('companyAnswerTypeName')?.invalid && answerTypeForm.get('companyAnswerTypeName')?.touched}" />
+                <div class="invalid-feedback"
+                    *ngIf="answerTypeForm.get('companyAnswerTypeName')?.touched && answerTypeForm.get('companyAnswerTypeName')?.hasError('required')">
+                    Answer Type Name is required.
+                </div>
+            </div>
 
-      <div class="col-md d-flex align-items-end">
-        <button type="submit" class="btn mt-4 w-100" [ngClass]="isEditMode ? 'btn-success' : 'btn-primary'" >
-           {{ isEditMode ? 'Save Changes' : 'Add' }}
-        </button>
-      </div>
 
-    </form>
-  </div>
+            <div class="col-md d-flex align-items-end">
+                <button type="submit" class="btn mt-4 w-100" [ngClass]="isEditMode ? 'btn-success' : 'btn-primary'">
+                    {{ isEditMode ? 'Save Changes' : 'Add' }}
+                </button>
+            </div>
+
+        </form>
+    </div>
 </div>
 }
