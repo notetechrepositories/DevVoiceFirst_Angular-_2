@@ -1,9 +1,9 @@
 <div>
-    <h3>Manage Company Answer Type </h3>
+    <h3>Manage Company Media Type </h3>
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Dashboard</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Answer Type</li>
+            <li class="breadcrumb-item active" aria-current="page">Media Type</li>
         </ol>
     </nav>
 
@@ -33,8 +33,8 @@
                                 <th>Name</th>
                                 <th>Status</th>
                                 <th class="text-end">
-                                    <button class="delete-btn btn-danger" (click)="deleteAnswerType()"
-                                        [disabled]="selectedAnswerTypeIds.length === 0">
+                                    <button class="delete-btn btn-danger" (click)="deleteMediaType()"
+                                        [disabled]="selectedMediaTypeIds.length === 0">
                                         <i class="pi pi-trash text-white"></i>
                                     </button>
                                 </th>
@@ -45,10 +45,10 @@
                             @for (item of pagedData; track item) {
                             <tr>
                                 <td> <input type="checkbox" class="form-check-input"
-                                        [checked]="selectedAnswerTypeIds.includes(item.id)"
+                                        [checked]="selectedMediaTypeIds.includes(item.id)"
                                         (change)="toggleSelection(item.id, $event)" />
                                 </td>
-                                <td>{{ item.companyAnswerTypeName }}</td>
+                                <td>{{ item.companyDescription }}</td>
                                 <td>
                                         <span
                                             class="badge"
@@ -60,7 +60,7 @@
                                         </span>
                                  </td>
                                 <td class="text-end">
-                                    <i class="pi pi-pen-to-square fw-bold" *ngIf="!item.answerTypeId" (click)="openModal(item)"></i>
+                                    <i class="pi pi-pen-to-square fw-bold" *ngIf="!item.mediaTypeId" (click)="openModal(item)"></i>
                                   
                                 </td>
                             </tr>
@@ -99,9 +99,9 @@
 
         <div class="col-md-4">
             <div class="card p-3">
-                <h5 class="fw-bold">System Answer Type</h5>
+                <h5 class="fw-bold">System Media Type</h5>
                 <p class="text-muted mb-2">
-                    Select the system Answer Type that apply to this company.
+                    Select the media type that apply to this company.
                 </p>
                 <div class="table-responsive" style="max-height: 555px; overflow-y: auto;">
                     <table class="table mt-3" >
@@ -112,13 +112,13 @@
                             </tr>
                         </thead>
                         <tbody style="height: 200px; overflow-y: auto;">
-                            @for (answerType of sysAnswerTypes; track answerType) {
+                            @for (mediaType of sysMediaTypes; track mediaType) {
                             <tr>
                                 <td>
-                                    <input type="checkbox" [checked]="answerType.selected" [disabled]="answerType.selected"
-                                        (change)="toggleAnswerType(answerType)" />
+                                    <input type="checkbox" [checked]="mediaType.selected" [disabled]="mediaType.selected"
+                                        (change)="toggleAnswerType(mediaType)" />
                                 </td>
-                                <td>{{ answerType.answerTypeName }}</td>
+                                <td>{{ mediaType.description }}</td>
                             </tr>
                             }
                             @empty {
@@ -147,16 +147,16 @@
 <div class="overlay">
   <div class="modal-content-2">
     <i class="fa-solid fa-xmark text-end w-100" (click)="closeModal()"></i>
-     <h4 class="mb-3">{{ isEditMode ? 'Edit Answer Type' : 'Add Answer Type' }}</h4>
+     <h4 class="mb-3">{{ isEditMode ? 'Edit Media Type' : 'Add Media Type' }}</h4>
 
-    <form class="mt-3" [formGroup]="answerTypeForm" (ngSubmit)="submitAnswerType()">
+    <form class="mt-3" [formGroup]="mediaTypeForm" (ngSubmit)="submitAnswerType()">
 
         <div class="form-group">
-          <label for="name" class="mb-2">Answer Type</label>
-          <input type="text" class="form-control" id="companyAnswerTypeName"  placeholder="Enter Answer Type Name"  formControlName="companyAnswerTypeName"
-           [ngClass]="{'is-invalid': answerTypeForm.get('companyAnswerTypeName')?.invalid && answerTypeForm.get('companyAnswerTypeName')?.touched}" />
-           <div class="invalid-feedback" *ngIf="answerTypeForm.get('companyAnswerTypeName')?.touched && answerTypeForm.get('companyAnswerTypeName')?.hasError('required')">
-              Answer Type Name is required.
+          <label for="name" class="mb-2">Media Type</label>
+          <input type="text" class="form-control" id="companyDescription"  placeholder="Enter Media Type Name"  formControlName="companyDescription"
+           [ngClass]="{'is-invalid': mediaTypeForm.get('companyDescription')?.invalid && mediaTypeForm.get('companyDescription')?.touched}" />
+           <div class="invalid-feedback" *ngIf="mediaTypeForm.get('companyDescription')?.touched && mediaTypeForm.get('companyDescription')?.hasError('required')">
+              Media Type Name is required.
            </div>
         </div>
   
