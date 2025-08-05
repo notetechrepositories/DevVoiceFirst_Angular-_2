@@ -309,8 +309,10 @@ ul ul {
 
 .dropdown-item {
   border-radius: 5px;
-  padding: 8px 12px;
+  padding: 5px 12px;
+  font-size: 14px;
   transition: background-color 0.2s;
+  cursor: pointer;
 }
 
 .dropdown-item:hover,

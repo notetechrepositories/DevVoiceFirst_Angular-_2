@@ -8,10 +8,10 @@ import { AnswerType } from './answer-type/answer-type';
 
 export const CompanyRoutes: Routes = [
   {
-    path: '', redirectTo: 'company-dashboard', pathMatch: 'full' 
+    path: '', redirectTo: 'dashboard', pathMatch: 'full' 
   },
   {
-    path: 'company-dashboard',
+    path: 'dashboard',
     component: CompanyDashboard
   },
   {

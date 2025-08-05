@@ -17,9 +17,6 @@ import { BusinessActivity } from '../CompanyPanel/business-activity/business-act
 
 export const AdminRoutes: Routes = [
   {
-    path: '', redirectTo: 'admin-dashboard', pathMatch: 'full' 
-  },
-  {
     path:'admin-dashboard',
     component:AdminDashboard
   },

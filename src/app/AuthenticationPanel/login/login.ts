@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Deviceinfo } from '../../Service/DeviceinfoService/deviceinfo';
 import { UtilityService } from '../../Service/UtilityService/utility-service';
+import { SecurityService } from '../../Service/SecurityService/security-service';
 
 
 @Component({
@@ -31,7 +32,8 @@ export class Login {
       private router:Router,
       private authService:Auth,
       private deviceInfoService:Deviceinfo,
-      private utilityService:UtilityService
+      private utilityService:UtilityService,
+      private securityService:SecurityService
     ){}
 
   ngOnInit(): void {
@@ -102,7 +104,7 @@ export class Login {
               if (responseData.user) {
                 this.router.navigate(['user/home']);
               } else if (responseData.company) {
-                this.router.navigate(['admin/admin-dashboard']);
+                this.router.navigate(['admin/dashboard']);
               } else {
                 this.utilityService.info("Please contact admin for access");
               }
@@ -154,7 +156,7 @@ export class Login {
             if (responseData.user) {
               this.router.navigate(['user/home']);
             } else if (responseData.company) {
-              this.router.navigate(['admin/admin-dashboard']);
+              this.router.navigate(['admin/dashboard']);
             } else {
               this.utilityService.info("Please contact admin for access");
             }
@@ -200,7 +202,7 @@ export class Login {
         if (type === "user") {
           this.router.navigate(['user/home']);
         } else if (type === "company") {
-          this.router.navigate(['admin/admin-dashboard']);
+          this.router.navigate(['admin/dashboard']);
         } else {
           this.utilityService.info("Please contact admin for access");
         }
