@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { environment } from '../../../environment/environment';
+import { SecurityService } from '../SecurityService/security-service';
 
 export interface User {
   id: number;
@@ -26,7 +27,8 @@ export class Auth {
 
   constructor(
     private router:Router,
-    private http:HttpClient
+    private http:HttpClient,
+    private securityService:SecurityService
   ) {}
 
 
@@ -63,7 +65,7 @@ export class Auth {
 
   getLoggedInUser() {
     const userData = sessionStorage.getItem('loggedInUser');
-    return userData ? JSON.parse(userData) : null;
+    return this.securityService.decryptObject(userData)
   }
 
   isLoggedIn(): boolean {

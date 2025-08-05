@@ -279,7 +279,7 @@ ul ul {
 .header-card{
   width: 100%;
   height: 100%;
-  background-color: #eeeeee;
+  background-color: #12192c;
   border-radius: 7px;
   box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
 }
@@ -295,16 +295,20 @@ ul ul {
 
 .user-avatar {
   object-fit: cover;
-  border: 1px solid #dee2e6;
+  border: 2px solid #dee2e6;
+}
+
+.dropdown-divider{
+  background-color: #949494;
 }
 
 .dropdown-menu {
   min-width: 200px;
   font-size: 0.95rem;
-  position: absolute;
-  inset: 0px 0px auto auto;
-  margin: 0px;
-  transform: translate(13px, 45px);
+  transform: translate(24px, 33px) !important;
+  border: 1px solid rgb(219, 219, 219);
+  background: #12192c;
+  color: white;
 }
 
 .dropdown-item {
@@ -313,10 +317,43 @@ ul ul {
   font-size: 14px;
   transition: background-color 0.2s;
   cursor: pointer;
+  color: #fff;
 }
 
-.dropdown-item:hover,
-.hover-bg-light:hover {
-  background-color: #f1f1f1;
+.dropdown-item:hover {
+  background-color: #f0c03b;
+  color: #12192C !important;
 }
 
+/* Role Selector dropdown*/
+
+.role-selector {
+  font-size: 0.9rem;
+}
+
+.role-selector-toggle {
+  height: 32px;
+  padding: 0.2rem 0.75rem;
+  border-radius: 8px;
+  background-color: #12192c;
+  color: #f0c03b;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  font-size: .9rem;
+  border: 1px solid;
+}
+
+.role-selector-menu {
+  min-width: 184px;
+  border-radius: 7px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-size: 0.9rem;
+  transform: translate(-8px, 33px) !important;
+  background: #12192c;
+  color: white;
+  padding: 7px;
+}
+
+.role-selector-item:hover {
+  background-color: #f0c03b;
+  color: #12192C
+}

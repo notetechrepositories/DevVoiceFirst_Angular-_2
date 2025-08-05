@@ -100,7 +100,8 @@ export class Login {
             } else {
               // Store token and navigate accordingly
               sessionStorage.setItem("token", JSON.stringify(this.selectedToken));
-              sessionStorage.setItem("loggedInUser",JSON.stringify(decodedPayload));
+              const encryptedData = this.securityService.encryptObject(decodedPayload);
+              sessionStorage.setItem("loggedInUser",encryptedData);
               if (responseData.user) {
                 this.router.navigate(['user/home']);
               } else if (responseData.company) {
@@ -114,7 +115,8 @@ export class Login {
         error: err => {
           this.isLoading=false;
           if(err.status === 404){
-            sessionStorage.setItem("loggedInUser",JSON.stringify(decodedPayload));
+            const encryptedData = this.securityService.encryptObject(decodedPayload);
+            sessionStorage.setItem("loggedInUser", encryptedData);
             this.router.navigate(['authentication/user-registration']);
           }
           else{

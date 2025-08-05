@@ -36,7 +36,7 @@ export class SecurityService {
     return this.encrypt(jsonString);
   }
 
-  decryptObject(ciphertext: string): any {
+  decryptObject(ciphertext: any): any {
     const jsonString = this.decrypt(ciphertext);
     return JSON.parse(jsonString);
   }

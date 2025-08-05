@@ -18,7 +18,7 @@ export class Landing implements OnInit {
   ){}
 
   ngOnInit(): void {
-   
+    sessionStorage.clear();
   }
 
 }

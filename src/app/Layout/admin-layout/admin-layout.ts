@@ -89,6 +89,7 @@ export class AdminLayout implements OnInit {
   loggedInUser:any;
   isLoggedIn:boolean=false;
 
+
   iconMap: { [key: string]: string } = {
     dashboard: 'pi pi-gauge',
     company: 'pi pi-building',
@@ -97,12 +98,13 @@ export class AdminLayout implements OnInit {
     organization: 'pi pi-sitemap',
     product: 'pi pi-box',
     country: 'pi pi-globe',
+    settings: 'pi pi-cog'
     // Add more mappings as needed
   };
 
   constructor(
     private authService:Auth,
-    private menuService:Menu
+    private menuService:Menu,
   ){}
 
   ngOnInit(): void {
@@ -181,8 +183,8 @@ export class AdminLayout implements OnInit {
 
   // ====================================================================
 
-  roles: string[] = ['Notetech Admin', 'Company Admin', 'Viewer'];
-  selectedRole: string = 'Notetech Admin';
+  roles: string[] = ['Super Admin', 'Organization', 'Employee'];
+  selectedRole: string = '';
 
   selectRole(role: string) {
     this.selectedRole = role;

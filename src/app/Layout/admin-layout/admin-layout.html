@@ -17,7 +17,7 @@
         </ul>
       </div>
 
-      <div class="mt-auto">
+      <!-- <div class="mt-auto">
         <div class="menu-item text-white" (click)="logout()">
           <span class="label-content">
             <div class="icon-container me-1">
@@ -26,7 +26,7 @@
             <span *ngIf="isSidebarExpanded">Logout</span>
           </span>
         </div>
-      </div>
+      </div> -->
   
     </div>
   </nav>
@@ -38,9 +38,26 @@
 <div class="main-content" [ngClass]="{ 'body-pd': !isSidebarExpanded }">
   <div class="header">
     <div class="header-card">
-    <div class="d-flex align-items-center justify-content-end h-100 pe-4" style="height: 65px;">
+    <div class="d-flex align-items-center justify-content-between h-100 pe-4 px-2" style="height: 65px;">
+       <!-- User Role Selector -->
+      <div class="role-selector dropdown">
+        <button class="role-selector-toggle btn btn-light dropdown-toggle d-flex align-items-center gap-2"
+                type="button" id="roleDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="fa fa-user-tag"></i>
+          {{ selectedRole || 'Select Role' }}
+        </button>
+
+        <ul class="role-selector-menu dropdown-menu mt-2" aria-labelledby="roleDropdown">
+          <li *ngFor="let role of roles">
+            <a class="role-selector-item dropdown-item" (click)="selectRole(role)">
+              <i class="me-2"></i>{{ role }}
+            </a>
+          </li>
+        </ul>
+      </div>
+
       <div class="dropdown">
-        <a class="d-flex align-items-center text-decoration-none dropdown-toggle user-dropdown-toggle"
+        <a class="d-flex align-items-center text-decoration-none dropdown-toggle user-dropdown-toggle text-white"
            href="#" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
           <img [src]="loggedInUser?.picture || 'images/user-default.png'" alt="User Avatar"
                width="30" height="30" class="rounded-circle me-2 user-avatar">
@@ -49,22 +66,23 @@
                }
         </a>
       
-        <ul class="dropdown-menu  shadow-sm rounded-3 p-2 mt-2 ms-2 user-dropdown"
+        <ul class="dropdown-menu shadow-sm p-2 mt-2 ms-2 user-dropdown" data-bs-display="static"
             aria-labelledby="userDropdown">
           <li>
-            <a class="dropdown-item d-flex align-items-center gap-2 text-dark hover-bg-light" href="#">
-              <i class="fa fa-user-cog"></i> Manage Account
-            </a>
-          </li>
-          <!-- <li><hr class="dropdown-divider"></li> -->
-          <li>
-            <a class="dropdown-item d-flex align-items-center gap-2 text-danger hover-bg-light" (click)="logout()">
-              <i class="fa fa-sign-out-alt"></i> Admin Console
+            <a class="dropdown-item d-flex align-items-center gap-2">
+              <i class="fa fa-user-cog me-2"></i> Manage Account
             </a>
           </li>
           <li>
-            <a class="dropdown-item d-flex align-items-center gap-2 text-danger hover-bg-light" (click)="logout()">
-              <i class="fa fa-sign-out-alt"></i> Logout
+            <a class="dropdown-item d-flex align-items-center gap-2">
+              <i class="fa fa-gears me-2"></i> Admin Console
+            </a>
+          </li>
+          
+          <li><hr class="dropdown-divider"></li>
+          <li>
+            <a class="dropdown-item d-flex align-items-center gap-2 text-danger" (click)="logout()">
+              <i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Logout
             </a>
           </li>
         </ul>
