@@ -52,7 +52,7 @@ export class UtilityService {
       return Swal.fire({
         title: 'Are you sure?',
         text: message,
-        icon: 'warning',
+        icon: 'question',
         showCancelButton: true,
         confirmButtonColor: '#eb1313',
         cancelButtonColor: '#565656',
@@ -81,6 +81,18 @@ export class UtilityService {
         confirmButtonColor: '#2daf1f',
         cancelButtonColor: '#565656',
         confirmButtonText: 'Yes, discard!'
+      });
+    }
+
+    if(action === 'logout'){
+      return Swal.fire({
+        title: 'Logout',
+        text: message,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#FCC737',
+        cancelButtonColor: '#565656',
+        confirmButtonText: 'Yes, logout!'
       });
     }
 

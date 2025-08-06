@@ -44,7 +44,7 @@
 
     <li>
       @if(isLoggedIn){
-        <button class="action-btn" (click)="logout()">Sign Out</button>
+        <a class="action-btn" (click)="logout()">Sign Out</a>
       }
       @else {
         <a class="action-btn" routerLink="/authentication/login">Sign In</a>

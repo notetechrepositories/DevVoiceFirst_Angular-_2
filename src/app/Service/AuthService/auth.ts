@@ -65,7 +65,8 @@ export class Auth {
 
   getLoggedInUser() {
     const userData = sessionStorage.getItem('loggedInUser');
-    return this.securityService.decryptObject(userData)
+    if(userData) return this.securityService.decryptObject(userData);
+    
   }
 
   isLoggedIn(): boolean {

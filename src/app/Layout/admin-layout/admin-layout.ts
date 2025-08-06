@@ -4,6 +4,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { Auth } from '../../Service/AuthService/auth';
 import { Menu } from '../../Service/MenuService/menu';
+import { UtilityService } from '../../Service/UtilityService/utility-service';
 
 export interface MenuItem {
   id: string;
@@ -105,6 +106,7 @@ export class AdminLayout implements OnInit {
   constructor(
     private authService:Auth,
     private menuService:Menu,
+    private utilityService:UtilityService
   ){}
 
   ngOnInit(): void {
@@ -177,8 +179,12 @@ export class AdminLayout implements OnInit {
     return this.toggleStates.get(itemId) || false;
   }
 
-  logout(){
-    this.authService.logout();
+  async logout(){
+    const message = 'Are you sure want to logout?'
+    const result = await this.utilityService.confirmDialog(message,'logout');
+    if(result.isConfirmed){
+      this.authService.logout();
+    }
   }
 
   // ====================================================================
