@@ -114,7 +114,6 @@ export class AnswerType {
               this.filteredData.push(newItem);
             }
           }
-          this.closeModal();
           this.utilityService.success(res.body.message);
         },
         error: (err) => {
@@ -166,7 +165,7 @@ export class AnswerType {
     }
   }
 
-  // ------------------
+  // -----------------------------------------------
 
   getCompanyAnswerType() {
     this.answerTypeService.getAllCompanyAnswerType().subscribe({

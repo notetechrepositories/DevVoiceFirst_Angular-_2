@@ -28,7 +28,7 @@ export const CompanyRoutes: Routes = [
     component: AnswerType
   },
   {
-    path: 'company-media-type',
+    path: 'media-type',
     component: CompanyMediaType
   }
 ];

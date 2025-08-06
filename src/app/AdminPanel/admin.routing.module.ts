@@ -36,7 +36,7 @@ export const AdminRoutes: Routes = [
     component:SysAnswerType
   },
   {
-    path:'media-type',
+    path:'system-media-type',
     component:MediaType
   },
   {
@@ -48,7 +48,7 @@ export const AdminRoutes: Routes = [
     component:EditIssueType
   },
    {
-    path:'issue-type',
+    path:'system-issue-type',
     component:IssueType
   },
   {
