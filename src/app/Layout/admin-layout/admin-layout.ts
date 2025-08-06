@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { Auth } from '../../Service/AuthService/auth';
 import { Menu } from '../../Service/MenuService/menu';
 import { UtilityService } from '../../Service/UtilityService/utility-service';
@@ -82,13 +82,14 @@ export function applyRoutePrefix(items: MenuItem[], prefix: string): MenuItem[] 
 })
 export class AdminLayout implements OnInit {
 
+  baseRoutePrefix: string = '';
   menuItems: MenuItem[] = [];
   toggleStates = new Map<string, boolean>();
-  isMenuCollapsed = false;
-  isSidebarExpanded: boolean = true;
-  baseRoutePrefix = '';
-  loggedInUser:any;
-  isLoggedIn:boolean=false;
+  sidebarVisible: boolean = true;
+  isSmallScreen: boolean = false;
+
+  loggedInUser: any;
+  isLoggedIn: boolean = false;
 
 
   iconMap: { [key: string]: string } = {
@@ -104,51 +105,63 @@ export class AdminLayout implements OnInit {
   };
 
   constructor(
-    private authService:Auth,
-    private menuService:Menu,
-    private utilityService:UtilityService
-  ){}
+    private authService: Auth,
+    private menuService: Menu,
+    private utilityService: UtilityService,
+    private router: Router
+  ) { }
 
   ngOnInit(): void {
     window.addEventListener('resize', () => this.checkScreenSize());
     this.checkScreenSize();
-    this.loggedInUser = this.authService.getLoggedInUser();
     this.loginCheck();
-    this.baseRoutePrefix = `/admin`;
     this.getMenus();
+
+    this.baseRoutePrefix = `/admin`;
+    this.loggedInUser = this.authService.getLoggedInUser();
   }
 
-  toggleSidebar() {
-    this.isSidebarExpanded = !this.isSidebarExpanded;
-  }
-
-  loginCheck(){
+  loginCheck() {
     this.authService.isLoggedIn$.subscribe((status) => {
       this.isLoggedIn = status;
     });
   }
 
   @HostListener('window:resize', [])
-   onWindowResize() {
-     this.checkScreenSize();
-   }
- 
-   checkScreenSize() {
-     if (window.innerWidth < 768) {
-       this.isSidebarExpanded = false;
-     } else {
-       this.isSidebarExpanded = true;
-     }
-   }
+  onResize() {
+    this.checkScreenSize();
+  }
 
-   getMappedIcon(icon: string | null): string {
+  checkScreenSize() {
+    this.isSmallScreen = window.innerWidth <= 908;
+    if (this.isSmallScreen) {
+      this.sidebarVisible = false;
+    }
+  }
+
+
+  toggleSidebar() {
+    this.sidebarVisible = !this.sidebarVisible;
+  }
+
+
+  toggleMenu(itemId: string) {
+    const current = this.toggleStates.get(itemId) || false;
+    this.toggleStates.set(itemId, !current);
+  }
+
+  isExpanded(itemId: string): boolean {
+    return this.toggleStates.get(itemId) || false;
+  }
+
+  getMappedIcon(icon: string | null): string {
     return this.iconMap[icon ?? ''] || 'pi pi-circle';
   }
 
-   getMenus() {
+  getMenus() {
     this.menuService.getMenu().subscribe({
       next: (res: any) => {
-        if(res.status==200){          
+        if (res.status == 200) {
           const cleaned = cleanMenuData(res.body.data);
           const tree = buildMenuTree(cleaned);
           const prefixed = applyRoutePrefix(tree, this.baseRoutePrefix);
@@ -170,19 +183,10 @@ export class AdminLayout implements OnInit {
     }
   }
 
-  toggleMenu(itemId: string) {
-    const current = this.toggleStates.get(itemId) || false;
-    this.toggleStates.set(itemId, !current);
-  }
-
-  isExpanded(itemId: string): boolean {
-    return this.toggleStates.get(itemId) || false;
-  }
-
-  async logout(){
+  async logout() {
     const message = 'Are you sure want to logout?'
-    const result = await this.utilityService.confirmDialog(message,'logout');
-    if(result.isConfirmed){
+    const result = await this.utilityService.confirmDialog(message, 'logout');
+    if (result.isConfirmed) {
       this.authService.logout();
     }
   }

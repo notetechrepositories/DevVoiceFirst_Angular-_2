@@ -1,5 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
 @import "../public/css/overlay.css";
+@import "../public/css/font.css";
 @import "primeicons/primeicons.css";
 
 html, body { height: 100vh; }
@@ -56,7 +57,7 @@ i{
 .custom-pagination {
   .page-item {
     margin: 0 4px;
-
+    z-index: -1;
     .page-link {
       color: #007bff;
       border: 1px solid #dee2e6;

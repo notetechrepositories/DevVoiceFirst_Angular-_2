@@ -38,7 +38,7 @@
         </div>
       </div>
     <div class="table-responsive">
-        <table class="table">
+        <table class="table-responsive table">
             <thead class="table-light">
                 <tr>
                     <th>
@@ -101,24 +101,23 @@
                 }
             </tbody>
         </table>
-
-        <!-- Pagination Controls -->
-        <nav class="d-flex justify-content-end">
-            <ul class="pagination custom-pagination">
-                <li class="page-item" [class.disabled]="currentPage === 1">
-                    <a class="page-link" (click)="previousPage()"><i class="fa-solid fa-angle-left"></i></a>
-                </li>
-                @for (page of totalPagesArray; track page) {
-                <li class="page-item" [class.active]="page === currentPage">
-                    <a class="page-link" (click)="goToPage(page)">{{ page }}</a>
-                </li>
-                }
-                <li class="page-item" [class.disabled]="currentPage === totalPages">
-                    <a class="page-link" (click)="nextPage()"><i class="fa-solid fa-angle-right"></i></a>
-                </li>
-            </ul>
-        </nav>
     </div>
+            <!-- Pagination Controls -->
+            <nav class="d-flex justify-content-center mt-3">
+                <ul class="pagination custom-pagination">
+                    <li class="page-item" [class.disabled]="currentPage === 1">
+                        <a class="page-link" (click)="previousPage()"><i class="fa-solid fa-angle-left"></i></a>
+                    </li>
+                    @for (page of totalPagesArray; track page) {
+                    <li class="page-item" [class.active]="page === currentPage">
+                        <a class="page-link" (click)="goToPage(page)">{{ page }}</a>
+                    </li>
+                    }
+                    <li class="page-item" [class.disabled]="currentPage === totalPages">
+                        <a class="page-link" (click)="nextPage()"><i class="fa-solid fa-angle-right"></i></a>
+                    </li>
+                </ul>
+            </nav>
 </div>
 
 
