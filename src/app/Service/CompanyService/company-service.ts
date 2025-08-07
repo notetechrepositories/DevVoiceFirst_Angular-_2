@@ -28,4 +28,7 @@ private apiUrl= environment.apiUrl;
   deleteCompany(data:any){
       return this.http.delete<any>(`${this.apiUrl}/company`,{body:data, observe:'response'});
   }
+
+  // ------------Company Media Type---------------------------------------------
+  
 }

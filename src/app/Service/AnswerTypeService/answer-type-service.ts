@@ -42,6 +42,8 @@ export class AnswerTypeService {
   createCompanyAnswertype(data:any){
     return this.http.post<any>(`${this.apiUrl}/company-answer-type`, data,{observe: 'response'});
   }
+   
+
 
   updateCompanyAnswerType(data:any){
     return this.http.put<any>(`${this.apiUrl}/company-answer-type`, data,{observe: 'response'});

@@ -32,6 +32,27 @@ export class MediaTypeService {
    return this.http.get<any>(`${this.apiUrl}/media-type`,{observe:'response'});
   }
 
+// --------------Company Media Type---------------------------------------------------------
 
+  getAllCompanyMediatype(){
+
+   return this.http.get<any>(`${this.apiUrl}/company-media-type/all`,{observe:'response'});
+  }
+  createCompanyMediaType(data:any){
+    return this.http.post<any>(`${this.apiUrl}/company-media-type`,data,{observe:'response'});
+  }
+  updateCompanyMediaType(data:any){
+    return this.http.put<any>(`${this.apiUrl}/company-media-type`,data ,{observe:'response'})
+  }
+  deleteCompanyMediaType(data:any){
+    return this.http.delete<any>(`${this.apiUrl}/company-media-type`,{body:data,observe:'response'})
+  }
+  updateCompanyMediaTypeStatus(data:any){
+    return this.http.patch<any>(`${this.apiUrl}/company-media-type`,data,{observe:'response'})
+  }
+  getCompanyMediatype(){
+
+   return this.http.get<any>(`${this.apiUrl}/company-media-type`,{observe:'response'});
+  }
   
 }

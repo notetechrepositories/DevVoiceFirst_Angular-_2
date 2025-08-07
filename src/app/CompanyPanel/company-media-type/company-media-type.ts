@@ -1,49 +1,47 @@
-import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { FormGroup, FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { FormGroup, FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { UtilityService } from '../../Service/UtilityService/utility-service';
-import { AnswerTypeService } from '../../Service/AnswerTypeService/answer-type-service';
-import { AnswerTypeModel, CompanyAnswerTypeModel } from '../../Models/AnswerTypeModel';
+import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { MediaTypeService } from '../../Service/MediaTypeService/media-type-service';
+import { CompanyMediaTypeModel, MediaTypeModel } from '../../Models/MediaTypeModel';
 
 @Component({
-  selector: 'app-answer-type',
+  selector: 'app-company-media-type',
   imports: [RouterLink, CommonModule, FormsModule, ReactiveFormsModule],
-  templateUrl: './answer-type.html',
-  styleUrl: './answer-type.css'
+  templateUrl: './company-media-type.html',
+  styleUrl: './company-media-type.css'
 })
-
-export class AnswerType {
-
-  data: CompanyAnswerTypeModel[] = [];
-  filteredData: CompanyAnswerTypeModel[] = [];
-  sysAnswerTypes: AnswerTypeModel[] = [];
+export class CompanyMediaType {
+  data: CompanyMediaTypeModel[] = [];
+  filteredData: CompanyMediaTypeModel[] = [];
+  sysMediaTypes: MediaTypeModel[] = [];
 
   itemsPerPage = 10;
   currentPage = 1;
   searchTerm: string = '';
   isModalVisible: boolean = false;
-  answerTypeForm!: FormGroup;
-  selectedAnswerTypeIds: string[] = [];
-  selectedAnswerTypeId: string[] = [];
+  mediaTypeForm!: FormGroup;
+  selectedMediaTypeIds: string[] = [];
+  selectedMediaTypeId: string[] = [];
   isAllSelected = false;
   isEditMode: boolean = false;
+  selectedMediaId: string | null = null;
+  originalItem: any;
   checkIcon = '<i class="fa-solid fa-check text-success"></i>';
   crossIcon = '<i class="fa-solid fa-xmark text-danger"></i>';
-  selectedAnswerIds: string | null = null;
-  originalItem: any;
 
   constructor(private fb: FormBuilder,
     private utilityService: UtilityService,
-    private answerTypeService: AnswerTypeService
+    private mediaTypeService: MediaTypeService
   ) { }
 
   ngOnInit() {
-    this.getCompanyAnswerType();
+    this.getCompanyMediaType();
     this.getAnswerType();
-    this.answerTypeForm = this.fb.group({
+    this.mediaTypeForm = this.fb.group({
       id: [''],
-      companyAnswerTypeName: ['', Validators.required],
+      companyDescription: ['', Validators.required],
     });
   }
 
@@ -66,7 +64,7 @@ export class AnswerType {
   onSearch() {
     const term = this.searchTerm.toLowerCase();
     this.filteredData = this.data.filter(item =>
-      item.companyAnswerTypeName.toLowerCase().includes(term)
+      item.companyDescription.toLowerCase().includes(term)
     );
     this.currentPage = 1;
   }
@@ -82,15 +80,16 @@ export class AnswerType {
     if (this.currentPage < this.totalPages) this.currentPage++;
   }
 
-  openModal(editItem?: CompanyAnswerTypeModel) {
+
+  openModal(editItem?: CompanyMediaTypeModel) {
     this.isModalVisible = true;
     this.isEditMode = !!editItem;
-    this.selectedAnswerIds = editItem?.id || null;
+    this.selectedMediaId = editItem?.id || null;
     if (editItem) {
       this.originalItem = { ...editItem };
-      this.answerTypeForm.patchValue({
+      this.mediaTypeForm.patchValue({
         id: editItem.id,
-        companyAnswerTypeName: editItem.companyAnswerTypeName,
+        companyDescription: editItem.companyDescription,
 
       });
     }
@@ -98,15 +97,15 @@ export class AnswerType {
 
   closeModal() {
     this.isModalVisible = false;
-    this.answerTypeForm.reset();
+    this.mediaTypeForm.reset();
   }
 
-  toggleAnswerType(answerType: any) {
-    if (!answerType.selected) {
+  toggleAnswerType(mediaType: any) {
+    if (!mediaType.selected) {
       const payload = {
-        answerTypeId: answerType.id,
+        mediaTypeId: mediaType.id,
       };
-      this.answerTypeService.createCompanyAnswertype(payload).subscribe({
+      this.mediaTypeService.createCompanyMediaType(payload).subscribe({
         next: (res) => {
           if (res.status == 201) {
             const newItem = res.body?.data;
@@ -114,6 +113,7 @@ export class AnswerType {
               this.filteredData.push(newItem);
             }
           }
+          mediaType.selected = true;
           this.utilityService.success(res.body.message);
         },
         error: (err) => {
@@ -126,20 +126,20 @@ export class AnswerType {
   toggleSelection(id: string, event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
     if (checked) {
-      if (!this.selectedAnswerTypeIds.includes(id)) {
-        this.selectedAnswerTypeIds.push(id);
+      if (!this.selectedMediaTypeIds.includes(id)) {
+        this.selectedMediaTypeIds.push(id);
       }
     } else {
-      this.selectedAnswerTypeIds = this.selectedAnswerTypeIds.filter(x => x !== id);
+      this.selectedMediaTypeIds = this.selectedMediaTypeIds.filter(x => x !== id);
     }
   }
 
   toggleSelectAll(event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
     if (checked) {
-      this.selectedAnswerTypeIds = this.pagedData.map(x => x.id);
+      this.selectedMediaTypeIds = this.pagedData.map((x: any) => x.id);
     } else {
-      this.selectedAnswerTypeIds = [];
+      this.selectedMediaTypeIds = [];
     }
     this.isAllSelected = checked;
   }
@@ -150,10 +150,10 @@ export class AnswerType {
       id: item.id,
       status: updatedStatus
     };
-    const message = `Are you sure you want to set this answer type as ${updatedStatus ? 'Active' : 'Inactive'}?`;
+    const message = `Are you sure you want to set this media type as ${updatedStatus ? 'Active' : 'Inactive'}?`;
     const result = await this.utilityService.confirmDialog(message, 'update');
     if (result.isConfirmed) {
-      this.answerTypeService.updateCompanyAnswerTypeStatus(payload).subscribe({
+      this.mediaTypeService.updateCompanyMediaTypeStatus(payload).subscribe({
         next: () => {
           item.status = updatedStatus;
           this.utilityService.success('Status updated successfully');
@@ -165,10 +165,10 @@ export class AnswerType {
     }
   }
 
-  // -----------------------------------------------
+  // ------------------
 
-  getCompanyAnswerType() {
-    this.answerTypeService.getAllCompanyAnswerType().subscribe({
+  getCompanyMediaType() {
+    this.mediaTypeService.getAllCompanyMediatype().subscribe({
       next: res => {
         this.data = res.body.data
         this.filteredData = [...this.data];
@@ -181,9 +181,9 @@ export class AnswerType {
   }
 
   getAnswerType() {
-    this.answerTypeService.getAnswerType().subscribe({
+    this.mediaTypeService.getMediatype().subscribe({
       next: res => {
-        this.sysAnswerTypes = res.body.data;
+        this.sysMediaTypes = res.body.data;
         this.markSelectedTypes();
       },
       error: err => { this.utilityService.showError(err.status, err.error?.message || 'Get failed.') }
@@ -191,28 +191,29 @@ export class AnswerType {
   }
 
   private markSelectedTypes() {
-    if (!this.sysAnswerTypes.length || !this.data.length) return;
-    const companyAnswerTypeIds = new Set(this.data.map((item) => item.answerTypeId));
-    this.sysAnswerTypes.forEach(type => {
+    if (!this.sysMediaTypes.length || !this.data.length) return;
+    const companyAnswerTypeIds = new Set(this.data.map((item) => item.mediaTypeId));
+    this.sysMediaTypes.forEach(type => {
       type.selected = companyAnswerTypeIds.has(type.id);
     });
   }
 
-  async deleteAnswerType(): Promise<void> {
-    const message = `Delete ${this.selectedAnswerTypeIds.length} Answer type(s)`;
+  async deleteMediaType(): Promise<void> {
+    const message = `Delete ${this.selectedMediaTypeIds.length} Answer type(s)`;
     const result = await this.utilityService.confirmDialog(message, 'delete');
     if (result.isConfirmed) {
-      this.answerTypeService.deleteCompanyAnswerType(this.selectedAnswerTypeIds).subscribe({
+      this.mediaTypeService.deleteCompanyMediaType(this.selectedMediaTypeIds).subscribe({
         next: (res) => {
           const deletedIds: string[] = res.body?.data || [];
           this.filteredData = this.filteredData.filter(item => !deletedIds.includes(item.id));
           this.data = this.data.filter(item => !deletedIds.includes(item.id));
 
-          const selectedIds = new Set(this.data.map(item => item.answerTypeId));
-          this.sysAnswerTypes.forEach(type => {
+          const selectedIds = new Set(this.data.map(item => item.mediaTypeId));
+          this.sysMediaTypes.forEach(type => {
             type.selected = selectedIds.has(type.id);
           });
-          this.selectedAnswerTypeIds = [];
+
+          this.selectedMediaTypeIds = [];
           this.isAllSelected = false;
           this.utilityService.success(res.body?.message || 'Deleted successfully.');
         },
@@ -220,31 +221,32 @@ export class AnswerType {
           this.utilityService.showError(err.status, err.error?.message || 'Failed to delete items.');
         }
       });
-      this.selectedAnswerTypeIds = [];
+      this.selectedMediaTypeIds = [];
       this.isAllSelected = false;
 
     }
   }
 
   submitAnswerType() {
-    const form = this.answerTypeForm;
+    const form = this.mediaTypeForm;
     const formValue = form.value;
     const payload = {
-      companyAnswerTypeName: formValue.companyAnswerTypeName,
+      companyDescription: formValue.companyDescription
 
     };
-    if (this.answerTypeForm.invalid) {
-      this.answerTypeForm.markAllAsTouched();
+    if (this.mediaTypeForm.invalid) {
+      this.mediaTypeForm.markAllAsTouched();
       return;
     }
     if (this.isEditMode) {
-      const updatedFields: any = { id: this.selectedAnswerIds };
-      this.utilityService.setIfDirty(form, 'companyAnswerTypeName', updatedFields);
+      const updatedFields: any = { id: this.selectedMediaId };
+
+      this.utilityService.setIfDirty(form, 'companyDescription', updatedFields);
       if (Object.keys(updatedFields).length === 1) {
         this.utilityService.warning('No changes detected.');
         return;
       }
-      this.answerTypeService.updateCompanyAnswerType(updatedFields).subscribe({
+      this.mediaTypeService.updateCompanyMediaType(updatedFields).subscribe({
         next: (res) => {
           const updatedItem = res.body?.data;
           if (updatedItem) {
@@ -262,14 +264,14 @@ export class AnswerType {
       });
     }
     else {
-      this.answerTypeService.createCompanyAnswertype(payload).subscribe({
+      this.mediaTypeService.createCompanyMediaType(payload).subscribe({
         next: (res) => {
-
           if (res.status == 201) {
             const newItem = res.body?.data;
             if (newItem) {
               this.filteredData.push(newItem);
             }
+
           }
           this.closeModal();
           this.utilityService.success(res.body.message);
