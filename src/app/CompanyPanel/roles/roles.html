@@ -1,1 +1,257 @@
-<p>roles works!</p>
+<div>
+    <h3>Manage Company Roles </h3>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Role</li>
+        </ol>
+    </nav>
+
+    <div class="page-header d-flex justify-content-between mb-3 mt-4">
+        <input type="text" class="form-control w-25" placeholder="Search" [(ngModel)]="searchTerm"
+            (input)="onSearch()" />
+
+    </div>
+
+
+    <div class="row gx-3">
+
+        <div class="col-md-8">
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-primary" (click)="openModal()">Add</button>
+            </div>
+            <div class="card p-4 mt-3 mb-3">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead class="table-light">
+                            <tr>
+                                <th>
+                                    <input type="checkbox" class="form-check-input"
+                                        [checked]="pagedData.length > 0 && isAllSelected"
+                                        [disabled]="pagedData.length === 0" (change)="toggleSelectAll($event)" />
+                                </th>
+                                <th>Name</th>
+                                <th>Status</th>
+                                <th class="text-end">
+                                    <button class="delete-btn btn-danger" (click)="deleteRoles()"
+                                        [disabled]="selectedAnswerTypeIds.length === 0">
+                                        <i class="pi pi-trash text-white"></i>
+                                    </button>
+                                </th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (item of pagedData; track item) {
+                            <tr>
+                                <td> <input type="checkbox" class="form-check-input"
+                                        [checked]="selectedAnswerTypeIds.includes(item.id)"
+                                        (change)="toggleSelection(item.id, $event)" />
+                                </td>
+                                <td>{{ item.companyRoleName }}</td>
+                                <td>
+                                    <span class="badge" [ngClass]="item.status ? 'bg-success' : 'bg-secondary'"
+                                        style="cursor: pointer;" (click)="toggleStatus(item)">
+                                        {{ item.status ? 'Active' : 'Inactive' }}
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <i class="pi pi-pen-to-square fw-bold" 
+                                        (click)="openModal(item)"></i>
+
+                                </td>
+                            </tr>
+                            }
+
+                            @empty {
+                            <tr>
+                                <td colspan="3" class="text-center">No data found</td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+
+            </div>
+
+            <!-- Pagination Controls -->
+            <nav class="d-flex justify-content-end">
+                <ul class="pagination custom-pagination">
+                    <li class="page-item" [class.disabled]="currentPage === 1">
+                        <a class="page-link" (click)="previousPage()"><i class="fa-solid fa-angle-left"></i></a>
+                    </li>
+                    @for (page of totalPagesArray; track page) {
+                    <li class="page-item" [class.active]="page === currentPage">
+                        <a class="page-link" (click)="goToPage(page)">{{ page }}</a>
+                    </li>
+                    }
+                    <li class="page-item" [class.disabled]="currentPage === totalPages">
+                        <a class="page-link" (click)="nextPage()"><i class="fa-solid fa-angle-right"></i></a>
+                    </li>
+                </ul>
+            </nav>
+
+        </div>
+
+        <div class="col-md-4">
+            <div class="card p-3">
+                <h5 class="fw-bold">System Roles</h5>
+                <p class="text-muted mb-2">
+                    Select the system Roles that apply to this company.
+                </p>
+                <div class="table-responsive" style="max-height: 555px; overflow-y: auto;">
+                    <table class="table mt-3">
+                        <thead>
+                            <tr>
+                                <th>Select</th>
+                                <th>Name</th>
+                               
+                            </tr>
+                        </thead>
+                        <tbody style="max-height: 200px; overflow-y: auto;">
+                            @for (role of sysRoles; track role) {
+                            <tr>
+                                <td>
+                                    <input type="checkbox" [checked]="role.selected"
+                                        [disabled]="role.selected" (change)="toggleRoles(role)" />
+                                </td>
+                                <td>{{ role.roleName }}</td>
+                                <!-- <td>
+                                    <i class="pi pi-eye" (click)="openViewModal(role)"></i>
+                                </td> -->
+                            </tr>
+                            }
+                            @empty {
+                            <tr>
+                                <td colspan="3" class="text-center">No data found</td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- Modal -->
+@if (isModalVisible && roleForm) {
+    <div class="overlay">
+      <div class="modal-content">
+        <i class="fa-solid fa-xmark text-end" (click)="closeModal()"></i>
+        <h4 class="mb-3">{{ isEditMode ? 'Edit Role' : 'Add Role' }}</h4>
+
+        <form  [formGroup]="roleForm" (ngSubmit)="submitRoles()">
+          <div class="form-group mb-3">
+            <label class="mb-1">Role Name</label>
+            <input type="text" class="form-control" formControlName="companyRoleName" /> 
+            <small class="text-danger" *ngIf="roleForm.get('companyRoleName')?.errors?.['required'] && roleForm.get('companyRoleName')?.touched">Role Name is required</small>
+          </div>
+
+          <div class="d-flex justify-content-center gap-5 mb-3">
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input"  formControlName="allLocationAccess" />
+              <label class="form-check-label" for="location">All Location Access</label>
+            </div>
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input"  formControlName="allIssuesAccess" />
+              <label class="form-check-label" for="issues">All Issue Access</label>
+            </div>
+          </div>
+
+          <h6>Permissions</h6>
+          <div formGroupName="permissions" class="table-responsive"  style="height: 250px;overflow-y: auto;">
+            <table class="table text-start align-middle">
+              <thead class="table-light text-center">
+                <tr>
+                  <th class="text-start">Module</th>
+                  @for (key of permissionKeys; track key) {
+                    <th class="text-capitalize">{{ key }}</th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (mod of modules; track mod.id) {
+                  <tr [formGroupName]="mod.id">
+                    <td class="text-capitalize">{{ mod.label }}</td>
+                    @for (key of permissionKeys; track key) {
+                      <td class="text-center">
+                        <input type="checkbox" class="form-check-input" [formControlName]="key" />
+                      </td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <button type="submit" class="btn mt-4 w-100" [ngClass]="isEditMode ? 'btn-success' : 'btn-primary'">
+            {{ isEditMode ? 'Save Changes' : 'Add' }}
+          </button>
+        </form>
+      </div>
+    </div>
+}
+<!-- ----- View System Roles  -->
+ @if (isSysModalVisible) {
+       <div class="overlay">
+      <div class="modal-content">
+        <i class="fa-solid fa-xmark text-end" (click)="closeModal()"></i>
+        <h4 class="mb-3">System Role</h4>
+
+        <form  [formGroup]="sysroleForm" (ngSubmit)="submitRoles()">
+          <div class="form-group mb-3">
+            <label class="mb-1">Role Name</label>
+            <input type="text" class="form-control" formControlName="roleName" /> 
+            <small class="text-danger" *ngIf="roleForm.get('roleName')?.errors?.['required'] && roleForm.get('roleName')?.touched">Role Name is required</small>
+          </div>
+
+          <div class="d-flex justify-content-center gap-5 mb-3">
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input"  formControlName="allLocationAccess" />
+              <label class="form-check-label" for="location">All Location Access</label>
+            </div>
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input"  formControlName="allIssuesAccess" />
+              <label class="form-check-label" for="issues">All Issue Access</label>
+            </div>
+          </div>
+
+          <h6>Permissions</h6>
+          <div formGroupName="permissions" class="table-responsive"  style="height: 250px;overflow-y: auto;">
+            <table class="table text-start align-middle">
+              <thead class="table-light text-center">
+                <tr>
+                  <th class="text-start">Module</th>
+                  @for (key of permissionKeys; track key) {
+                    <th class="text-capitalize">{{ key }}</th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (mod of modules; track mod.id) {
+                  <tr [formGroupName]="mod.id">
+                    <td class="text-capitalize">{{ mod.label }}</td>
+                    @for (key of permissionKeys; track key) {
+                      <td class="text-center">
+                        <input type="checkbox" class="form-check-input" [formControlName]="key" />
+                      </td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <button type="submit" class="btn mt-4 w-100" [ngClass]="isEditMode ? 'btn-success' : 'btn-primary'">
+            {{ isEditMode ? 'Save Changes' : 'Add' }}
+          </button>
+        </form>
+      </div>
+    </div>
+
+ }
+  

@@ -36,4 +36,27 @@ export class RoleService {
   updateRoleStatus(data:any){
     return this.http.patch<any>(`${this.apiUrl}/roles`, data,{observe: 'response'});
   }
+
+  //--------------------Company Role--------------------------------------
+
+  getCompanyRoles(){
+    return this.http.get<any>(`${this.apiUrl}/company-role/all`,{observe: 'response'});
+  }
+  createCompanyRole(data:any){
+    return this.http.post<any>(`${this.apiUrl}/company-role`, data,{observe: 'response'});
+  }
+  updateCompanyRole(data:any){
+    return this.http.put<any>(`${this.apiUrl}/company-role`, data,{observe: 'response'});
+  }
+   deleteCompanyRole(data:any){
+    return this.http.delete<any>(`${this.apiUrl}/company-role`, {body: data, observe: 'response'});
+  }
+  updateCompanyRoleStatus(data:any){
+    return this.http.patch<any>(`${this.apiUrl}/company-role`, data,{observe: 'response'});
+  }
+  
+  createCompanyRoleBySysRoleId(data:any){
+    return this.http.post<any>(`${this.apiUrl}/company-role/role-id`,data ,{observe: 'response'});
+  }
+
 }

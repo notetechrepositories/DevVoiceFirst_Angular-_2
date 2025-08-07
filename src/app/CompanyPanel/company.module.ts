@@ -7,7 +7,7 @@ import { CompanyDashboard } from './company-dashboard/company-dashboard';
 import { Roles } from './roles/roles';
 import { BusinessActivity } from './business-activity/business-activity';
 import { AnswerType } from './answer-type/answer-type';
-import { HttpClient } from '@angular/common/http';
+import { CompanyMediaType } from './company-media-type/company-media-type';
 
 @NgModule({
   imports: [
@@ -17,7 +17,8 @@ import { HttpClient } from '@angular/common/http';
     CompanyDashboard,
     Roles,
     BusinessActivity,
-    AnswerType
+    AnswerType,
+    CompanyMediaType
   ],
   declarations: [
 
