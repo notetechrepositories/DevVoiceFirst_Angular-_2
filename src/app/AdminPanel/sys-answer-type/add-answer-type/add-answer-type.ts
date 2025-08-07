@@ -13,11 +13,13 @@ import { UtilityService } from '../../../Service/UtilityService/utility-service'
 })
 export class AddAnswerType {
 
-  answerTypeForm!: FormGroup;
-  newAnswerType:any;
+answerTypeForm!: FormGroup;
+newAnswerType:any;
+
 @Output() close = new EventEmitter<void>();
 @Output() created = new EventEmitter<any>();
-  constructor(
+
+constructor(
     private fb: FormBuilder,
     private utilityService: UtilityService,
     private answerTypeSevice: AnswerTypeService
