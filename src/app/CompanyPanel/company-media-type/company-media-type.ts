@@ -13,13 +13,17 @@ import { CompanyMediaTypeModel, MediaTypeModel } from '../../Models/MediaTypeMod
   styleUrl: './company-media-type.css'
 })
 export class CompanyMediaType {
-  data: CompanyMediaTypeModel[] = [];
+  companyMediaTypeData: CompanyMediaTypeModel[] = [];
   filteredData: CompanyMediaTypeModel[] = [];
   sysMediaTypes: MediaTypeModel[] = [];
+  filteredSysData: MediaTypeModel[] = [];
 
   itemsPerPage = 10;
   currentPage = 1;
   searchTerm: string = '';
+  statusFilter = '';
+  searchSysTerm: string = '';
+
   isModalVisible: boolean = false;
   mediaTypeForm!: FormGroup;
   selectedMediaTypeIds: string[] = [];
@@ -61,13 +65,6 @@ export class CompanyMediaType {
 
   }
 
-  onSearch() {
-    const term = this.searchTerm.toLowerCase();
-    this.filteredData = this.data.filter(item =>
-      item.companyDescription.toLowerCase().includes(term)
-    );
-    this.currentPage = 1;
-  }
   goToPage(page: number) {
     this.currentPage = page;
   }
@@ -79,6 +76,37 @@ export class CompanyMediaType {
   nextPage() {
     if (this.currentPage < this.totalPages) this.currentPage++;
   }
+
+  onSearch() {
+    const term = this.searchTerm.toLowerCase();
+    this.filteredData = this.companyMediaTypeData.filter(item =>
+      item.companyDescription.toLowerCase().includes(term)
+    );
+    this.currentPage = 1;
+  }
+
+  onSysSearch() {
+    const term = this.searchSysTerm.toLowerCase();
+    this.filteredSysData = this.sysMediaTypes.filter(item =>
+      item.description.toLowerCase().includes(term)
+    );
+  }
+
+  onStatusFilterChange() {
+    this.currentPage = 1;
+    this.filteredData = this.companyMediaTypeData.filter(item => {
+      if (this.statusFilter === '') return true;
+      return Boolean(item.status) === (this.statusFilter === 'true');
+
+    });
+    this.updateSelectAllStatus();
+  }
+
+  updateSelectAllStatus() {
+    this.isAllSelected = this.pagedData.length > 0 && this.pagedData.every(x => this.selectedMediaTypeIds.includes(x.id));
+  }
+
+  // ===============================================================================================
 
 
   openModal(editItem?: CompanyMediaTypeModel) {
@@ -170,8 +198,8 @@ export class CompanyMediaType {
   getCompanyMediaType() {
     this.mediaTypeService.getAllCompanyMediatype().subscribe({
       next: res => {
-        this.data = res.body.data
-        this.filteredData = [...this.data];
+        this.companyMediaTypeData = res.body.data
+        this.filteredData = [...this.companyMediaTypeData];
         this.markSelectedTypes();
       },
       error: err => {
@@ -184,6 +212,7 @@ export class CompanyMediaType {
     this.mediaTypeService.getMediatype().subscribe({
       next: res => {
         this.sysMediaTypes = res.body.data;
+        this.filteredSysData = [...this.sysMediaTypes]
         this.markSelectedTypes();
       },
       error: err => { this.utilityService.showError(err.status, err.error?.message || 'Get failed.') }
@@ -191,8 +220,8 @@ export class CompanyMediaType {
   }
 
   private markSelectedTypes() {
-    if (!this.sysMediaTypes.length || !this.data.length) return;
-    const companyAnswerTypeIds = new Set(this.data.map((item) => item.mediaTypeId));
+    if (!this.sysMediaTypes.length || !this.companyMediaTypeData.length) return;
+    const companyAnswerTypeIds = new Set(this.companyMediaTypeData.map((item) => item.mediaTypeId));
     this.sysMediaTypes.forEach(type => {
       type.selected = companyAnswerTypeIds.has(type.id);
     });
@@ -206,9 +235,9 @@ export class CompanyMediaType {
         next: (res) => {
           const deletedIds: string[] = res.body?.data || [];
           this.filteredData = this.filteredData.filter(item => !deletedIds.includes(item.id));
-          this.data = this.data.filter(item => !deletedIds.includes(item.id));
+          this.companyMediaTypeData = this.companyMediaTypeData.filter(item => !deletedIds.includes(item.id));
 
-          const selectedIds = new Set(this.data.map(item => item.mediaTypeId));
+          const selectedIds = new Set(this.companyMediaTypeData.map(item => item.mediaTypeId));
           this.sysMediaTypes.forEach(type => {
             type.selected = selectedIds.has(type.id);
           });

@@ -102,14 +102,14 @@
 <!-- Recursive template -->
 <ng-template #renderMenuItem let-item="item">
   <li class="mb-1">
-    <div
-      class="btn btn-toggle align-items-center rounded w-100 text-start d-flex justify-content-between"
-      (click)="item.children?.length ? toggleMenu(item.id) : null"
-      [routerLink]="!item.children?.length && item.route ? item.route : null"
-      [attr.aria-expanded]="isExpanded(item.id)"
-      [class.collapsible]="item.children?.length"
-      [class.active]=""
-    >
+      <div
+        class="btn btn-toggle align-items-center rounded w-100 text-start d-flex justify-content-between"
+        (click)="!item.route ? toggleMenu(item.id) : null"
+        [routerLink]="item.route ? item.route : null"
+        [attr.aria-expanded]="isExpanded(item.id)"
+        [class.collapsible]="!item.route"
+        [class.active]=""
+      >
       <!-- Left side: Icon + Name -->
       <div class="d-flex align-items-center" style="font-size: .9rem !important;">
         <div class="icon-container me-3">
@@ -120,7 +120,7 @@
 
       <!-- Right side: Arrow (only if children) -->
       <span
-        *ngIf="item.children?.length"
+        *ngIf="!item.route"
         class="arrow-icon"
         [class.rotate]="isExpanded(item.id)"
       ><i class="pi pi-angle-down"></i></span>

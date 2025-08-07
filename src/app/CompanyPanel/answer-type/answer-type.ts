@@ -15,21 +15,25 @@ import { AnswerTypeModel, CompanyAnswerTypeModel } from '../../Models/AnswerType
 
 export class AnswerType {
 
-  data: CompanyAnswerTypeModel[] = [];
+  companyAnswerTypeData: CompanyAnswerTypeModel[] = [];
   filteredData: CompanyAnswerTypeModel[] = [];
   sysAnswerTypes: AnswerTypeModel[] = [];
+  filteredSysData: AnswerTypeModel[] = [];
 
   itemsPerPage = 10;
   currentPage = 1;
   searchTerm: string = '';
+  statusFilter = '';
+  searchSysTerm: string = '';
+
   isModalVisible: boolean = false;
-  answerTypeForm!: FormGroup;
-  selectedAnswerTypeIds: string[] = [];
-  selectedAnswerTypeId: string[] = [];
   isAllSelected = false;
   isEditMode: boolean = false;
-  checkIcon = '<i class="fa-solid fa-check text-success"></i>';
-  crossIcon = '<i class="fa-solid fa-xmark text-danger"></i>';
+
+  answerTypeForm!: FormGroup;
+
+  selectedAnswerTypeIds: string[] = [];
+  selectedAnswerTypeId: string[] = [];
   selectedAnswerIds: string | null = null;
   originalItem: any;
 
@@ -60,16 +64,8 @@ export class AnswerType {
   get pagedData() {
     const start = (this.currentPage - 1) * this.itemsPerPage;
     return this.filteredData.slice(start, start + this.itemsPerPage);
-
   }
 
-  onSearch() {
-    const term = this.searchTerm.toLowerCase();
-    this.filteredData = this.data.filter(item =>
-      item.companyAnswerTypeName.toLowerCase().includes(term)
-    );
-    this.currentPage = 1;
-  }
   goToPage(page: number) {
     this.currentPage = page;
   }
@@ -81,6 +77,71 @@ export class AnswerType {
   nextPage() {
     if (this.currentPage < this.totalPages) this.currentPage++;
   }
+
+  onSearch() {
+    const term = this.searchTerm.toLowerCase();
+    this.filteredData = this.companyAnswerTypeData.filter(item =>
+      item.companyAnswerTypeName.toLowerCase().includes(term)
+    );
+    this.currentPage = 1;
+  }
+
+  onSysSearch() {
+    const term = this.searchSysTerm.toLowerCase();
+    this.filteredSysData = this.sysAnswerTypes.filter(item =>
+      item.answerTypeName.toLowerCase().includes(term)
+    );
+    this.currentPage = 1;
+  }
+
+  onStatusFilterChange() {
+    this.currentPage = 1;
+    this.filteredData = this.companyAnswerTypeData.filter(item => {
+      if (this.statusFilter === '') return true;
+      return Boolean(item.status) === (this.statusFilter === 'true');
+
+    });
+    this.updateSelectAllStatus();
+  }
+
+  updateSelectAllStatus() {
+    this.isAllSelected = this.pagedData.length > 0 && this.pagedData.every(x => this.selectedAnswerTypeIds.includes(x.id));
+  }
+
+  // ==================================================================
+
+  getCompanyAnswerType() {
+    this.answerTypeService.getAllCompanyAnswerType().subscribe({
+      next: res => {
+        this.companyAnswerTypeData = res.body.data
+        this.filteredData = [...this.companyAnswerTypeData];
+        this.markSelectedTypes();
+      },
+      error: err => {
+        this.utilityService.showError(err.status, err.error?.message || 'Get failed.');
+      }
+    });
+  }
+
+  getAnswerType() {
+    this.answerTypeService.getAnswerType().subscribe({
+      next: res => {
+        this.sysAnswerTypes = res.body.data;
+        this.filteredSysData = [...this.sysAnswerTypes]
+        this.markSelectedTypes();
+      },
+      error: err => { this.utilityService.showError(err.status, err.error?.message || 'Get failed.') }
+    });
+  }
+
+  private markSelectedTypes() {
+    if (!this.sysAnswerTypes.length || !this.companyAnswerTypeData.length) return;
+    const companyAnswerTypeIds = new Set(this.companyAnswerTypeData.map((item) => item.answerTypeId));
+    this.sysAnswerTypes.forEach(type => {
+      type.selected = companyAnswerTypeIds.has(type.id);
+    });
+  }
+
 
   openModal(editItem?: CompanyAnswerTypeModel) {
     this.isModalVisible = true;
@@ -100,6 +161,93 @@ export class AnswerType {
     this.isModalVisible = false;
     this.answerTypeForm.reset();
   }
+
+  submitAnswerType() {
+    const form = this.answerTypeForm;
+    const formValue = form.value;
+    const payload = {
+      companyAnswerTypeName: formValue.companyAnswerTypeName,
+
+    };
+    if (this.answerTypeForm.invalid) {
+      this.answerTypeForm.markAllAsTouched();
+      return;
+    }
+    if (this.isEditMode) {
+      const updatedFields: any = { id: this.selectedAnswerIds };
+      this.utilityService.setIfDirty(form, 'companyAnswerTypeName', updatedFields);
+      if (Object.keys(updatedFields).length === 1) {
+        this.utilityService.warning('No changes detected.');
+        return;
+      }
+      this.answerTypeService.updateCompanyAnswerType(updatedFields).subscribe({
+        next: (res) => {
+          const updatedItem = res.body?.data;
+          if (updatedItem) {
+            const filteredIndex = this.filteredData.findIndex(item => item.id === updatedItem.id);
+            if (filteredIndex !== -1) {
+              this.filteredData[filteredIndex] = updatedItem;
+            }
+          }
+          this.closeModal();
+          this.utilityService.success(res.body?.message || 'Media Type updated.');
+        },
+        error: err => {
+          this.utilityService.showError(err.status, err.error?.message || 'Update failed.');
+        }
+      });
+    }
+    else {
+      this.answerTypeService.createCompanyAnswertype(payload).subscribe({
+        next: (res) => {
+
+          if (res.status == 201) {
+            const newItem = res.body?.data;
+            if (newItem) {
+              this.filteredData.push(newItem);
+            }
+          }
+          this.closeModal();
+          this.utilityService.success(res.body.message);
+        },
+        error: err => {
+          this.utilityService.showError(err.status, err.error.message);
+        }
+      });
+    }
+  }
+
+
+  async deleteAnswerType(): Promise<void> {
+    const message = `Delete ${this.selectedAnswerTypeIds.length} Answer type(s)`;
+    const result = await this.utilityService.confirmDialog(message, 'delete');
+    if (result.isConfirmed) {
+      this.answerTypeService.deleteCompanyAnswerType(this.selectedAnswerTypeIds).subscribe({
+        next: (res) => {
+          const deletedIds: string[] = res.body?.data || [];
+          this.filteredData = this.filteredData.filter(item => !deletedIds.includes(item.id));
+          this.companyAnswerTypeData = this.companyAnswerTypeData.filter(item => !deletedIds.includes(item.id));
+
+          const selectedIds = new Set(this.companyAnswerTypeData.map(item => item.answerTypeId));
+          this.sysAnswerTypes.forEach(type => {
+            type.selected = selectedIds.has(type.id);
+          });
+          this.selectedAnswerTypeIds = [];
+          this.isAllSelected = false;
+          this.utilityService.success(res.body?.message || 'Deleted successfully.');
+        },
+        error: (err) => {
+          this.utilityService.showError(err.status, err.error?.message || 'Failed to delete items.');
+        }
+      });
+      this.selectedAnswerTypeIds = [];
+      this.isAllSelected = false;
+
+    }
+  }
+
+
+  // ------------------------ System AnswerTypes -----------------------------
 
   toggleAnswerType(answerType: any) {
     if (!answerType.selected) {
@@ -165,119 +313,4 @@ export class AnswerType {
     }
   }
 
-  // -----------------------------------------------
-
-  getCompanyAnswerType() {
-    this.answerTypeService.getAllCompanyAnswerType().subscribe({
-      next: res => {
-        this.data = res.body.data
-        this.filteredData = [...this.data];
-        this.markSelectedTypes();
-      },
-      error: err => {
-        this.utilityService.showError(err.status, err.error?.message || 'Get failed.');
-      }
-    });
-  }
-
-  getAnswerType() {
-    this.answerTypeService.getAnswerType().subscribe({
-      next: res => {
-        this.sysAnswerTypes = res.body.data;
-        this.markSelectedTypes();
-      },
-      error: err => { this.utilityService.showError(err.status, err.error?.message || 'Get failed.') }
-    });
-  }
-
-  private markSelectedTypes() {
-    if (!this.sysAnswerTypes.length || !this.data.length) return;
-    const companyAnswerTypeIds = new Set(this.data.map((item) => item.answerTypeId));
-    this.sysAnswerTypes.forEach(type => {
-      type.selected = companyAnswerTypeIds.has(type.id);
-    });
-  }
-
-  async deleteAnswerType(): Promise<void> {
-    const message = `Delete ${this.selectedAnswerTypeIds.length} Answer type(s)`;
-    const result = await this.utilityService.confirmDialog(message, 'delete');
-    if (result.isConfirmed) {
-      this.answerTypeService.deleteCompanyAnswerType(this.selectedAnswerTypeIds).subscribe({
-        next: (res) => {
-          const deletedIds: string[] = res.body?.data || [];
-          this.filteredData = this.filteredData.filter(item => !deletedIds.includes(item.id));
-          this.data = this.data.filter(item => !deletedIds.includes(item.id));
-
-          const selectedIds = new Set(this.data.map(item => item.answerTypeId));
-          this.sysAnswerTypes.forEach(type => {
-            type.selected = selectedIds.has(type.id);
-          });
-          this.selectedAnswerTypeIds = [];
-          this.isAllSelected = false;
-          this.utilityService.success(res.body?.message || 'Deleted successfully.');
-        },
-        error: (err) => {
-          this.utilityService.showError(err.status, err.error?.message || 'Failed to delete items.');
-        }
-      });
-      this.selectedAnswerTypeIds = [];
-      this.isAllSelected = false;
-
-    }
-  }
-
-  submitAnswerType() {
-    const form = this.answerTypeForm;
-    const formValue = form.value;
-    const payload = {
-      companyAnswerTypeName: formValue.companyAnswerTypeName,
-
-    };
-    if (this.answerTypeForm.invalid) {
-      this.answerTypeForm.markAllAsTouched();
-      return;
-    }
-    if (this.isEditMode) {
-      const updatedFields: any = { id: this.selectedAnswerIds };
-      this.utilityService.setIfDirty(form, 'companyAnswerTypeName', updatedFields);
-      if (Object.keys(updatedFields).length === 1) {
-        this.utilityService.warning('No changes detected.');
-        return;
-      }
-      this.answerTypeService.updateCompanyAnswerType(updatedFields).subscribe({
-        next: (res) => {
-          const updatedItem = res.body?.data;
-          if (updatedItem) {
-            const filteredIndex = this.filteredData.findIndex(item => item.id === updatedItem.id);
-            if (filteredIndex !== -1) {
-              this.filteredData[filteredIndex] = updatedItem;
-            }
-          }
-          this.closeModal();
-          this.utilityService.success(res.body?.message || 'Media Type updated.');
-        },
-        error: err => {
-          this.utilityService.showError(err.status, err.error?.message || 'Update failed.');
-        }
-      });
-    }
-    else {
-      this.answerTypeService.createCompanyAnswertype(payload).subscribe({
-        next: (res) => {
-
-          if (res.status == 201) {
-            const newItem = res.body?.data;
-            if (newItem) {
-              this.filteredData.push(newItem);
-            }
-          }
-          this.closeModal();
-          this.utilityService.success(res.body.message);
-        },
-        error: err => {
-          this.utilityService.showError(err.status, err.error.message);
-        }
-      });
-    }
-  }
 }

@@ -133,6 +133,7 @@ export class Login {
   onLogin() {
     this.isLoading=true;
     if (!this.username || !this.password) {
+      this.isLoading=false;
       this.utilityService.info("Please enter both username and password.");
       return;
     }

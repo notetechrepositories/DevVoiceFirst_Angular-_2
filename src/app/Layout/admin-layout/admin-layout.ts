@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { Auth } from '../../Service/AuthService/auth';
 import { Menu } from '../../Service/MenuService/menu';
 import { UtilityService } from '../../Service/UtilityService/utility-service';
@@ -76,7 +76,7 @@ export function applyRoutePrefix(items: MenuItem[], prefix: string): MenuItem[] 
 @Component({
   selector: 'app-admin-layout',
   standalone: true,
-  imports: [RouterLink, FormsModule, ReactiveFormsModule, CommonModule, RouterOutlet, RouterLinkActive],
+  imports: [RouterLink, FormsModule, ReactiveFormsModule, CommonModule, RouterOutlet],
   templateUrl: './admin-layout.html',
   styleUrls: ['./admin-layout.css']
 })
