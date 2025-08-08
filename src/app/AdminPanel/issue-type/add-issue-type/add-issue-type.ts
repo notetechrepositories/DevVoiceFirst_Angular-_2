@@ -411,18 +411,18 @@ closeIssueStatusModal(){
     const form = this.issueTypeForm.value;
     console.log(form);
 
-    // this.issueTypeService.createIssueType(form).subscribe({
-    //   next: (res) => {
-    //     console.log(res);
-    //     this.utilityService.success(res.body.message);
-    //     this.router.navigate(['admin/issue-type'])
-    //   },
-    //   error: err => {
-    //     console.log(err);
+    this.issueTypeService.createIssueType(form).subscribe({
+      next: (res) => {
+        console.log(res);
+        this.utilityService.success(res.body.message);
+        this.router.navigate(['admin/issue-type'])
+      },
+      error: err => {
+        console.log(err);
 
-    //     this.utilityService.showError(err.status, err.error.message);
-    //   }
-    // });
+        this.utilityService.showError(err.status, err.error.message);
+      }
+    });
   }
 
 
