@@ -128,7 +128,7 @@ export class Login {
     }
   }
   
-
+ loginResponseData: any;
 
   onLogin() {
     this.isLoading=true;
@@ -146,19 +146,17 @@ export class Login {
       next: (res) => {
         if (res.status === 200) {
           this.isLoading=false;
-          const responseData = res.body.data;
-          this.selectedToken = responseData.accessToken;
-  
-          if (responseData.user && responseData.company) {
-            // Don't store token — pass it directly
+         this.loginResponseData = res.body.data;
+
+          if (this.loginResponseData.userAccessToken && this.loginResponseData.companyAccessToken) {
             this.openUserTypeModal();
           } else {
             // Store token and route accordingly
-            sessionStorage.setItem("token", JSON.stringify(this.selectedToken));
-            
-            if (responseData.user) {
+            if (this.loginResponseData.userAccessToken) {
+              sessionStorage.setItem("token", this.loginResponseData.userAccessToken);
               this.router.navigate(['user/home']);
-            } else if (responseData.company) {
+            } else if (this.loginResponseData.companyAccessToken) {
+              sessionStorage.setItem("token", this.loginResponseData.companyAccessToken);
               this.router.navigate(['admin/dashboard']);
             } else {
               this.utilityService.info("Please contact admin for access");
@@ -179,8 +177,8 @@ export class Login {
     });
   }
   
-
-    openUserTypeModal(){
+    
+    openUserTypeModal() {
       this.isUserTypeVisible=true;
     }
 
@@ -192,7 +190,7 @@ export class Login {
     onChooseUserType(type: string) {
       this.isLoading = true; // Start spinner
 
-      if (!this.selectedToken) {
+      if (this.loginResponseData.userAccessToken === null && this.loginResponseData.companyAccessToken === null) {
         this.utilityService.warning("Missing token. Please log in again.");
         this.isLoading = false;
         return;
@@ -200,17 +198,15 @@ export class Login {
       this.isUserTypeVisible = false;
       // Show spinner for 2 seconds before navigating
       setTimeout(() => {
-        sessionStorage.setItem("token", JSON.stringify(this.selectedToken));
-
         if (type === "user") {
+          sessionStorage.setItem("token", this.loginResponseData.userAccessToken);
           this.router.navigate(['user/home']);
         } else if (type === "company") {
+          sessionStorage.setItem("token", this.loginResponseData.companyAccessToken);
           this.router.navigate(['admin/dashboard']);
         } else {
           this.utilityService.info("Please contact admin for access");
         }
-
-        // Hide modal
         this.isLoading = false;         // Hide spinner
       }, 2000);
       
