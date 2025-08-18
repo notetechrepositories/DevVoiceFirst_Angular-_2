@@ -7,10 +7,16 @@
   background: #12192c;
   transition: all 0.3s ease;
   z-index: 999;
+  position: fixed;
 }
 
 .sidebar.d-none {
   transform: translateX(-100%);
+}
+
+.flex-fill{
+  margin-left: 250px;
+  transition: margin-left 0.3s ease;
 }
 
 /* Bootstrap icon fix */
