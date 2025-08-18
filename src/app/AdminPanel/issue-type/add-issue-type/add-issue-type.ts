@@ -415,7 +415,7 @@ closeIssueStatusModal(){
       next: (res) => {
         console.log(res);
         this.utilityService.success(res.body.message);
-        this.router.navigate(['admin/issue-type'])
+        this.router.navigate(['admin/system-issue-type'])
       },
       error: err => {
         console.log(err);

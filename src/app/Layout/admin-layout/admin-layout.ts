@@ -15,6 +15,14 @@ export interface MenuItem {
   children?: MenuItem[];
 }
 
+export interface RoleDTO {
+  id: string;
+  roleName: string;
+  allLocationAccess: boolean;
+  allIssuesAccess: boolean;
+  status: boolean;
+}
+
 // Clean route and initialize empty children array
 export function cleanMenuData(data: any): MenuItem[] {
   if (!Array.isArray(data)) {
@@ -91,6 +99,8 @@ export class AdminLayout implements OnInit {
   loggedInUser: any;
   isLoggedIn: boolean = false;
 
+  loggedInUserRoles: RoleDTO[] = [];
+
 
   iconMap: { [key: string]: string } = {
     dashboard: 'pi pi-gauge',
@@ -162,6 +172,7 @@ export class AdminLayout implements OnInit {
     this.menuService.getMenu().subscribe({
       next: (res: any) => {
         if (res.status == 200) {
+          this.loggedInUserRoles = res.body.data.roleDTOs;
           const cleaned = cleanMenuData(res.body.data.menuDTOs);
           const tree = buildMenuTree(cleaned);
           const prefixed = applyRoutePrefix(tree, this.baseRoutePrefix);

@@ -51,6 +51,6 @@ submitMediaType(){
       });
 }
  closeModal(){
-      this.close.emit();
-    }
+    this.close.emit();
+  }
 }

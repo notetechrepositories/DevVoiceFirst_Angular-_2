@@ -5,7 +5,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   if (req.headers.has('skip-auth')) {
     const newHeaders = req.headers.delete('skip-auth');
     const modifiedReq = req.clone({ headers: newHeaders });
-    console.log('[Interceptor] Skipping Auth:', modifiedReq.url);
     return next(modifiedReq);
   }
 
@@ -17,7 +16,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         Authorization: `Bearer ${token}`
       }
     });
-    console.log('[Interceptor] Adding token:', authReq);
     return next(authReq);
   }
 

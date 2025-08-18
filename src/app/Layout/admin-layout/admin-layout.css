@@ -252,6 +252,7 @@
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   font-size: .9rem;
   border: 1px solid;
+  text-transform: capitalize;
 }
 
 .role-selector-menu {
@@ -263,6 +264,11 @@
   background: #12192c;
   color: white;
   padding: 7px;
+  
+}
+
+.role-selector-item {
+  text-transform: capitalize;
 }
 
 .role-selector-item:hover {

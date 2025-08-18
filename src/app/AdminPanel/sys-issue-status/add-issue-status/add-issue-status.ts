@@ -61,9 +61,12 @@ submitIssueStatus() {
     });
   }
 
-  closeModal (){
-    this.close.emit();
-  }
+ closeModal(){
+      this.close.emit();
+  this.issueStatusForm.reset();
+  console.log('Modal closed and form reset');
   
+  
+}
 }
 
