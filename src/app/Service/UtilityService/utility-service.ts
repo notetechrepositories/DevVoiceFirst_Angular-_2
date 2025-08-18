@@ -52,7 +52,7 @@ export class UtilityService {
       return Swal.fire({
         title: 'Are you sure?',
         text: message,
-        icon: 'warning',
+        icon: 'question',
         showCancelButton: true,
         confirmButtonColor: '#eb1313',
         cancelButtonColor: '#565656',
@@ -84,6 +84,18 @@ export class UtilityService {
       });
     }
 
+    if(action === 'logout'){
+      return Swal.fire({
+        title: 'Logout',
+        text: message,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#FCC737',
+        cancelButtonColor: '#565656',
+        confirmButtonText: 'Yes, logout!'
+      });
+    }
+
     return Promise.resolve({ isConfirmed: false } as SweetAlertResult<any>);
 
   }
@@ -93,7 +105,7 @@ export class UtilityService {
 
   showError(statusCode: number , message?:string) {
 
-    if(statusCode === 500){
+    if(statusCode === 500 || statusCode === 400){
       Swal.fire({
         icon: "error",
         title: "Oops...",
@@ -101,11 +113,11 @@ export class UtilityService {
       });
     }
 
-    if(statusCode === 400){
+    if(statusCode === 404){
       Swal.fire({
         icon: "error",
-        title: "Bad Request",
-        text: "Please check your request and try again.",
+        title: "Not Found",
+        text: `${message}`,
       });
     }
 

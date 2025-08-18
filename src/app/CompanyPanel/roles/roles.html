@@ -7,18 +7,43 @@
         </ol>
     </nav>
 
-    <div class="page-header d-flex justify-content-between mb-3 mt-4">
+    <!-- <div class="page-header d-flex justify-content-between mb-3 mt-4">
         <input type="text" class="form-control w-25" placeholder="Search" [(ngModel)]="searchTerm"
             (input)="onSearch()" />
 
-    </div>
+    </div> -->
 
 
-    <div class="row gx-3">
+    <div class="row gx-3 mb-3 mt-5">
 
         <div class="col-md-8">
-            <div class="d-flex justify-content-end">
-                <button class="btn btn-primary" (click)="openModal()">Add</button>
+            <div class="d-flex justify-content-between">
+              <div class="d-flex flex-wrap gap-2 align-items-center">
+                <div class="input-group w-auto" style="min-width: 300px;">
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Search"
+                    [(ngModel)]="searchTerm"
+                    (input)="onSearch()"
+                  />
+                </div>
+                <select
+                  class="form-select w-auto"
+                  [(ngModel)]="statusFilter"
+                  (change)="onStatusFilterChange()"
+                >
+                  <option value="">All Status</option>
+                  <option value="true">Active</option>
+                  <option value="false">Inactive</option>
+                </select>
+              </div>
+              <div class="tooltip-container mb-0">
+                <button class="btn btn-primary tooltip-button mt-1" (click)="openModal()">
+                  <i class="pi pi-plus"></i>
+                  <span class="tooltipText">Add Role</span>
+                </button>
+              </div>
             </div>
             <div class="card p-4 mt-3 mb-3">
                 <div class="table-responsive">
@@ -34,7 +59,7 @@
                                 <th>Status</th>
                                 <th class="text-end">
                                     <button class="delete-btn btn-danger" (click)="deleteRoles()"
-                                        [disabled]="selectedAnswerTypeIds.length === 0">
+                                        [disabled]="selectedCompanyRoleIds.length === 0">
                                         <i class="pi pi-trash text-white"></i>
                                     </button>
                                 </th>
@@ -45,7 +70,7 @@
                             @for (item of pagedData; track item) {
                             <tr>
                                 <td> <input type="checkbox" class="form-check-input"
-                                        [checked]="selectedAnswerTypeIds.includes(item.id)"
+                                        [checked]="selectedCompanyRoleIds.includes(item.id)"
                                         (change)="toggleSelection(item.id, $event)" />
                                 </td>
                                 <td>{{ item.companyRoleName }}</td>
@@ -100,8 +125,18 @@
                 <p class="text-muted mb-2">
                     Select the system Roles that apply to this company.
                 </p>
-                <div class="table-responsive" style="max-height: 555px; overflow-y: auto;">
-                    <table class="table mt-3">
+                <div class="input-group w-auto" >
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Search"
+                    [(ngModel)]="searchSysTerm"
+                    (input)="onSysSearch()"
+                    style="font-size: 14px;"
+                  />
+                </div>
+                <div class="table-responsive mt-3" style="max-height: 560px; overflow-y: auto;">
+                    <table class="table">
                         <thead>
                             <tr>
                                 <th>Select</th>
@@ -109,8 +144,8 @@
                                
                             </tr>
                         </thead>
-                        <tbody style="max-height: 200px; overflow-y: auto;">
-                            @for (role of sysRoles; track role) {
+                        <tbody>
+                            @for (role of filteredSysData; track role) {
                             <tr>
                                 <td>
                                     <input type="checkbox" [checked]="role.selected"

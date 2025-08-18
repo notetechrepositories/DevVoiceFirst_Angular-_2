@@ -1,0 +1,100 @@
+.dashboard-wrapper {
+    padding: 2rem;
+    margin: 0 auto;
+  }
+  
+  .dashboard-header h2 {
+    font-size: 2rem;
+    margin-bottom: 0.3rem;
+  }
+  
+  .dashboard-header .subtext {
+    color: #6c757d;
+    font-size: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .summary-card {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s ease;
+  }
+  
+  .summary-card:hover {
+    transform: translateY(-5px);
+  }
+  
+  .card-title {
+    font-size: 1rem;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+  }
+  
+  .card-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #212529;
+  }
+  
+  .dashboard-table {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  }
+  
+  .table-title {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  thead th {
+    text-align: left;
+    padding: 0.75rem;
+    background-color: #f1f3f5;
+    font-size: 0.95rem;
+    color: #495057;
+  }
+  
+  tbody td {
+    padding: 0.75rem;
+    border-top: 1px solid #e9ecef;
+    font-size: 0.95rem;
+  }
+  
+  .badge {
+    padding: 0.3rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    color: white;
+    font-weight: 500;
+  }
+  
+  .badge-success {
+    background-color: #28a745;
+  }
+  
+  .badge-warning {
+    background-color: #ffc107;
+    color: #212529;
+  }
+  
+  .badge-danger {
+    background-color: #dc3545;
+  }
+  

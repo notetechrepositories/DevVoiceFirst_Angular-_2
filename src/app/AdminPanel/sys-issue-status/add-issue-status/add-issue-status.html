@@ -1,0 +1,24 @@
+<div class="overlay">
+    <div class="modal-content-2">
+      <i class="fa-solid fa-xmark text-end w-100" (click)="closeModal()"></i>
+       <h4 class="mb-3">Add Issue Status</h4>
+  
+      <form class="mt-3" [formGroup]="issueStatusForm" (ngSubmit)="submitIssueStatus()">
+  
+          <div class="form-group">
+            <label for="name" class="mb-2">Issue Status</label>
+            <input type="text" class="form-control" id="issueStatus"  placeholder="Enter Issue Status Name"  formControlName="issueStatus"
+             [ngClass]="{'is-invalid': issueStatusForm.get('issueStatus')?.invalid && issueStatusForm.get('issueStatus')?.touched}" />
+             <div class="invalid-feedback" *ngIf="issueStatusForm.get('issueStatus')?.touched && issueStatusForm.get('issueStatus')?.hasError('required')">
+                Issue Status Name is required.
+             </div>
+          </div>
+    
+  
+        <div class="col-md d-flex align-items-end">
+          <button type="submit" class="btn mt-4 w-100 btn-primary">Add</button>
+        </div>
+  
+      </form>
+    </div>
+  </div>

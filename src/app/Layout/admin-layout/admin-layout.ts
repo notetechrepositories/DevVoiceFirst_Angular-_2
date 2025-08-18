@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { Auth } from '../../Service/AuthService/auth';
 import { Menu } from '../../Service/MenuService/menu';
+import { UtilityService } from '../../Service/UtilityService/utility-service';
 
 export interface MenuItem {
   id: string;
@@ -14,12 +15,28 @@ export interface MenuItem {
   children?: MenuItem[];
 }
 
+export interface RoleDTO {
+  id: string;
+  roleName: string;
+  allLocationAccess: boolean;
+  allIssuesAccess: boolean;
+  status: boolean;
+}
+
 // Clean route and initialize empty children array
-export function cleanMenuData(data: any[]): MenuItem[] {
-  return data.map((item) => ({
-    ...item,
-    route: item.route?.trim() || undefined,
-    children: [],
+export function cleanMenuData(data: any): MenuItem[] {
+  if (!Array.isArray(data)) {
+    console.error('Invalid menu data:', data);
+    return [];
+  }
+
+  return data.map(item => ({
+    id: item.id,
+    name: item.name,
+    icon: item.icon,
+    route: item.route,
+    position: item.position,
+    children: [] // assuming flat data initially
   }));
 }
 
@@ -67,18 +84,23 @@ export function applyRoutePrefix(items: MenuItem[], prefix: string): MenuItem[] 
 @Component({
   selector: 'app-admin-layout',
   standalone: true,
-  imports: [RouterLink, FormsModule, ReactiveFormsModule, CommonModule, RouterOutlet, RouterLinkActive],
+  imports: [RouterLink, FormsModule, ReactiveFormsModule, CommonModule, RouterOutlet],
   templateUrl: './admin-layout.html',
   styleUrls: ['./admin-layout.css']
 })
 export class AdminLayout implements OnInit {
 
+  baseRoutePrefix: string = '';
   menuItems: MenuItem[] = [];
   toggleStates = new Map<string, boolean>();
-  isMenuCollapsed = false;
-  isSidebarExpanded: boolean = true;
-  baseRoutePrefix = '';
-  loggedInUser:any;
+  sidebarVisible: boolean = true;
+  isSmallScreen: boolean = false;
+
+  loggedInUser: any;
+  isLoggedIn: boolean = false;
+
+  loggedInUserRoles: RoleDTO[] = [];
+
 
   iconMap: { [key: string]: string } = {
     dashboard: 'pi pi-gauge',
@@ -88,55 +110,76 @@ export class AdminLayout implements OnInit {
     organization: 'pi pi-sitemap',
     product: 'pi pi-box',
     country: 'pi pi-globe',
+    settings: 'pi pi-cog'
     // Add more mappings as needed
   };
 
   constructor(
-    private authService:Auth,
-    private menuService:Menu
-  ){}
+    private authService: Auth,
+    private menuService: Menu,
+    private utilityService: UtilityService,
+    private router: Router
+  ) { }
 
   ngOnInit(): void {
     window.addEventListener('resize', () => this.checkScreenSize());
     this.checkScreenSize();
-    this.loggedInUser = this.authService.getLoggedInUser();
-    const role = this.loggedInUser?.role === 'company' ? 'company' : 'admin';
-    // this.baseRoutePrefix = `/${role}`;
-    this.baseRoutePrefix = `/admin`;
+    this.loginCheck();
     this.getMenus();
+
+    this.baseRoutePrefix = `/admin`;
+    this.loggedInUser = this.authService.getLoggedInUser();
   }
 
-  toggleSidebar() {
-    this.isSidebarExpanded = !this.isSidebarExpanded;
+  loginCheck() {
+    this.authService.isLoggedIn$.subscribe((status) => {
+      this.isLoggedIn = status;
+    });
   }
 
   @HostListener('window:resize', [])
-   onWindowResize() {
-     this.checkScreenSize();
-   }
- 
-   checkScreenSize() {
-     if (window.innerWidth < 768) {
-       this.isSidebarExpanded = false;
-     } else {
-       this.isSidebarExpanded = true;
-     }
-   }
+  onResize() {
+    this.checkScreenSize();
+  }
 
-   getMappedIcon(icon: string | null): string {
+  checkScreenSize() {
+    this.isSmallScreen = window.innerWidth <= 908;
+    if (this.isSmallScreen) {
+      this.sidebarVisible = false;
+    }
+  }
+
+
+  toggleSidebar() {
+    this.sidebarVisible = !this.sidebarVisible;
+  }
+
+
+  toggleMenu(itemId: string) {
+    const current = this.toggleStates.get(itemId) || false;
+    this.toggleStates.set(itemId, !current);
+  }
+
+  isExpanded(itemId: string): boolean {
+    return this.toggleStates.get(itemId) || false;
+  }
+
+  getMappedIcon(icon: string | null): string {
     return this.iconMap[icon ?? ''] || 'pi pi-circle';
   }
 
-   getMenus() {
+  getMenus() {
     this.menuService.getMenu().subscribe({
       next: (res: any) => {
-        const cleaned = cleanMenuData(res.data);
-        const tree = buildMenuTree(cleaned);
-        const prefixed = applyRoutePrefix(tree, this.baseRoutePrefix);
-        this.menuItems = prefixed;
-        console.log(this.menuItems);
-        
-        this.initializeToggleStates(this.menuItems);
+        if (res.status == 200) {
+          this.loggedInUserRoles = res.body.data.roleDTOs;
+          const cleaned = cleanMenuData(res.body.data.menuDTOs);
+          const tree = buildMenuTree(cleaned);
+          const prefixed = applyRoutePrefix(tree, this.baseRoutePrefix);
+          this.menuItems = prefixed;
+          console.log(this.menuItems);
+          this.initializeToggleStates(this.menuItems);
+        }
       },
       error: (error) => console.error(error)
     });
@@ -151,23 +194,18 @@ export class AdminLayout implements OnInit {
     }
   }
 
-  toggleMenu(itemId: string) {
-    const current = this.toggleStates.get(itemId) || false;
-    this.toggleStates.set(itemId, !current);
-  }
-
-  isExpanded(itemId: string): boolean {
-    return this.toggleStates.get(itemId) || false;
-  }
-
-  logout(){
-    this.authService.logout();
+  async logout() {
+    const message = 'Are you sure want to logout?'
+    const result = await this.utilityService.confirmDialog(message, 'logout');
+    if (result.isConfirmed) {
+      this.authService.logout();
+    }
   }
 
   // ====================================================================
 
-  roles: string[] = ['Notetech Admin', 'Company Admin', 'Viewer'];
-  selectedRole: string = 'Notetech Admin';
+  roles: string[] = ['Super Admin', 'Organization', 'Employee'];
+  selectedRole: string = '';
 
   selectRole(role: string) {
     this.selectedRole = role;

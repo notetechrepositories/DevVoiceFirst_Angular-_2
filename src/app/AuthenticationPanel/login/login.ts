@@ -5,6 +5,8 @@ import { Auth } from '../../Service/AuthService/auth';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Deviceinfo } from '../../Service/DeviceinfoService/deviceinfo';
+import { UtilityService } from '../../Service/UtilityService/utility-service';
+import { SecurityService } from '../../Service/SecurityService/security-service';
 
 
 @Component({
@@ -20,15 +22,21 @@ export class Login {
 
   deviceInfo: any;
 
+  isUserTypeVisible:boolean=false;
+  isLoading:boolean=false;
+
+  selectedToken: string | null = null;
+
 
   constructor(
       private router:Router,
       private authService:Auth,
-      private deviceInfoService:Deviceinfo
+      private deviceInfoService:Deviceinfo,
+      private utilityService:UtilityService,
+      private securityService:SecurityService
     ){}
 
   ngOnInit(): void {
-   localStorage.clear();
    sessionStorage.clear();
   }
 
@@ -45,7 +53,10 @@ export class Login {
       client_id: '1058839439916-ish868v28g5j4fa0jilg5qf4hdbqm7v2.apps.googleusercontent.com',
       callback: (res: any)=>{
         console.log(res);
-        this.handleLogin(res);
+        this.onGoogleLogin(res);
+      },
+      error:(err:any)=>{
+        this.utilityService.showError(err.status, err.error.message);
       }
     });
      google.accounts.id.renderButton(document.getElementById('google-btn'),{
@@ -57,92 +68,153 @@ export class Login {
     });
   }
 
-private decodeToken(token: string) {
-  const payload = token.split('.')[1];
-  const base64 = payload.replace(/-/g, '+').replace(/_/g, '/'); 
-  const jsonPayload = decodeURIComponent(
-    atob(base64)
-      .split('')
-      .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-      .join('')
-  );
-  return JSON.parse(jsonPayload);
-}
+  private decodeToken(token: string) {
+    const payload = token.split('.')[1];
+    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/'); 
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  }
 
 
-handleLogin(response:any){
-    if(response){
-      const payload=this.decodeToken(response.credential);
-      console.log(payload);
-      if(payload.email_verified){
-        this.authService.userExists(payload.email).subscribe({
-          next:res=>{
-            console.log("User Details", res);
-            
-            if(res.exists){
-              sessionStorage.setItem("loggedInUser",JSON.stringify(payload));
-              if(res.user?.type=="admin"){
-                this.router.navigate(['admin/admin-dashboard']);
-              }
-              else if(res.user?.type=="company"){
-                this.router.navigate(['admin/company-dashboard']);
-              }
-              else{
+  onGoogleLogin(response: any) {
+    if (response) {
+      const decodedPayload = this.decodeToken(response.credential);
+      const googleToken = response.credential;
+      const payload = { googleToken };
+      this.isLoading=true;
+      this.authService.googleLogin(payload).subscribe({
+        next: res => {
+          if (res.status === 200) {
+            this.isLoading=false;
+            const responseData = res.body.data;
+           this.selectedToken = responseData.accessToken;
+  
+            if (responseData.user && responseData.company) {
+              // Don't store token, just pass to modal
+              this.openUserTypeModal();
+            } else {
+              // Store token and navigate accordingly
+              sessionStorage.setItem("token", JSON.stringify(this.selectedToken));
+              const encryptedData = this.securityService.encryptObject(decodedPayload);
+              sessionStorage.setItem("loggedInUser",encryptedData);
+              if (responseData.user) {
                 this.router.navigate(['user/home']);
+              } else if (responseData.company) {
+                this.router.navigate(['admin/dashboard']);
+              } else {
+                this.utilityService.info("Please contact admin for access");
               }
-              const deviceData =  this.deviceInfoService.getFullDeviceInfo();
-              console.log(deviceData);
-              
-            }
-            else{
-              this.authService.signUpUser(payload);
-              sessionStorage.setItem("loggedInUser", JSON.stringify(payload));
-              this.router.navigate(['authentication/user-registration']);
             }
           }
-        })
-      }
-      
+        },
+        error: err => {
+          this.isLoading=false;
+          if(err.status === 404){
+            const encryptedData = this.securityService.encryptObject(decodedPayload);
+            sessionStorage.setItem("loggedInUser", encryptedData);
+            this.router.navigate(['authentication/user-registration']);
+          }
+          else{
+            this.utilityService.showError(err.status, err.error.message);
+          }
+         
+        }
+      });
     }
   }
-
-  onForgotPassword(){
-
-  }
+  
+ loginResponseData: any;
 
   onLogin() {
+    this.isLoading=true;
     if (!this.username || !this.password) {
-      alert("Please enter both username and password.");
+      this.isLoading=false;
+      this.utilityService.info("Please enter both username and password.");
       return;
     }
   
-    this.authService.loginWithCredentials(this.username, this.password).subscribe({
+    const payload = {
+      username: this.username,
+      password: this.password
+    };
+    this.authService.login(payload).subscribe({
       next: (res) => {
-        if (res.success && res.user) {
-          sessionStorage.setItem("loggedInUser", JSON.stringify(res.user));
-          
-          // Navigate based on user type
-          if (res.user.type === "admin") {
-            this.router.navigate(['admin/admin-dashboard']);
-          } else if (res.user.type === "company") {
-            this.router.navigate(['company/company-dashboard']);
+        if (res.status === 200) {
+          this.isLoading=false;
+         this.loginResponseData = res.body.data;
+
+          if (this.loginResponseData.userAccessToken && this.loginResponseData.companyAccessToken) {
+            this.openUserTypeModal();
           } else {
-            this.router.navigate(['user/home']);
+            // Store token and route accordingly
+            if (this.loginResponseData.userAccessToken) {
+              sessionStorage.setItem("token", this.loginResponseData.userAccessToken);
+              this.router.navigate(['user/home']);
+            } else if (this.loginResponseData.companyAccessToken) {
+              sessionStorage.setItem("token", this.loginResponseData.companyAccessToken);
+              this.router.navigate(['admin/dashboard']);
+            } else {
+              this.utilityService.info("Please contact admin for access");
+            }
           }
   
-          // Optionally fetch device info
           const deviceData = this.deviceInfoService.getFullDeviceInfo();
           console.log("Device Info:", deviceData);
-  
-        } else {
-          alert("Invalid username or password.");
+        } 
+        else {
+          this.utilityService.error("Invalid username or password.");
         }
       },
-      error: () => {
-        alert("An error occurred while logging in.");
+      error: (err) => {
+        this.isLoading=false;
+        this.utilityService.showError(err.status, err.error.message);
       }
     });
   }
+  
+    
+    openUserTypeModal() {
+      this.isUserTypeVisible=true;
+    }
+
+    closeModal(){
+      this.isUserTypeVisible=false;
+      sessionStorage.clear();
+    }
+
+    onChooseUserType(type: string) {
+      this.isLoading = true; // Start spinner
+
+      if (this.loginResponseData.userAccessToken === null && this.loginResponseData.companyAccessToken === null) {
+        this.utilityService.warning("Missing token. Please log in again.");
+        this.isLoading = false;
+        return;
+      }
+      this.isUserTypeVisible = false;
+      // Show spinner for 2 seconds before navigating
+      setTimeout(() => {
+        if (type === "user") {
+          sessionStorage.setItem("token", this.loginResponseData.userAccessToken);
+          this.router.navigate(['user/home']);
+        } else if (type === "company") {
+          sessionStorage.setItem("token", this.loginResponseData.companyAccessToken);
+          this.router.navigate(['admin/dashboard']);
+        } else {
+          this.utilityService.info("Please contact admin for access");
+        }
+        this.isLoading = false;         // Hide spinner
+      }, 2000);
+      
+    }
+
+    onForgotPassword(){
+
+    }
 
 
 

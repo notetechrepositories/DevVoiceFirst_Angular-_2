@@ -1,5 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
 @import "../public/css/overlay.css";
+@import "../public/css/font.css";
 @import "primeicons/primeicons.css";
 
 html, body { height: 100vh; }
@@ -56,7 +57,7 @@ i{
 .custom-pagination {
   .page-item {
     margin: 0 4px;
-
+    z-index: -1;
     .page-link {
       color: #007bff;
       border: 1px solid #dee2e6;
@@ -151,6 +152,35 @@ i{
 
 .tooltip-button:hover .tooltipText {
   opacity: 1;
+}
+
+/*  Loading Screen */
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.spinner {
+  border: 6px solid #ccc;
+  border-top: 6px solid #007bff;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 

@@ -18,7 +18,8 @@ import { AddIssueType } from './issue-type/add-issue-type/add-issue-type';
 import { AddAnswerType } from './sys-answer-type/add-answer-type/add-answer-type';
 import { EditIssueType } from './issue-type/edit-issue-type/edit-issue-type';
 import { Company } from './company/company';
-import { BusinessActivity } from '../CompanyPanel/business-activity/business-activity';
+import { SysIssueStatus } from './sys-issue-status/sys-issue-status';
+import { AddIssueStatus } from './sys-issue-status/add-issue-status/add-issue-status';
 
 @NgModule({
   imports: [
@@ -41,9 +42,8 @@ import { BusinessActivity } from '../CompanyPanel/business-activity/business-act
     AddIssueType,
     EditIssueType,
     Company,
-   
-
-
+    SysIssueStatus,
+    AddIssueStatus
   ],
   declarations: [
 

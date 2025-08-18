@@ -13,12 +13,10 @@ import { AddIssueType } from './issue-type/add-issue-type/add-issue-type';
 import { EditIssueType } from './issue-type/edit-issue-type/edit-issue-type';
 import { Company } from './company/company';
 import { BusinessActivity } from '../CompanyPanel/business-activity/business-activity';
+import { SysIssueStatus } from './sys-issue-status/sys-issue-status';
 
 
 export const AdminRoutes: Routes = [
-  {
-    path: '', redirectTo: 'admin-dashboard', pathMatch: 'full' 
-  },
   {
     path:'admin-dashboard',
     component:AdminDashboard
@@ -70,6 +68,10 @@ export const AdminRoutes: Routes = [
    {
     path:'company',
     component:Company
+  },
+  {
+    path:'system-issue-status',
+    component:SysIssueStatus
   },
 
  

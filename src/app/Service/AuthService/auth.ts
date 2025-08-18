@@ -1,8 +1,9 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { environment } from '../../../environment/environment';
+import { SecurityService } from '../SecurityService/security-service';
 
 export interface User {
   id: number;
@@ -18,108 +19,62 @@ export interface User {
 })
 export class Auth {
 
-    userDetails: User[] = [
-      {
-        id: 1,
-        email: "athulks@notetech.com",
-        name: "Athul",
-        password: null,
-        sub: "113306282126888142011",
-        type: "admin"
-      },
-      {
-        id: 2,
-        email: "bincy@notetech.com",
-        name: "Bincy",
-        password: null,
-        sub: "113306282126888142011",
-        type: "user"
-      },
-      {
-        id: 3,
-        email: "thomasjordy@gmail.com",
-        name: "Thomas Jordy",
-        password: null,
-        sub: "113306282126888142011",
-        type: "admin"
-      },
-      {
-        id: 4,
-        email: "thomasjordy@notetech.com",
-        name: "Thomas Jordy",
-        password: null,
-        sub: "113306282126888142071",
-        type: "admin"
-      }
-    ];
-
   private apiUrl = environment.apiUrl;
+
+  private isLoggedInSubject = new BehaviorSubject<boolean>(this.hasToken());
+
+  private skipAuth = new HttpHeaders().set('skip-auth', 'true');
+
+  isLoggedIn$ = this.isLoggedInSubject.asObservable();
 
   constructor(
     private router:Router,
-    private http:HttpClient
+    private http:HttpClient,
+    private securityService:SecurityService
   ) {}
-
-  userExists(email: string): Observable<{ exists: boolean; user?: User }> {
-    const user = this.userDetails.find(
-      u => u.email.toLowerCase() === email.toLowerCase()
-    );
-    return of({
-      exists: !!user,
-      user: user || undefined
-    });
-}
-
-
-   signUpUser(payload: any) {
-    const newUser = {
-      id: this.userDetails.length + 1,
-      email: payload.email,
-      name: payload.name || '',
-      password: null,
-      sub: payload.sub ,
-      type:null// Google user ID
-    };
-    this.userDetails.push(newUser);
-  }
-
-  loginWithCredentials(email: string, password: string): Observable<{ success: boolean; user?: User }> {
-    // You can later replace this with a real backend API call.
-    const user = this.userDetails.find(
-      u => u.email.toLowerCase() === email.toLowerCase()
-    );
-  
-    // NOTE: Since your user data has null passwords, this is placeholder logic.
-    // Replace this with hashed password comparison or backend check.
-    if (user && password === '123456') { // Hardcoded for demo; you must improve this
-      return of({ success: true, user });
-    }
-  
-    return of({ success: false });
-  }
-
-  getLoggedInUser() {
-    const userData = sessionStorage.getItem('loggedInUser');
-    return userData ? JSON.parse(userData) : null;
-  }
-  
-
-  logout(){
-    localStorage.clear();
-    sessionStorage.clear();
-    this.router.navigate(['']);
-  }
 
 
   // -----------------------------------------------------------
 
+  login(data:any){
+    return this.http.post<any>(`${this.apiUrl}/Auth/login`, data, {observe: 'response', headers:this.skipAuth});
+  }
+
+  googleLogin(data:any){
+    return this.http.post<any>(`${this.apiUrl}/Auth/google-login`, data,{observe: 'response', headers:this.skipAuth});
+  }
+
 
   userRegistration(data:any){
-    return this.http.post<any>(`${this.apiUrl}/Auth/register`, data,{observe: 'response'});
+    return this.http.post<any>(`${this.apiUrl}/Auth/register`, data,{observe: 'response', headers:this.skipAuth});
   }
 
   googleRegistration(data:any){
-    return this.http.post<any>(`${this.apiUrl}/Auth/google-registration`, data,{observe: 'response'});
+    return this.http.post<any>(`${this.apiUrl}/Auth/google-registration`, data,{observe: 'response', headers:this.skipAuth});
+  }
+
+
+
+  // ------------------------------------------------------------------------------------------------------
+
+  private hasToken(): boolean {
+    return !!sessionStorage.getItem('token');
+  }
+
+  getLoggedInUser() {
+    const userData = sessionStorage.getItem('loggedInUser');
+    if(userData) return this.securityService.decryptObject(userData);
+  }
+
+  isLoggedIn(): boolean {
+    return this.hasToken();
+  }
+  
+  logout(){
+    localStorage.clear();
+    sessionStorage.clear();
+    this.router.navigate(['']);
+    this.isLoggedInSubject.next(false);
   }
 
 }
