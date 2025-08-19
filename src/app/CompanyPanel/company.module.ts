@@ -8,6 +8,7 @@ import { Roles } from './roles/roles';
 import { BusinessActivity } from './business-activity/business-activity';
 import { AnswerType } from './answer-type/answer-type';
 import { MediaType } from './media-type/media-type';
+import { IssueStatus } from './issue-status/issue-status';
 
 @NgModule({
   imports: [
@@ -18,7 +19,8 @@ import { MediaType } from './media-type/media-type';
     Roles,
     BusinessActivity,
     AnswerType,
-    MediaType
+    MediaType,
+    IssueStatus
   ],
   declarations: [
 

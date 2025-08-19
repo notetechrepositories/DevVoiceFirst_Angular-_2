@@ -4,6 +4,7 @@ import { Roles } from './roles/roles';
 import { BusinessActivity } from './business-activity/business-activity';
 import { AnswerType } from './answer-type/answer-type';
 import { MediaType } from './media-type/media-type';
+import { IssueStatus } from './issue-status/issue-status';
 
 
 
@@ -30,5 +31,9 @@ export const CompanyRoutes: Routes = [
   {
     path: 'media-type',
     component: MediaType
+  },
+  {
+    path: 'issue-status',
+    component: IssueStatus
   }
 ];

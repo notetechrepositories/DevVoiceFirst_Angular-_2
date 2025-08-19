@@ -558,38 +558,35 @@ export class EditIssueType {
 
   clearAllIssueStatus() {
     const issueStatusArray = this.issueTypeForm.get('issueStatus') as FormArray;
-    // Track items with issueStatusId before clearing
     for (const control of issueStatusArray.controls) {
       const item = control.value;
-      if (item.issueStatusId) {
-        this.deletedIssueStatusIds.push(item.issueStatusId);
+      if (item.issueStatusLinkId) {
+        this.deletedIssueStatusIds.push(item.issueStatusLinkId); // <-- link id
       }
     }
-    // Now clear the FormArray and visual list
-    while (issueStatusArray.length !== 0) {
-      issueStatusArray.removeAt(0);
-    }
-    this.issueIssueStatus = []; // Clear the visual list
+    while (issueStatusArray.length) issueStatusArray.removeAt(0);
+    this.issueIssueStatus = [];
     issueStatusArray.markAsDirty();
   }
 
   onIssueStatusToggle(type: any, event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
     const issueStatusArray = this.issueTypeForm.get('issueStatus') as FormArray;
+
     if (checked) {
       const exists = issueStatusArray.controls.some(
         (ctrl) => ctrl.value.issueStatusId === type.id
       );
       if (!exists) {
         const group = this.fb.group({
-          issueStatusLinkId: [null],
+          issueStatusLinkId: [null],                    // new row => null link id
           issueStatusId: [type.id],
           issueStatus: [type.issueStatus],
           issueTypeId: [this.issueTypeForm.value.id],
           status: [true],
         });
         issueStatusArray.push(group);
-        this.issueIssueStatus.push(group.value); // ✅ add to visual list
+        this.issueIssueStatus.push(group.value);
       }
     } else {
       const index = issueStatusArray.controls.findIndex(
@@ -598,18 +595,11 @@ export class EditIssueType {
       if (index > -1) {
         const removedItem = issueStatusArray.at(index).value;
         issueStatusArray.removeAt(index);
-        // ✅ Track for deletion if it has issueStatusId
-        if (removedItem.issueStatusId) {
-          this.deletedIssueStatusIds.push(removedItem.issueStatusId);
+        if (removedItem.issueStatusLinkId) {
+          this.deletedIssueStatusIds.push(removedItem.issueStatusLinkId); // <-- link id
         }
       }
-      // Remove from display list
-      const visualIndex = this.issueStatusList.findIndex(
-        (item: any) => item.issueStatusId === type.id
-      );
-      if (visualIndex > -1) {
-        this.issueStatusList.splice(visualIndex, 1);
-      }
+      // (Optional) if you keep a separate visual list, update it here as you already do
     }
     issueStatusArray.markAsDirty();
   }
@@ -1141,39 +1131,48 @@ export class EditIssueType {
     }
 
     //------------- Handle Issue Status ----------------
-
     const issueStatusArray = form.get('issueStatus') as FormArray;
-    const originalIssueStatus = this.issueIssueStatus;
+    const originalIssueStatus = this.issueIssueStatus; // server snapshot
     const issueStatusChanges: any[] = [];
 
     issueStatusArray.controls.forEach((ctrl) => {
-      const val = ctrl.value;
+      const val = ctrl.value as {
+        issueStatusLinkId?: number;
+        issueStatusId: number;
+        status?: boolean;
+      };
+
+      // Find the original row (if any) by status id
       const original = originalIssueStatus.find(
         (o: any) => o.issueStatusId === val.issueStatusId
       );
 
-      if (val.issueStatusId) {
-        if (original && original.status !== val.status) {
+      if (val.issueStatusLinkId) {
+        // Existing link: include only if status flipped (or original missing for safety)
+        if (!original || original.status !== val.status) {
           issueStatusChanges.push({
-            issueStatusId: val.issueStatusId,
+            issueStatusLinkId: val.issueStatusLinkId,
+            status: val.status ?? true,
           });
         }
       } else {
+        // New selection: we must send the status id to create the link
         issueStatusChanges.push({
           issueStatusId: val.issueStatusId,
+          status: val.status ?? true,
         });
       }
     });
-    // ✅ Add deletions
-    this.deletedIssueStatusIds.forEach((id) => {
-      issueStatusChanges.push({
-        issueStatusId: id,
-      });
+
+    // ✅ Add deletions by link id
+    (this.deletedIssueStatusIds || []).forEach((linkId: string) => {
+      issueStatusChanges.push({ issueStatusLinkId: linkId });
     });
 
     if (issueStatusChanges.length > 0) {
       payload.issueStatus = issueStatusChanges;
     }
+
 
     //-------------------- Handle Media Required ----------------------
 
@@ -1272,30 +1271,29 @@ export class EditIssueType {
     
     if (!this.isFormChanged()) {
       this.utilityService.warning('No changes detected.');
-      this.isEdit = false;
       return;
     }
 
     const payload = await this.generateUpdatePayload();
     console.log(payload);
 
-    // this.issueTypeService.updateIssueType(payload).subscribe({
-    //   next: (res) => {
-    //     if (res.status == 200) {
-    //       this.utilityService.success(res.body.message);
-    //       this.isEdit = false;
-    //       this.bindIssueTypeData(res.body.data);
-    //       this.removedAttachments = [];
-    //       this.attachmentTypeSearchTerm = '';
-    //       this.answerTypeSearchTerm = '';
-    //       this.mediatypeSearchTerm = '';
-    //       this.issueStatusSearchTerm = '';
-    //     }
-    //   },
-    //   error: (err) => {
-    //     console.log(err);
-    //     this.utilityService.showError(err.status, err.error.message);
-    //   },
-    // });
+    this.issueTypeService.updateIssueType(payload).subscribe({
+      next: (res) => {
+        if (res.status == 200) {
+          this.utilityService.success(res.body.message);
+          this.isEdit = false;
+          this.bindIssueTypeData(res.body.data);
+          this.removedAttachments = [];
+          this.attachmentTypeSearchTerm = '';
+          this.answerTypeSearchTerm = '';
+          this.mediatypeSearchTerm = '';
+          this.issueStatusSearchTerm = '';
+        }
+      },
+      error: (err) => {
+        console.log(err);
+        this.utilityService.showError(err.status, err.error.message);
+      },
+    });
   }
 }

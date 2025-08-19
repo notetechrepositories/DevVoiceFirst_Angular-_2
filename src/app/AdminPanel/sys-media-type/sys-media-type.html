@@ -139,9 +139,12 @@
           <label for="name" class="mb-2">Media Type</label>
           <input type="text" class="form-control" id="description"  placeholder="Enter Media Type Name"  formControlName="description"
            [ngClass]="{'is-invalid': mediaTypeForm.get('description')?.invalid && mediaTypeForm.get('description')?.touched}" />
-           <div class="invalid-feedback" *ngIf="mediaTypeForm.get('description')?.touched && mediaTypeForm.get('description')?.hasError('required')">
+           @if (mediaTypeForm.get('description')?.touched && mediaTypeForm.get('description')?.hasError('required')) {
+            <div class="invalid-feedback">
               Media Type Name is required.
            </div>
+           }
+           
         </div>
   
 
