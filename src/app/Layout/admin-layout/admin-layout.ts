@@ -172,8 +172,8 @@ export class AdminLayout implements OnInit {
     this.menuService.getMenu().subscribe({
       next: (res: any) => {
         if (res.status == 200) {
-          this.loggedInUserRoles = res.body.data.roleDTOs;
-          const cleaned = cleanMenuData(res.body.data.menuDTOs);
+          this.loggedInUserRoles = res.body.data.roles;
+          const cleaned = cleanMenuData(res.body.data.menus);
           const tree = buildMenuTree(cleaned);
           const prefixed = applyRoutePrefix(tree, this.baseRoutePrefix);
           this.menuItems = prefixed;

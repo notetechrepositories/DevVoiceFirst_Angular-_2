@@ -141,8 +141,10 @@
                             @for (issueStatus of filteredSysData; track issueStatus) {
                             <tr>
                                 <td>
-                                    <input type="checkbox" [checked]="issueStatus.selected"
-                                        [disabled]="issueStatus.selected" (change)="toggleIssueStatus(issueStatus)" />
+                                    <input type="checkbox" 
+                                        [checked]="issueStatus.selected"
+                                        [disabled]="issueStatus.selected" 
+                                        (change)="toggleIssueStatus(issueStatus,$event)" />
                                 </td>
                                 <td>{{ issueStatus.issueStatus }}</td>
                             </tr>
@@ -170,7 +172,7 @@
         <i class="fa-solid fa-xmark text-end w-100" (click)="closeModal()"></i>
         <h4 class="mb-3">{{ isEditMode ? 'Edit Issue Status' : 'Add Issue Status' }}</h4>
 
-        <form class="mt-3" [formGroup]="issueStatusForm" (ngSubmit)="submitAnswerType()">
+        <form class="mt-3" [formGroup]="issueStatusForm" (ngSubmit)="submitIssueStatus()">
 
             <div class="form-group">
                 <label for="name" class="mb-2">Issue Status</label>

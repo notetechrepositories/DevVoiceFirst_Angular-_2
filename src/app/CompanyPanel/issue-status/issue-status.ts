@@ -161,12 +161,11 @@ export class IssueStatus {
     this.issueStatusForm.reset();
   }
 
-  submitAnswerType() {
+  submitIssueStatus() {
     const form = this.issueStatusForm;
     const formValue = form.value;
     const payload = {
-      companyAnswerTypeName: formValue.companyAnswerTypeName,
-
+      companyIssueStatus: formValue.companyIssueStatus,
     };
     if (this.issueStatusForm.invalid) {
       this.issueStatusForm.markAllAsTouched();
@@ -174,7 +173,7 @@ export class IssueStatus {
     }
     if (this.isEditMode) {
       const updatedFields: any = { id: this.selectedStatusIds };
-      this.utilityService.setIfDirty(form, 'companyAnswerTypeName', updatedFields);
+      this.utilityService.setIfDirty(form, 'companyIssueStatus', updatedFields);
       if (Object.keys(updatedFields).length === 1) {
         this.utilityService.warning('No changes detected.');
         return;
@@ -197,6 +196,8 @@ export class IssueStatus {
       });
     }
     else {
+      console.log(payload);
+      
       this.issueStatusService.createCompanyIssueStatus(payload).subscribe({
         next: (res) => {
 
@@ -248,27 +249,51 @@ export class IssueStatus {
 
   // ------------------------ System Issue Status -----------------------------
 
-  toggleIssueStatus(issueStatus: any) {
+  toggleIssueStatus(issueStatus: any, ev: Event) {
     if (!issueStatus.selected) {
+      const input = ev.target as HTMLInputElement; // use the event target
+      input.disabled = true;                       // prevent double clicks while saving
+
       const payload = {
         issueStatusId: issueStatus.id,
       };
+
       this.issueStatusService.createCompanyIssueStatus(payload).subscribe({
         next: (res) => {
           if (res.status == 201) {
             const newItem = res.body?.data;
+
+            // mark as selected -> your [disabled]="issueStatus.selected" will disable it
+            issueStatus.selected = true;
+
+            // keep any server identifiers if present
+            if (newItem?.issueStatusLinkId) {
+              issueStatus.issueStatusLinkId = newItem.issueStatusLinkId;
+            }
+
             if (newItem) {
               this.filteredData.push(newItem);
             }
+
+            this.utilityService.success(res.body.message);
+          } else {
+            // unexpected status: revert UI
+            input.checked = false;
+            input.disabled = false;
+            this.utilityService.success(res.body?.message || 'Request completed.');
           }
-          this.utilityService.success(res.body.message);
         },
         error: (err) => {
+          // revert UI on failure
+          input.checked = false;
+          input.disabled = false;
           this.utilityService.showError(err.status, err.error?.message || 'Creation failed');
         }
       });
     }
   }
+
+ 
 
   toggleSelection(id: string, event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
