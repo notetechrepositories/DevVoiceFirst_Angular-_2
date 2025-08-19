@@ -7,13 +7,12 @@ import { UnderDevelopment } from './under-development/under-development';
 import { Country } from './country/country';
 import { SysAnswerType } from './sys-answer-type/sys-answer-type';
 import { Divisions } from './divisions/divisions';
-import { MediaType } from './media-type/media-type';
-import { IssueType } from './issue-type/issue-type';
-import { AddIssueType } from './issue-type/add-issue-type/add-issue-type';
-import { EditIssueType } from './issue-type/edit-issue-type/edit-issue-type';
+import { AddIssueType } from './sys-issue-type/add-issue-type/add-issue-type';
+import { EditIssueType } from './sys-issue-type/edit-issue-type/edit-issue-type';
 import { Company } from './company/company';
-import { BusinessActivity } from '../CompanyPanel/business-activity/business-activity';
 import { SysIssueStatus } from './sys-issue-status/sys-issue-status';
+import { SysIssueType } from './sys-issue-type/sys-issue-type';
+import { SysMediaType } from './sys-media-type/sys-media-type';
 
 
 export const AdminRoutes: Routes = [
@@ -35,7 +34,7 @@ export const AdminRoutes: Routes = [
   },
   {
     path:'system-media-type',
-    component:MediaType
+    component:SysMediaType
   },
   {
     path:'add-issue-type',
@@ -47,7 +46,7 @@ export const AdminRoutes: Routes = [
   },
    {
     path:'system-issue-type',
-    component:IssueType
+    component:SysIssueType
   },
   {
     path:'test',

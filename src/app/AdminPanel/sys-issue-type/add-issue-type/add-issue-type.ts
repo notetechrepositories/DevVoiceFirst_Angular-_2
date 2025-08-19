@@ -7,7 +7,7 @@ import { UtilityService } from '../../../Service/UtilityService/utility-service'
 import { MediaTypeService } from '../../../Service/MediaTypeService/media-type-service';
 import { IssueTypeService } from '../../../Service/IssueTypeService/issue-type-service';
 import { AddAnswerType } from '../../sys-answer-type/add-answer-type/add-answer-type';
-import { AddMediaType } from "../../media-type/add-media-type/add-media-type";
+import { AddMediaType } from "../../sys-media-type/add-media-type/add-media-type";
 import { AttachmentSevice } from '../../../Service/AttachmentService/attachment-sevice';
 import { IssueStatusModel } from '../../../Models/IssueStatusModel';
 import { IssueStatusService } from '../../../Service/IssueStatusService/issue-status-service';

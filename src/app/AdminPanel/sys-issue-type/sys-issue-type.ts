@@ -1,21 +1,20 @@
-import { Component } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { AnswerTypeModel } from '../../Models/AnswerTypeModel';
-import { AnswerTypeService } from '../../Service/AnswerTypeService/answer-type-service';
-import { UtilityService } from '../../Service/UtilityService/utility-service';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
-import { IssueTypeService } from '../../Service/IssueTypeService/issue-type-service';
+import { Component } from '@angular/core';
+import { FormsModule, ReactiveFormsModule, FormBuilder } from '@angular/forms';
+import { RouterLink, Router } from '@angular/router';
 import { IssueTypeModel } from '../../Models/IssueTypeModel';
+import { IssueTypeService } from '../../Service/IssueTypeService/issue-type-service';
+import { UtilityService } from '../../Service/UtilityService/utility-service';
 
 @Component({
-  selector: 'app-issue-type',
+  selector: 'app-sys-issue-type',
   imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink],
-  templateUrl: './issue-type.html',
-  styleUrl: './issue-type.css'
+  templateUrl: './sys-issue-type.html',
+  styleUrl: './sys-issue-type.css'
 })
-export class IssueType {
- data: IssueTypeModel[] = [];
+export class SysIssueType {
+ 
+  data: IssueTypeModel[] = [];
   filteredData: IssueTypeModel[] = [];
 
   itemsPerPage = 10;

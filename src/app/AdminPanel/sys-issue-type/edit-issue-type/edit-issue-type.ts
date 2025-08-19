@@ -14,7 +14,7 @@ import { ActivatedRoute, Route, Router, RouterLink } from '@angular/router';
 import { IssueTypeService } from '../../../Service/IssueTypeService/issue-type-service';
 import { MediaTypeService } from '../../../Service/MediaTypeService/media-type-service';
 import { AddAnswerType } from '../../sys-answer-type/add-answer-type/add-answer-type';
-import { AddMediaType } from '../../media-type/add-media-type/add-media-type';
+import { AddMediaType } from '../../sys-media-type/add-media-type/add-media-type';
 import { AttachmentSevice } from '../../../Service/AttachmentService/attachment-sevice';
 import { AddIssueStatus } from '../../sys-issue-status/add-issue-status/add-issue-status';
 import { IssueStatusService } from '../../../Service/IssueStatusService/issue-status-service';

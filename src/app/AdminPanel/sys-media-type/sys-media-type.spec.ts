@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CompanyMediaType } from './company-media-type';
+import { SysMediaType } from './sys-media-type';
 
-describe('CompanyMediaType', () => {
-  let component: CompanyMediaType;
-  let fixture: ComponentFixture<CompanyMediaType>;
+describe('SysMediaType', () => {
+  let component: SysMediaType;
+  let fixture: ComponentFixture<SysMediaType>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CompanyMediaType]
+      imports: [SysMediaType]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(CompanyMediaType);
+    fixture = TestBed.createComponent(SysMediaType);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
