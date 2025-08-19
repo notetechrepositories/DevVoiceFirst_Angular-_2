@@ -3,7 +3,8 @@ import { CompanyDashboard } from './company-dashboard/company-dashboard';
 import { Roles } from './roles/roles';
 import { BusinessActivity } from './business-activity/business-activity';
 import { AnswerType } from './answer-type/answer-type';
-import { CompanyMediaType } from './company-media-type/company-media-type';
+import { MediaType } from './media-type/media-type';
+import { IssueStatus } from './issue-status/issue-status';
 
 
 
@@ -29,6 +30,10 @@ export const CompanyRoutes: Routes = [
   },
   {
     path: 'media-type',
-    component: CompanyMediaType
+    component: MediaType
+  },
+  {
+    path: 'issue-status',
+    component: IssueStatus
   }
 ];

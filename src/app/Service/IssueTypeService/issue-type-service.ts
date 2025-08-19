@@ -42,6 +42,10 @@ export class IssueTypeService {
     return this.http.patch<any>(`${this.apiUrl}/issue-type/issue-answer-type`,data,{observe:'response'});
   }
 
+  updateStatusIssueStatus(data:any){
+    return this.http.patch<any>(`${this.apiUrl}/issue-type/issue-status`,data,{observe:'response'});
+  }
+
   updateStatusAttchmentType(data:any){
     return this.http.patch<any>(`${this.apiUrl}/issue-type/media-required`,data,{observe:'response'});
   }

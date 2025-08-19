@@ -1,18 +1,20 @@
 import { Component } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { UtilityService } from '../../Service/UtilityService/utility-service';
+import { CompanyMediaTypeModel, MediaTypeModel } from '../../Models/MediaTypeModel';
 import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { MediaTypeService } from '../../Service/MediaTypeService/media-type-service';
-import { CompanyMediaTypeModel, MediaTypeModel } from '../../Models/MediaTypeModel';
+import { UtilityService } from '../../Service/UtilityService/utility-service';
 
 @Component({
-  selector: 'app-company-media-type',
+  selector: 'app-media-type',
   imports: [RouterLink, CommonModule, FormsModule, ReactiveFormsModule],
-  templateUrl: './company-media-type.html',
-  styleUrl: './company-media-type.css'
+  templateUrl: './media-type.html',
+  styleUrl: './media-type.css'
 })
-export class CompanyMediaType {
+
+export class MediaType {
+  
   companyMediaTypeData: CompanyMediaTypeModel[] = [];
   filteredData: CompanyMediaTypeModel[] = [];
   sysMediaTypes: MediaTypeModel[] = [];

@@ -177,7 +177,6 @@ export class AdminLayout implements OnInit {
           const tree = buildMenuTree(cleaned);
           const prefixed = applyRoutePrefix(tree, this.baseRoutePrefix);
           this.menuItems = prefixed;
-          console.log(this.menuItems);
           this.initializeToggleStates(this.menuItems);
         }
       },

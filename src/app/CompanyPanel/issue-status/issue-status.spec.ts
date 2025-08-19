@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CompanyMediaType } from './company-media-type';
+import { IssueStatus } from './issue-status';
 
-describe('CompanyMediaType', () => {
-  let component: CompanyMediaType;
-  let fixture: ComponentFixture<CompanyMediaType>;
+describe('IssueStatus', () => {
+  let component: IssueStatus;
+  let fixture: ComponentFixture<IssueStatus>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CompanyMediaType]
+      imports: [IssueStatus]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(CompanyMediaType);
+    fixture = TestBed.createComponent(IssueStatus);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

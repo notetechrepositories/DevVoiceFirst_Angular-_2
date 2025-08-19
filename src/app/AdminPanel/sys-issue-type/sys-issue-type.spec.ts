@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { IssueType } from './issue-type';
+import { SysIssueType } from './sys-issue-type';
 
-describe('IssueType', () => {
-  let component: IssueType;
-  let fixture: ComponentFixture<IssueType>;
+describe('SysIssueType', () => {
+  let component: SysIssueType;
+  let fixture: ComponentFixture<SysIssueType>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [IssueType]
+      imports: [SysIssueType]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(IssueType);
+    fixture = TestBed.createComponent(SysIssueType);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

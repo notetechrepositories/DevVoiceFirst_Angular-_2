@@ -1,20 +1,19 @@
-import { Component } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { UtilityService } from '../../Service/UtilityService/utility-service';
 import { CommonModule } from '@angular/common';
+import { Component } from '@angular/core';
+import { FormsModule, ReactiveFormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { MediaTypeModel } from '../../Models/MediaTypeModel';
 import { MediaTypeService } from '../../Service/MediaTypeService/media-type-service';
-
+import { UtilityService } from '../../Service/UtilityService/utility-service';
 
 @Component({
-  selector: 'app-media-type',
+  selector: 'app-sys-media-type',
   imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink],
-  templateUrl: './media-type.html',
-  styleUrl: './media-type.css'
+  templateUrl: './sys-media-type.html',
+  styleUrl: './sys-media-type.css'
 })
-export class MediaType {
-  data: MediaTypeModel[] = [];
+export class SysMediaType {
+data: MediaTypeModel[] = [];
   filteredData: MediaTypeModel[] = [];
 
   itemsPerPage = 10;
