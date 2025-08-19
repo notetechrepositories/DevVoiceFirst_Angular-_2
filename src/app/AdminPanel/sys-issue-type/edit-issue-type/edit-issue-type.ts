@@ -104,7 +104,7 @@ export class EditIssueType {
       mediaType: [mediaType, Validators.required],
       maximum: ['', [Validators.required]],
       maximumSize: ['', [Validators.required]],
-      issueMediaTypeLinks: this.fb.array([]),
+      issueMediaType: this.fb.array([]),
     });
 
     (this.issueTypeForm.get('mediaRequired') as FormArray).push(control);
@@ -115,7 +115,7 @@ export class EditIssueType {
       this.issueTypeForm.get('mediaRequired') as FormArray
     )
       .at(index)
-      .get('issueMediaTypeLinks') as FormArray;
+      .get('issueMediaType') as FormArray;
     mediaTypeIdsArray.push(
       this.fb.group({
         mediaTypeId: [id, Validators.required],
@@ -176,6 +176,7 @@ export class EditIssueType {
       const mediaGroup = this.fb.group({
         mediaRequiredId: [item.mediaRequiredId],
         attachmentTypeId: [item.attachmentTypeId, Validators.required],
+        attachmentType: [item.attachmentType],
         maximum: [item.maximum, Validators.required],
         maximumSize: [item.maximumSize, Validators.required],
         status: [item.status ?? true],
@@ -239,6 +240,8 @@ export class EditIssueType {
     this.issueTypeService.getIssueTypeBYId(this.issueTypeId).subscribe({
       next: (res) => {
         const data = res.body.data;
+        console.log(data);
+        
         this.bindIssueTypeData(data);
       },
       error: (err) =>
