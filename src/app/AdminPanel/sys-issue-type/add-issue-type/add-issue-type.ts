@@ -32,14 +32,18 @@ export class AddIssueType {
   addPopupphotoVisible: boolean = false;
   isMediaModalVisible: boolean = false;
   selectedMediaTypeList: any[][] = [];
+  allAnswerTypes: any[] = [];
   answerTypeList: any[] = [];
-  issueStatusList : IssueStatusModel[]=[];
+
+  allIssueStatusList: IssueStatusModel[] = [];
+  issueStatusList: IssueStatusModel[] = [];
+
   selectedAnswerTypes: any[] = [];
   mediaTypeList: any[] = [];
-
-
+  allMediaTypes: any[] = [];
 
   isAnswerModalVisible: boolean = false;
+  allAttachmentType: any[] = [];
   attachmentType :any[ ]=[];
   selectedAttachments: any[] = [];
 
@@ -47,6 +51,10 @@ export class AddIssueType {
 
   isIssueStatusModalVisible:boolean=false;
 
+  answerTypeSearchTerm: string = '';
+  attachmentTypeSearchTerm: string = '';
+  mediaTypeSearchTerm: string = '';
+  issueStatusSearchTerm: string = '';
 
   constructor(private fb: FormBuilder,
     private answerTypeSevice: AnswerTypeService,
@@ -114,7 +122,10 @@ export class AddIssueType {
 
   getAnswerType() {
     this.answerTypeSevice.getAnswerType().subscribe({
-      next: res => this.answerTypeList = res.body.data,
+      next: res =>{
+        this.allAnswerTypes = res.body.data;
+        this.answerTypeList = [...this.allAnswerTypes];
+      },
       error: err => this.utilityService.showError(err.status, err.error?.message || 'Get failed.')
     });
   }
@@ -177,10 +188,20 @@ export class AddIssueType {
     this.answerTypeList.push(newType);
   }
 
+  onSearchAnswerType() {
+    const term = this.answerTypeSearchTerm.toLowerCase();
+    this.answerTypeList = this.allAnswerTypes.filter((item) =>
+      item.answerTypeName.toLowerCase().includes(term)
+    );
+  }
+
   //----------------------------
   getAttachment(){
      this.attachmentService.getAttachment().subscribe({
-      next: res => this.attachmentType = res.body.data,
+      next: res =>{
+        this.allAttachmentType = res.body.data;
+        this.attachmentType = [...this.allAttachmentType];
+      },
       error: err => this.utilityService.showError(err.status, err.error?.message || 'Get failed.')
     });
   }
@@ -191,6 +212,13 @@ export class AddIssueType {
 
   clearAll() {
     this.selectedPhotoTypes = [];
+  }
+
+  onSearchAttachmentType() {
+    const term = this.attachmentTypeSearchTerm.toLowerCase();
+    this.attachmentType = this.allAttachmentType.filter((item) =>
+      item.attachmentType.toLowerCase().includes(term)
+    );
   }
 
   toggleAttachment(type: any, event: Event) {
@@ -236,7 +264,10 @@ export class AddIssueType {
 
   getIssueStatus(){
     this.issueStatusService.getIssueStatus().subscribe({
-     next: res => this.issueStatusList = res.body.data,
+     next: res =>{
+      this.allIssueStatusList = res.body.data
+      this.issueStatusList = [...this.allIssueStatusList];
+     } ,
      error: err => this.utilityService.showError(err.status, err.error?.message || 'Get failed.')
    });
  }
@@ -307,12 +338,22 @@ closeIssueStatusModal(){
   this.isIssueStatusModalVisible=false;
 }
 
+ onSearchIssueStatus() {
+    const term = this.issueStatusSearchTerm.toLowerCase();
+    this.issueStatusList = this.allIssueStatusList.filter((item) =>
+      item.issueStatus.toLowerCase().includes(term)
+    );
+  }
+
 
   // ------------------------MediaType--------------------------------------
 
   getMediaType() {
     this.mediaTypeService.getMediatype().subscribe({
-      next: res => this.mediaTypeList = res.body.data,
+      next: res =>{
+        this.allMediaTypes = res.body.data;
+        this.mediaTypeList = [...this.allMediaTypes];
+      } ,
       error: err => this.utilityService.showError(err.status, err.error?.message || 'Get failed.')
     });
   }
@@ -405,8 +446,17 @@ closeIssueStatusModal(){
     }
   }
 
+    onSearchMediaType() {
+    const term = this.mediaTypeSearchTerm.toLowerCase();
+    this.mediaTypeList = this.allMediaTypes.filter((item) =>
+      item.description.toLowerCase().includes(term)
+    );
+  }
+
 
 // ------------SUBMIT------------------------------------------------------------
+
+
   submit() {
     const form = this.issueTypeForm.value;
     console.log(form);
