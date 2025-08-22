@@ -1,17 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { FormsModule, ReactiveFormsModule, FormGroup, FormBuilder } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { BusinessActivityService } from '../../Service/BusinessActivityService/business-activity';
+import { UtilityService } from '../../Service/UtilityService/utility-service';
+import { BusinessActivityModel, CompanyBusinessActivityModel } from '../../Models/BusinessActivityModel';
 
-interface BusinessActivityItem {
-  id: string;
-  business_activity_name: string;
-  company: string;
-  branch: string;
-  section: string;
-  sub_section: string;
-  selected?: boolean; // optional, because it's added dynamically
-}
 
 @Component({
   selector: 'app-business-activity',
@@ -21,82 +15,41 @@ interface BusinessActivityItem {
   styleUrl: './business-activity.css'
 })
 export class BusinessActivity {
-  data: BusinessActivityItem[]  = [
-    {
-      "id": "11011011",
-      "business_activity_name": "Pharmaceuticals",
-      "company": "n",
-      "branch": "n",
-      "section": "n",
-      "sub_section": "n"
-    },
-    {
-      "id": "010110011",
-      "business_activity_name": "Electronics Retail",
-      "company": "n",
-      "branch": "n",
-      "section": "n",
-      "sub_section": "n"
-    }
-  ];
-
-  businessactivity: BusinessActivityItem[] = [
-    {
-      "id": "010110101",
-      "business_activity_name": "Restaurant",
-      "company": "y",
-      "branch": "y",
-      "section": "y",
-      "sub_section": "y"
-    },
-    {
-      "id": "010110111",
-      "business_activity_name": "Textiles",
-      "company": "y",
-      "branch": "y",
-      "section": "y",
-      "sub_section": "y"
-    },
-    {
-      "id": "010111111",
-      "business_activity_name": "Jewellery",
-      "company": "y",
-      "branch": "y",
-      "section": "n",
-      "sub_section": "n"
-    }
-  ];
+ companyAnswerTypeData: CompanyBusinessActivityModel[] = [];
+  filteredData: CompanyBusinessActivityModel[] = [];
+  sysBusinessActivity: BusinessActivityModel[] = [];
+  filteredSysData: BusinessActivityModel[] = [];
 
   itemsPerPage = 10;
   currentPage = 1;
   searchTerm: string = '';
-  filteredData = [...this.data];
+  statusFilter = '';
+  searchSysTerm: string = '';
 
   isModalVisible: boolean = false;
-  isEditModalVisible: boolean = false;
+  isAllSelected = false;
+  isEditMode: boolean = false;
+
   businessActivityForm!: FormGroup;
 
-  checkIcon = '<i class="fa-solid fa-check text-success"></i>';
-  crossIcon = '<i class="fa-solid fa-xmark text-danger"></i>';
+  selectedBusinessActivityIds: string[] = [];
+  selectedBusinessActivityId: string[] = [];
+  selectedActivtyIds: string | null = null;
+  originalItem: any;
 
-  constructor(private fb: FormBuilder) {}
+  constructor(
+    private fb: FormBuilder,
+    private utilityService: UtilityService,
+    private businessActivityService: BusinessActivityService
+  ) { }
 
   ngOnInit() {
+    this.getCompanyAnswerType();
+    this.getAnswerType();
     this.businessActivityForm = this.fb.group({
-      id: [''], // Required for edit mode
-      business_activity_name: [''],
-      company: [false],
-      branch: [false],
-      section: [false],
-      sub_section: [false]
-    });
-
-
-
-    // mark existing business activities as selected
-    this.businessactivity = this.businessactivity.map(activity => {
-      const exists = this.data.some(d => d.id === activity.id);
-      return { ...activity, selected: exists };
+      id: [''],
+      activityName: ['', Validators.required],
+  
     });
   }
 
@@ -115,14 +68,6 @@ export class BusinessActivity {
     return this.filteredData.slice(start, start + this.itemsPerPage);
   }
 
-  onSearch() {
-    const term = this.searchTerm.toLowerCase();
-    this.filteredData = this.data.filter(item =>
-      item.business_activity_name.toLowerCase().includes(term)
-    );
-    this.currentPage = 1;
-  }
-
   goToPage(page: number) {
     this.currentPage = page;
   }
@@ -135,92 +80,238 @@ export class BusinessActivity {
     if (this.currentPage < this.totalPages) this.currentPage++;
   }
 
-  openModal() {
+  onSearch() {
+    const term = this.searchTerm.toLowerCase();
+    this.filteredData = this.companyAnswerTypeData.filter(item =>
+      item.activityName.toLowerCase().includes(term)
+    );
+    this.currentPage = 1;
+  }
+
+  onSysSearch() {
+    const term = this.searchSysTerm.toLowerCase();
+    this.filteredSysData = this.sysBusinessActivity.filter(item =>
+      item.activityName.toLowerCase().includes(term)
+    );
+    this.currentPage = 1;
+  }
+
+  onStatusFilterChange() {
+    this.currentPage = 1;
+    this.filteredData = this.companyAnswerTypeData.filter(item => {
+      if (this.statusFilter === '') return true;
+      return Boolean(item.status) === (this.statusFilter === 'true');
+
+    });
+    this.updateSelectAllStatus();
+  }
+
+  updateSelectAllStatus() {
+    this.isAllSelected = this.pagedData.length > 0 && this.pagedData.every(x => this.selectedBusinessActivityIds.includes(x.id));
+  }
+
+  // ==================================================================
+
+  getCompanyAnswerType() {
+    this.businessActivityService.getCompanyBusinessActivity().subscribe({
+      next: res => {
+        this.companyAnswerTypeData = res.body.data
+        this.filteredData = [...this.companyAnswerTypeData];
+        this.markSelectedTypes();
+      },
+      error: err => {
+        this.utilityService.showError(err.status, err.error?.message || 'Get failed.');
+      }
+    });
+  }
+
+  getAnswerType() {
+    this.businessActivityService.getBusinessActivity().subscribe({
+      next: res => {
+        this.sysBusinessActivity = res.body.data;
+        this.filteredSysData = [...this.sysBusinessActivity]
+        this.markSelectedTypes();
+      },
+      error: err => { this.utilityService.showError(err.status, err.error?.message || 'Get failed.') }
+    });
+  }
+
+  private markSelectedTypes() {
+    if (!this.sysBusinessActivity.length || !this.companyAnswerTypeData.length) return;
+    const companyAnswerTypeIds = new Set(this.companyAnswerTypeData.map((item) => item.id));
+    this.sysBusinessActivity.forEach(type => {
+      type.selected = companyAnswerTypeIds.has(type.id);
+    });
+  }
+
+
+  openModal(editItem?: CompanyBusinessActivityModel) {
     this.isModalVisible = true;
+    this.isEditMode = !!editItem;
+    this.selectedActivtyIds = editItem?.id || null;
+    if (editItem) {
+      this.originalItem = { ...editItem };
+      this.businessActivityForm.patchValue({
+        id: editItem.id,
+        companyAnswerTypeName: editItem.activityName,
+
+      });
+    }
   }
 
   closeModal() {
     this.isModalVisible = false;
-    this.isEditModalVisible = false;
     this.businessActivityForm.reset();
   }
 
-  addBusinessActivity() {
-    const formValue = this.businessActivityForm.value;
-  
-    // Generate a random ID for new entries (optional)
-    const newId = Math.floor(Math.random() * 100000000).toString();
-  
-    const newItem: BusinessActivityItem = {
-      id: newId,
-      business_activity_name: formValue.business_activity_name,
-      company: formValue.company ? 'y' : 'n',
-      branch: formValue.branch ? 'y' : 'n',
-      section: formValue.section ? 'y' : 'n',
-      sub_section: formValue.sub_section ? 'y' : 'n'
+  submitAnswerType() {
+    const form = this.businessActivityForm;
+    const formValue = form.value;
+    const payload = {
+      companyAnswerTypeName: formValue.companyAnswerTypeName,
+
     };
-  
-    this.data.push(newItem);
-    this.filteredData = [...this.data];
-    this.closeModal();
-  }
-
-  openEditModal(item: BusinessActivityItem) {
-    this.isEditModalVisible = true;
-  
-    // Convert 'y'/'n' to true/false
-    this.businessActivityForm.patchValue({
-      ...item,
-      company: item.company === 'y',
-      branch: item.branch === 'y',
-      section: item.section === 'y',
-      sub_section: item.sub_section === 'y'
-    });
-  }
-
-  saveChanges() {
-    const formValue = this.businessActivityForm.value;
-  
-    const updatedItem: BusinessActivityItem = {
-      id: formValue.id,
-      business_activity_name: formValue.business_activity_name,
-      company: formValue.company ? 'y' : 'n',
-      branch: formValue.branch ? 'y' : 'n',
-      section: formValue.section ? 'y' : 'n',
-      sub_section: formValue.sub_section ? 'y' : 'n'
-    };
-  
-    const index = this.filteredData.findIndex(item => item.id === updatedItem.id);
-    if (index !== -1) {
-      this.filteredData[index] = updatedItem;
+    if (this.businessActivityForm.invalid) {
+      this.businessActivityForm.markAllAsTouched();
+      return;
     }
-  
-    const dataIndex = this.data.findIndex(item => item.id === updatedItem.id);
-    if (dataIndex !== -1) {
-      this.data[dataIndex] = updatedItem;
-    }
-  
-    this.closeModal();
-  }
-
-  deleteBusinessActivity(id: any) {
-    this.filteredData = this.filteredData.filter(item => item.id !== id);
-    this.data = this.data.filter(item => item.id !== id);
-  
-    // Unselect in system businessactivity list
-    const sysItem = this.businessactivity.find(item => item.id === id);
-    if (sysItem) {
-      sysItem.selected = false;
-    }
-  }
-
-  toggleBusinessActivity(activity: any) {
-    if (!activity.selected) {
-      if (!this.data.some(item => item.id === activity.id)) {
-        this.data.push({ ...activity });
-        this.filteredData = [...this.data];
+    if (this.isEditMode) {
+      const updatedFields: any = { id: this.selectedActivtyIds };
+      this.utilityService.setIfDirty(form, 'companyAnswerTypeName', updatedFields);
+      if (Object.keys(updatedFields).length === 1) {
+        this.utilityService.warning('No changes detected.');
+        return;
       }
-      activity.selected = true;
+      this.businessActivityService.updateCompanyBusinessActivity(updatedFields).subscribe({
+        next: (res) => {
+          const updatedItem = res.body?.data;
+          if (updatedItem) {
+            const filteredIndex = this.filteredData.findIndex(item => item.id === updatedItem.id);
+            if (filteredIndex !== -1) {
+              this.filteredData[filteredIndex] = updatedItem;
+            }
+          }
+          this.closeModal();
+          this.utilityService.success(res.body?.message || 'Media Type updated.');
+        },
+        error: err => {
+          this.utilityService.showError(err.status, err.error?.message || 'Update failed.');
+        }
+      });
+    }
+    else {
+      this.businessActivityService.createCompanyBusinessActivity(payload).subscribe({
+        next: (res) => {
+
+          if (res.status == 201) {
+            const newItem = res.body?.data;
+            if (newItem) {
+              this.filteredData.push(newItem);
+            }
+          }
+          this.closeModal();
+          this.utilityService.success(res.body.message);
+        },
+        error: err => {
+          this.utilityService.showError(err.status, err.error.message);
+        }
+      });
+    }
+  }
+
+
+  async deleteAnswerType(): Promise<void> {
+    const message = `Delete ${this.selectedBusinessActivityIds.length} Answer type(s)`;
+    const result = await this.utilityService.confirmDialog(message, 'delete');
+    if (result.isConfirmed) {
+      this.businessActivityService.deleteCompanyBusinessActivity(this.selectedBusinessActivityIds).subscribe({
+        next: (res) => {
+          const deletedIds: string[] = res.body?.data || [];
+          this.filteredData = this.filteredData.filter(item => !deletedIds.includes(item.id));
+          this.companyAnswerTypeData = this.companyAnswerTypeData.filter(item => !deletedIds.includes(item.id));
+
+          const selectedIds = new Set(this.companyAnswerTypeData.map(item => item.id));
+          this.sysBusinessActivity.forEach(type => {
+            type.selected = selectedIds.has(type.id);
+          });
+          this.selectedBusinessActivityIds = [];
+          this.isAllSelected = false;
+          this.utilityService.success(res.body?.message || 'Deleted successfully.');
+        },
+        error: (err) => {
+          this.utilityService.showError(err.status, err.error?.message || 'Failed to delete items.');
+        }
+      });
+      this.selectedBusinessActivityIds = [];
+      this.isAllSelected = false;
+
+    }
+  }
+
+
+  // ------------------------ System AnswerTypes -----------------------------
+
+  toggleAnswerType(answerType: any) {
+    if (!answerType.selected) {
+      const payload = {
+        answerTypeId: answerType.id,
+      };
+      this.businessActivityService.createCompanyBusinessActivity(payload).subscribe({
+        next: (res) => {
+          if (res.status == 201) {
+            const newItem = res.body?.data;
+            if (newItem) {
+              this.filteredData.push(newItem);
+            }
+          }
+          this.utilityService.success(res.body.message);
+        },
+        error: (err) => {
+          this.utilityService.showError(err.status, err.error?.message || 'Creation failed');
+        }
+      });
+    }
+  }
+
+  toggleSelection(id: string, event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+    if (checked) {
+      if (!this.selectedBusinessActivityIds.includes(id)) {
+        this.selectedBusinessActivityIds.push(id);
+      }
+    } else {
+      this.selectedBusinessActivityIds = this.selectedBusinessActivityIds.filter(x => x !== id);
+    }
+  }
+
+  toggleSelectAll(event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+    if (checked) {
+      this.selectedBusinessActivityIds = this.pagedData.map(x => x.id);
+    } else {
+      this.selectedBusinessActivityIds = [];
+    }
+    this.isAllSelected = checked;
+  }
+
+  async toggleStatus(item: any): Promise<void> {
+    const updatedStatus = !item.status;
+    const payload = {
+      id: item.id,
+      status: updatedStatus
+    };
+    const message = `Are you sure you want to set this answer type as ${updatedStatus ? 'Active' : 'Inactive'}?`;
+    const result = await this.utilityService.confirmDialog(message, 'update');
+    if (result.isConfirmed) {
+      this.businessActivityService.updateCompanyBusinessActivityStatus(payload).subscribe({
+        next: () => {
+          item.status = updatedStatus;
+          this.utilityService.success('Status updated successfully');
+        },
+        error: err => {
+          this.utilityService.showError(err.status, err.error?.message || 'Failed to Update Status.')
+        }
+      });
     }
   }
 }
