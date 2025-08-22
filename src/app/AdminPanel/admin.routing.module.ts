@@ -26,7 +26,7 @@ export const AdminRoutes: Routes = [
   },
   {
     path:'system-business-activity',
-    component:SysBusinessActivity
+    component:SysBusinessActivity 
   },
   {
     path:'system-answer-type',

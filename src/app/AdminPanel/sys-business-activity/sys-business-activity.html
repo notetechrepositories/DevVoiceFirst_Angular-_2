@@ -52,8 +52,6 @@
               <th>Name</th>
               <th class="text-center">Company</th>
               <th class="text-center">Branch</th>
-              <th class="text-center">Section</th>
-              <th class="text-center">Sub Section</th>
               <th>Status</th>
               <th class="text-end">
               <button
@@ -78,10 +76,8 @@
             <!-- <td>{{ (currentPage - 1) * itemsPerPage + pagedData.indexOf(item) + 1 }}</td> -->
             
             <td>{{ item.activityName }}</td>
-            <td class="text-center" [innerHTML]="item.company ? checkIcon : crossIcon"></td>
-            <td class="text-center" [innerHTML]="item.branch ? checkIcon : crossIcon"></td>
-            <td class="text-center" [innerHTML]="item.section ? checkIcon : crossIcon"></td>
-            <td class="text-center" [innerHTML]="item.subSection ? checkIcon : crossIcon"></td>
+            <td class="text-center" [innerHTML]="item.isForCompany ? checkIcon : crossIcon"></td>
+            <td class="text-center" [innerHTML]="item.isForBranch ? checkIcon : crossIcon"></td>
             <td>
               <span
                 class="badge"
@@ -110,7 +106,7 @@
 
 <!-- Pagination Controls -->
 <nav class="d-flex justify-content-end">
-  <ul class="pagination custom-pagination">
+  <ul class="pagination">
     <li class="page-item" [class.disabled]="currentPage === 1">
       <a class="page-link" (click)="previousPage()"><i class="fa-solid fa-angle-left"></i></a>
     </li>
@@ -142,27 +138,22 @@
           <label for="activityName" class="mb-2">Business Activity Name</label>
           <input type="text" class="form-control" id="activityName"  placeholder="Enter BusinessActivity"  formControlName="activityName"
            [ngClass]="{'is-invalid': businessActivityForm.get('activityName')?.invalid && businessActivityForm.get('activityName')?.touched}" />
-           <div class="invalid-feedback" *ngIf="businessActivityForm.get('activityName')?.touched && businessActivityForm.get('activityName')?.hasError('required')">
-              Business Activity Name is required.
-           </div>
+           @if(businessActivityForm.get('activityName')?.touched && businessActivityForm.get('activityName')?.hasError('required')) {
+            <div class="invalid-feedback">
+                Business Activity Name is required.
+            </div>
+           }
+            
         </div>
   
-        <div class="d-flex gap-3 align-items-center mt-3 mb-2 justify-content-between">
+        <div class="d-flex gap-5 align-items-center mt-3 mb-2 justify-content-start">
           <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="companyCheckbox" formControlName="company">
+            <input class="form-check-input" type="checkbox" id="companyCheckbox" formControlName="isForCompany">
             <label class="form-check-label" for="companyCheckbox">Company</label>
           </div>
           <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="branchCheckbox" formControlName="branch">
+            <input class="form-check-input" type="checkbox" id="branchCheckbox" formControlName="isForBranch">
             <label class="form-check-label" for="branchCheckbox">Branch</label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="sectionCheckbox" formControlName="section">
-            <label class="form-check-label" for="sectionCheckbox">Section</label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="subSectionCheckbox" formControlName="subSection">
-            <label class="form-check-label" for="subSectionCheckbox">Sub Section</label>
           </div>
         </div>
 
