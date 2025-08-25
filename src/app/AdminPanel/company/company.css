@@ -1,0 +1,22 @@
+.form-group{
+    position: relative;
+}
+
+small.text-danger{
+    font-size: 0.7rem;
+    color: #dc3545;
+    position: absolute;
+    bottom: -14px;
+    left: 13px;
+    padding: 0;
+    line-height: 1;
+    background: white;
+    z-index: 2;
+}
+
+.form-group label{
+    font-weight: 700;
+    margin-bottom: 4px;
+    font-size: .9rem;
+    color: #474747;
+}

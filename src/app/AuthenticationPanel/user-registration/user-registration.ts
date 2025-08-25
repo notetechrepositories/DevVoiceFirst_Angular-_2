@@ -51,7 +51,7 @@ export class UserRegistration {
       firstname: ['', [Validators.required, Validators.minLength(2)]],
       lastname: [''],
       email: ['', [Validators.required, Validators.email]],
-      mobile: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
+      mobile: ['', [Validators.required, Validators.pattern(/^\d{7}$/)]],
       addressOne: ['', Validators.required],
       addressTwo: [''],
       birthYear: ['', Validators.required],
@@ -81,6 +81,31 @@ export class UserRegistration {
     const confirmPassword = form.get('confirmPassword')?.value;
     return password === confirmPassword ? null : { mismatch: true };
   }
+
+  // Group-level validator that checks length based on selected country
+  // private mobileByCountryValidator() {
+  //   return (group: AbstractControl) => {
+  //     const id = group.get('countryCode')?.value;
+  //     const mobile: string = group.get('mobile')?.value ?? '';
+  //     const country = this.countries.find(c => c.id === id);
+
+  //     // Clear previous group error
+  //     if (group.hasError('mobileLengthMismatch')) {
+  //       const currentErrors = { ...group.errors };
+  //       delete currentErrors['mobileLengthMismatch'];
+  //       group.setErrors(Object.keys(currentErrors).length ? currentErrors : null);
+  //     }
+
+  //     if (!country || !mobile) return null;
+
+  //     // allow leading zeroes but enforce length
+  //     if (mobile.length !== country.mobileLength) {
+  //       group.setErrors({ ...(group.errors || {}), mobileLengthMismatch: true });
+  //       return { mobileLengthMismatch: true };
+  //     }
+  //     return null;
+  //   };
+  // }
 
   googleAuthenticationCheck(){
     this.authenticatedUser =this.authService.getLoggedInUser();

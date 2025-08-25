@@ -133,72 +133,71 @@
 
     <form class="mt-3" [formGroup]="companyForm" (ngSubmit)="onSubmit()">
 
-             <div class="row mb-3">
-    <div class="col-md-6">
-      <label>Company Name</label>
-      <input type="text" class="form-control" formControlName="companyName" placeholder="Enter Company Name">
-    </div>
+  
+      <div class="form-group mb-3">
+        <label>Company Name</label>
+        <input type="text" class="form-control" formControlName="companyName" placeholder="Enter Company Name">
+      </div>
 
-    <div class="col-md-6">
-      <label>Zip Code</label>
-      <input type="text" class="form-control" formControlName="zipCode" placeholder="Enter Zip Code">
-    </div>
-  </div>
+      <div class="row mb-3">
+        <div class="form-group col-md-6">
+          <label>Mobile No</label>
+          <input type="text" class="form-control" formControlName="mobileNo" placeholder="Enter Mobile Number">
+        </div>
 
-  <div class="row mb-3">
-    <div class="col-md-6">
-      <label>Address One</label>
-      <input type="text" class="form-control" formControlName="addressOne" placeholder="Enter Address One">
-    </div>
+        <div class="form-group col-md-6">
+          <label>Email</label>
+          <input type="email" class="form-control" formControlName="email" placeholder="Enter Email">
+        </div>
+      </div>
 
-    <div class="col-md-6">
-      <label>Address Two</label>
-      <input type="text" class="form-control" formControlName="addressTwo" placeholder="Enter Address Two">
-    </div>
-  </div>
+      <div class="row mb-3">
+        <div class="form-group col-md-6">
+          <label>Address One</label>
+          <input type="text" class="form-control" formControlName="addressOne" placeholder="Enter Address One">
+        </div>
 
-  <div class="row mb-3">
-    <div class="col-md-6">
-      <label>Mobile No</label>
-      <input type="text" class="form-control" formControlName="mobileNo" placeholder="Enter Mobile Number">
-    </div>
+        <div class="form-group col-md-6">
+          <label>Address Two</label>
+          <input type="text" class="form-control" formControlName="addressTwo" placeholder="Enter Address Two">
+        </div>
+      </div>
 
-    <div class="col-md-6">
-      <label>Email</label>
-      <input type="email" class="form-control" formControlName="email" placeholder="Enter Email">
-    </div>
-  </div>
+      <div class="row mb-3">
+        <div class="form-group col-md-6">
+          <label>Country</label>
+          <input type="text" class="form-control" formControlName="countryId" placeholder="Enter Country ID">
+        </div>
 
-  <div class="row mb-3">
-    <div class="col-md-6">
-      <label>Country</label>
-      <input type="text" class="form-control" formControlName="countryId" placeholder="Enter Country ID">
-    </div>
+        <div class="form-group col-md-6">
+          <label>Division One</label>
+          <input type="text" class="form-control" formControlName="divisionOneId" placeholder="Enter Division One ID">
+        </div>
+      </div>
 
-    <div class="col-md-6">
-      <label>Division One</label>
-      <input type="text" class="form-control" formControlName="divisionOneId" placeholder="Enter Division One ID">
-    </div>
-  </div>
+      <div class="row mb-3">
+        <div class="form-group col-md-6">
+          <label>Division Two</label>
+          <input type="text" class="form-control" formControlName="divisionTwoId" placeholder="Enter Division Two ID">
+        </div>
 
-  <div class="row mb-3">
-    <div class="col-md-6">
-      <label>Division Two</label>
-      <input type="text" class="form-control" formControlName="divisionTwoId" placeholder="Enter Division Two ID">
-    </div>
+        <div class="form-group col-md-6">
+          <label>Division Three</label>
+          <input type="text" class="form-control" formControlName="divisionThreeId" placeholder="Enter Division Three ID">
+        </div>
+      </div>
 
-    <div class="col-md-6">
-      <label>Division Three</label>
-      <input type="text" class="form-control" formControlName="divisionThreeId" placeholder="Enter Division Three ID">
-    </div>
-  </div>
+      <div class="row mb-3">
+        <div class="form-group col-md-6">
+          <label>Place Name</label>
+          <input type="text" class="form-control" formControlName="placeName" placeholder="Enter Place Name">
+        </div>
 
-  <div class="row mb-3">
-    <div class="col-md-6">
-      <label>Place Name</label>
-      <input type="text" class="form-control" formControlName="placeName" placeholder="Enter Place Name">
-    </div>
-  </div>
+        <div class="form-group col-md-6">
+            <label>Zip Code</label>
+            <input type="text" class="form-control" formControlName="zipCode" placeholder="Enter Zip Code">
+          </div>
+      </div>
 
 
       <div class="col-md d-flex align-items-end">

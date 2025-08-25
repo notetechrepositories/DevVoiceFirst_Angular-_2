@@ -55,24 +55,48 @@
   
           <!-- Mobile -->
           <div class="form-group col-md-6">
-            <div class="row">
-              <div class="col-3 col-xs-4">
-                <label for="code">Code</label>
-                <select id="code" class="form-control styled-select" style="font-size: 10px;padding: 10px;">
-                  @for(country of countries; track country.id){
-                    <option [value]="country.countryCode">{{ country.countryCode }}</option>
-                  }
-                </select>
-              </div>
-              <div class="col-9 col-xs-8">
-                <label for="mobile">Mobile</label>
-                <input id="mobile" type="text" class="form-control" formControlName="mobile" placeholder="Enter mobile number" (keypress)="utilityService.allowOnlyNumbers($event)">
-                <div class="text-danger small-error" *ngIf="registrationForm.get('mobile')?.touched && registrationForm.get('mobile')?.invalid" style="margin-left: 102px;">
-                  <small *ngIf="registrationForm.get('mobile')?.errors?.['required']">Mobile number is required.</small>
-                  <small *ngIf="registrationForm.get('mobile')?.errors?.['pattern']">Enter a valid 10-digit number.</small>
-                </div>
-              </div>
+            <label class="form-label">Mobile</label>
+            <div class="input-group">
+              <select class="form-select styled-select" style="max-width: 100px; font-size:12px; padding:8px;"
+                      formControlName="countryCode">
+                @for (country of countries; track country.id) {
+                  <option [value]="country.id">{{ country.countryIsoCode }} ({{ country.countryCode }})</option>
+                }
+              </select>
+
+              <input id="mobile"
+                    type="text"
+                    class="form-control"
+                    placeholder="Enter mobile number"
+                    formControlName="mobile"
+                    (keypress)="utilityService.allowOnlyNumbers($event)">
             </div>
+
+            @if (registrationForm.get('countryCode')?.touched || registrationForm.get('mobile')?.touched) {
+
+              <!-- 1. Country code error -->
+              @if (registrationForm.get('countryCode')?.hasError('required')) {
+                <div class="text-danger small-error">
+                  <small>Country code is required.</small>
+                </div>
+              }
+
+              <!-- 2. Mobile required -->
+              @else if (registrationForm.get('mobile')?.hasError('required')) {
+                <div class="text-danger small-error">
+                  <small>Mobile number is required.</small>
+                </div>
+              }
+
+              <!-- 3. Mobile digits only -->
+              @else if (registrationForm.get('mobile')?.hasError('pattern')) {
+                <div class="text-danger small-error">
+                  <small>Min 7 digits required.</small>
+                </div>
+              }
+
+            }
+
           </div>
 
             <!-- Birth Year -->

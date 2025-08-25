@@ -47,6 +47,7 @@
                     </th>
                     <th>Country</th>
                     <th>Country Code</th>
+                    <th>ISO Code</th>
                     <th>Division One</th>
                     <th>Division Two</th>
                     <th>Division Three</th>
@@ -70,6 +71,7 @@
                     </td>
                     <td>{{ item.country }}</td>
                     <td>{{ item.countryCode }}</td>
+                    <td>{{ item.countryIsoCode }}</td>
                     <td>{{ item.divisionOneLabel }}</td>
                     <td>{{ item.divisionTwoLabel }}</td>
                     <td>{{ item.divisionThreeLabel }}</td>
@@ -139,14 +141,39 @@
                 }
         </div>
 
-        <!-- Country Code -->
-        <div class="form-group mb-3">
-            <label for="countryCode">Country Code</label>
-            <input type="text" class="form-control" id="countryCode" placeholder="Enter country code" formControlName="countryCode">
-            @if(countryForm.get('countryCode')?.invalid && countryForm.get('countryCode')?.touched){
-                <small class="text-danger">This field is required</small>
-                }
+        <div class="row">
+             <!-- Country Code -->
+            <div class="form-group mb-3 col-md-6">
+                <label for="countryCode">Country Code</label>
+                <input type="text" class="form-control" id="countryCode" placeholder="Enter country code" formControlName="countryCode">
+                @if(countryForm.get('countryCode')?.invalid && countryForm.get('countryCode')?.touched){
+                    <small class="text-danger">This field is required</small>
+                    }
+            </div>
+
+            <!-- Iso code -->
+
+            <div class="form-group mb-3 col-md-6">
+                <label for="countryIsoCode">ISO Code</label>
+                <input type="text" class="form-control" id="countryIsoCode" placeholder="Enter ISO code" formControlName="countryIsoCode">
+                @if(countryForm.get('countryIsoCode')?.touched) {
+                        @if(countryForm.get('countryIsoCode')?.hasError('required')){
+                            <small class="text-danger">This field is required</small>
+                        }
+                        @else if(countryForm.get('countryIsoCode')?.hasError('minlength')){
+                            <small class="text-danger">Minimum 2 characters required</small>
+                        }
+                        @else if(countryForm.get('countryIsoCode')?.hasError('maxlength')){
+                            <small class="text-danger">Maximum 2 characters allowed</small>
+                        }
+                        @else if(countryForm.get('countryIsoCode')?.hasError('pattern')){
+                            <small class="text-danger">Must be 2 uppercase letters (e.g., "US")</small>
+                        }
+                    }
+            </div>
         </div>
+       
+
         <!-- Division One -->
         <div class="form-group mb-3">
             <label for="divisionOneLabel">Division One Label Name</label>
@@ -184,7 +211,7 @@
         </div>
   
             <div class="form-group">
-                <button type="submit" class="btn mt-4 w-100" [ngClass]="isEditMode ? 'btn-success' : 'btn-primary'">
+                <button type="submit" class="btn mt-4 w-100" [ngClass]="isEditMode ? 'btn-success' : 'btn-primary'" [disabled]="countryForm.invalid">
                     {{ isEditMode ? 'Save Changes' : 'Add' }}
                 </button>
             </div>

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, MaxValidator, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { CountryService } from '../../Service/CountryService/country-service';
 import { ProgramService } from '../../Service/ProgramService/program';
@@ -57,6 +57,7 @@ export class Country {
       id:[''],
       country:['',Validators.required],
       countryCode:['',Validators.required],
+      countryIsoCode: ['', [Validators.required,Validators.minLength(2),Validators.maxLength(2),Validators.pattern('^[A-Z]{2}$') ]],
       divisionOneLabel:[''],
       divisionTwoLabel:[''],
       divisionThreeLabel:[''],
@@ -121,6 +122,7 @@ export class Country {
         id:editItem.id,
         country:editItem.country,
         countryCode:editItem.countryCode,
+        countryIsoCode:editItem.countryIsoCode,
         divisionOneLabel:editItem.divisionOneLabel,
         divisionTwoLabel:editItem.divisionTwoLabel,
         divisionThreeLabel:editItem.divisionThreeLabel
@@ -157,6 +159,7 @@ export class Country {
       const updatedFields: any = { id: this.selectedCountryId };
       this.utilityService.setIfDirty(form, 'country', updatedFields);
       this.utilityService.setIfDirty(form, 'countryCode', updatedFields);
+      this.utilityService.setIfDirty(form, 'countryIsoCode', updatedFields);
       this.utilityService.setIfDirty(form, 'divisionOneLabel', updatedFields);
       this.utilityService.setIfDirty(form, 'divisionTwoLabel', updatedFields);
       this.utilityService.setIfDirty(form, 'divisionThreeLabel', updatedFields);
@@ -187,6 +190,7 @@ export class Country {
       const updatedFields: any = {};
       this.utilityService.setIfDirty(form, 'country', updatedFields);
       this.utilityService.setIfDirty(form, 'countryCode', updatedFields);
+      this.utilityService.setIfDirty(form, 'countryIsoCode', updatedFields);
       this.utilityService.setIfDirty(form, 'divisionOneLabel', updatedFields);
       this.utilityService.setIfDirty(form, 'divisionTwoLabel', updatedFields);
       this.utilityService.setIfDirty(form, 'divisionThreeLabel', updatedFields);
